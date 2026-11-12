@@ -150,6 +150,8 @@ body.lxp-enabled {
 .lxp-clicker-name { font-size: clamp(19px, 4vw, 42px); font-weight: 900; letter-spacing: -.035em; line-height: 1.1; overflow-wrap: anywhere; }
 .lxp-clicker-name span, .lxp-clicker-link > .lxp-icon { color: var(--lxp-clicker-accent); }
 .lxp-clicker-art { display: block; width: clamp(54px, 14vw, 136px); height: auto; }
+.lxp-clicker-view { padding: 20px clamp(16px, 3vw, 46px); }
+.lxp-clicker-frame { display: block; width: 100%; height: calc(100vh - 68px - 40px); height: calc(100dvh - 68px - 40px); min-height: 420px; border: 1px solid var(--lxp-border); border-radius: 10px; background: #0d0f14; }
 .lxp-violet { background: var(--lxp-active); color: var(--lxp-accent); }
 .lxp-blue { background: var(--lxp-blue-bg); color: var(--lxp-blue); }
 .lxp-green { background: var(--lxp-green-bg); color: var(--lxp-green); }

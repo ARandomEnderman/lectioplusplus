@@ -84,7 +84,7 @@ jobs:
           xcrun safari-web-extension-converter "$EXTENSION_DIR" \
             --project-location build \
             --app-name LectioPlus \
-            --bundle-identifier dk.lectioplus.extension \
+            --bundle-identifier dk.lectioplus.LectioPlus \
             --swift --macos-only --copy-resources \
             --no-open --no-prompt --force
 

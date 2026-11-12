@@ -39,6 +39,10 @@
   const fastPages = new Set(['home', 'schedule', 'tasks', 'homework', 'messages', 'school']);
   const navigationSelector = '#m_mastermenu, #m_MobilMenuNav, #mobilMereSheetMenu, nav, [role="navigation"], [role="tablist"], .ls-master-header-container, .ls-subnav-container, .ls-subnav1, .ls-subnav2, [id*="menutab" i], [class*="menutab" i]';
   const activityPage = { key: 'activity', label: 'Aktivitet', icon: 'calendar' };
+  // Extension-owned tab (not a Lectio page): an embed of Strafe Clicker, opened via the #lxp-clicker hash.
+  const clickerHash = '#lxp-clicker';
+  const clickerUrl = 'https://clicker.strafe-mc.com/#/clicker';
+  const clickerPage = { key: 'clicker', label: 'Strafe Clicker', icon: 'game', href: clickerHash };
   const homeSources = new Map();
   const pageCache = new Map();
   let preferences = { ...defaults };
@@ -157,6 +161,7 @@
   }
 
   function pageInfo() {
+    if (location.hash === clickerHash) return clickerPage;
     if (preview) return pages.find(({ key }) => `#${key}` === location.hash.split('/')[0]) || pages[0];
     const url = new URL(sourceUrl);
     const name = url.pathname.split('/').pop();
@@ -197,6 +202,9 @@
   overview.id = 'lxp-overview';
   const nativeOverview = element('section', 'lxp-native-overview');
   nativeOverview.id = 'lxp-native-overview';
+  const clickerView = element('main', 'lxp-clicker-view');
+  clickerView.id = 'lxp-clicker';
+  clickerView.hidden = true;
   const workspace = globalThis.lectioPlusWorkspace({
     ui: { element, button, anchor, icon }, data: lectio, narrow, safeHref, revealOriginal
   });
@@ -214,7 +222,7 @@
   const restore = button('lxp-restore', 'Aktivér LectioPlus+', () => savePreferences({ enabled: true }), 'Aktivér LectioPlus+');
   root.hidden = true;
   restore.hidden = true;
-  root.append(skip, sidebar, topbar, navigationStatus, overview, workspace.node, nativeOverview);
+  root.append(skip, sidebar, topbar, navigationStatus, overview, workspace.node, clickerView, nativeOverview);
   native.before(root);
   document.body.append(search, settings, restore);
   const hideHints = globalThis.lectioPlusHints();
@@ -274,22 +282,34 @@
   function updateViewVisibility() {
     const enabled = preferences.enabled;
     const home = activePage?.key === 'home';
-    const enhanced = enabled && !showNative && (home || workspaceReady);
+    const clickerOpen = enabled && activePage?.key === 'clicker';
+    const enhanced = enabled && !showNative && !clickerOpen && (home || workspaceReady);
     overview.hidden = !enhanced || !home;
     workspace.node.hidden = !enhanced || home;
-    document.body.classList.toggle('lxp-native-hidden', enhanced || (enabled && source !== native));
-    document.body.classList.toggle('lxp-inline-native', enabled && !showNative && !enhanced && links.has('home') && links.has('schedule'));
+    clickerView.hidden = !clickerOpen;
+    if (clickerOpen && !clickerView.firstChild) {
+      // Created on first open and kept afterwards, so the game keeps running while other tabs are shown.
+      const frame = element('iframe', 'lxp-clicker-frame');
+      frame.src = clickerUrl;
+      frame.title = 'Strafe Clicker';
+      frame.allow = 'fullscreen; autoplay; clipboard-write';
+      frame.referrerPolicy = 'no-referrer';
+      clickerView.append(frame);
+    }
+    document.body.classList.toggle('lxp-native-hidden', enhanced || clickerOpen || (enabled && source !== native));
+    document.body.classList.toggle('lxp-inline-native', enabled && !showNative && !enhanced && !clickerOpen && links.has('home') && links.has('schedule'));
     document.body.classList.toggle('lxp-activity-page', enabled && source === native && activePage?.key === 'activity');
-    updateNativeOverview(enabled && !enhanced && source === native);
+    updateNativeOverview(enabled && !enhanced && !clickerOpen && source === native);
     const originalButton = topbar.querySelector('[data-lxp-original]');
     if (originalButton) {
+      originalButton.hidden = clickerOpen;
       const label = showNative ? 'Tilbage til LectioPlus+' : 'Lectios værktøjer';
       originalButton.setAttribute('aria-expanded', String(showNative));
       originalButton.setAttribute('aria-label', label);
       originalButton.dataset.lxpHint = showNative ? 'Vis siden i LectioPlus+ igen' : 'Åbn de oprindelige formularer og værktøjer';
       originalButton.lastElementChild.textContent = label;
     }
-    skip.href = enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
+    skip.href = clickerOpen ? clickerHash : enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
       (document.getElementById('m_outerContentFrameDiv') ? '#m_outerContentFrameDiv' : '#masterContent');
   }
 
@@ -361,6 +381,7 @@
     navigationProgress();
     if (href === sourceUrl) {
       if (!fromHistory && location.href !== href) history.pushState({ lectioPlusNavigation: true }, '', href);
+      if (activePage?.key === 'clicker') refresh();
       if (showNative) {
         showNative = false;
         updateViewVisibility();
@@ -419,10 +440,10 @@
     const navigation = element('nav', 'lxp-nav');
     navigation.setAttribute('aria-label', 'Navigation i LectioPlus+');
     for (const [label, keys] of [
-      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages']],
+      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages', 'clicker']],
       ['Elev', ['attendance', 'grades', 'study', 'documents', 'books', 'surveys', 'support', 'profile', 'school']]
     ]) {
-      const group = keys.map((key) => links.get(key)).filter(Boolean);
+      const group = keys.map((key) => (key === 'clicker' ? clickerPage : links.get(key))).filter(Boolean);
       if (!group.length) continue;
       navigation.append(element('div', 'lxp-nav-heading', label));
       for (const entry of group) {
@@ -639,12 +660,10 @@
     clickerArtwork.height = 512;
     const clickerIconUrl = preview ? '../extension/strafe-clicker-icon.png' : globalThis.chrome?.runtime?.getURL('strafe-clicker-icon.png');
     if (clickerIconUrl) clickerArtwork.src = clickerIconUrl;
-    const clicker = anchor('lxp-clicker-link', 'https://clicker.strafe-mc.com/#/clicker',
+    const clicker = anchor('lxp-clicker-link', clickerHash,
       element('span', 'lxp-clicker-name', 'Strafe', element('span', '', 'Clicker')),
-      clickerArtwork, icon('external'));
-    clicker.target = '_blank';
-    clicker.rel = 'noopener noreferrer';
-    clicker.setAttribute('aria-label', 'Strafe Clicker (åbner i en ny fane)');
+      clickerArtwork, icon('arrow'));
+    clicker.setAttribute('aria-label', 'Åbn Strafe Clicker');
     overview.replaceChildren(hero, summaries, details, clicker);
   }
 
@@ -867,6 +886,9 @@
       if (preferences.enabled) refresh();
       else selectPreviewPage();
       navigatePreview();
+    });
+    if (!preview) window.addEventListener('hashchange', () => {
+      if (preferences.enabled && (activePage?.key === 'clicker' || location.hash === clickerHash)) refresh();
     });
     if (!preview) window.addEventListener('popstate', () => {
       if (!preferences.enabled) return;
