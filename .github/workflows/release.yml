@@ -1,34 +1,58 @@
 name: 'release extension'
 
-# Push a tag like v0.1.0 to build the LectioPlus+ extension for Chrome and Safari
-# and publish both builds as a GitHub release. The tag must match
-# "version" in apps/lectioplus/extension/manifest.json.
+# Releases the LectioPlus+ extension for Chrome and Safari automatically:
+# on every push to main that touches the extension, if "version" in
+# apps/lectioplus/extension/manifest.json has no vX.Y.Z tag yet, the extension
+# is built and published as release vX.Y.Z (the tag is created by the release).
+# To release, bump the version and push to main. Can also be run by hand.
 # Asset names carry no version, so .../releases/latest/download/<name> always
 # points at the newest build (the Safari install script relies on this).
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [main]
+    paths:
+      - 'apps/lectioplus/**'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-extension
+  cancel-in-progress: false
 
 env:
   EXTENSION_DIR: apps/lectioplus/extension
 
 jobs:
-  chrome:
+  version:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      release: ${{ steps.check.outputs.release }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check manifest version matches tag
+      - name: Is this manifest version already released?
+        id: check
         run: |
-          manifest_version=$(jq -r .version "$EXTENSION_DIR/manifest.json")
-          if [ "v$manifest_version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::manifest.json version ($manifest_version) does not match tag ($GITHUB_REF_NAME)"
-            exit 1
+          tag="v$(jq -r .version "$EXTENSION_DIR/manifest.json")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag already exists; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Releasing $tag."
+            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
+
+  chrome:
+    needs: version
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       # The repo name is only filled in at build time so it is never committed.
       - name: Fill in repository for update checks
@@ -46,6 +70,8 @@ jobs:
           path: dist/*
 
   safari:
+    needs: version
+    if: needs.version.outputs.release == 'true'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +107,7 @@ jobs:
           path: dist/*.zip
 
   release:
-    needs: [chrome, safari]
+    needs: [version, chrome, safari]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -91,7 +117,9 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: LectioPlus+ ${{ github.ref_name }}
+          tag_name: ${{ needs.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: LectioPlus+ ${{ needs.version.outputs.tag }}
           files: dist/*
           body: |
             ## Safari (macOS): installér eller opdatér
