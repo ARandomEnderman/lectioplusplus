@@ -132,6 +132,24 @@ body.lxp-enabled {
 .lxp-summary-value { margin-top: 1px; font-size: 22px; font-weight: 720; letter-spacing: -.035em; line-height: 1.2; }
 .lxp-summary-arrow { margin-inline-start: auto; color: var(--lxp-muted); }
 .lxp-summary-arrow .lxp-icon { width: 14px; height: 14px; }
+.lxp a.lxp-clicker-link {
+  --lxp-clicker-accent: #f5a524;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: clamp(10px, 3vw, 38px);
+  margin-top: 18px;
+  padding: clamp(12px, 2.4vw, 24px);
+  border: 1px solid #262c3d;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at 78% 50%, #1c2130, transparent 60%), #0d0f14;
+  color: #e6e9f0;
+}
+.lxp a.lxp-clicker-link:is(:hover, :focus-visible) { border-color: var(--lxp-clicker-accent); }
+.lxp a.lxp-clicker-link:focus-visible { outline: 2px solid var(--lxp-clicker-accent); outline-offset: 3px; }
+.lxp-clicker-name { font-size: clamp(19px, 4vw, 42px); font-weight: 900; letter-spacing: -.035em; line-height: 1.1; overflow-wrap: anywhere; }
+.lxp-clicker-name span, .lxp-clicker-link > .lxp-icon { color: var(--lxp-clicker-accent); }
+.lxp-clicker-art { display: block; width: clamp(54px, 14vw, 136px); height: auto; }
 .lxp-violet { background: var(--lxp-active); color: var(--lxp-accent); }
 .lxp-blue { background: var(--lxp-blue-bg); color: var(--lxp-blue); }
 .lxp-green { background: var(--lxp-green-bg); color: var(--lxp-green); }

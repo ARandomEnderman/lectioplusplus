@@ -633,7 +633,19 @@
       detailCard(generalTasks.length ? 'Opgaver på forsiden' : 'Næste afleveringer', 'tasks', 'Alle opgaver', tasks.length ? tasks : generalTasks, 'tasks', taskSource?.pending
         ? 'Henter afleveringer…' : taskSource?.items ? 'Ingen kommende afleveringer i opgavelisten.' : 'Åbn dine opgaver for at se fristerne.'));
     if (messages.length) details.append(detailCard('Ulæste beskeder', 'messages', 'Alle beskeder', messages, 'messages', ''));
-    overview.replaceChildren(hero, summaries, details);
+    const clickerArtwork = element('img', 'lxp-clicker-art');
+    clickerArtwork.alt = '';
+    clickerArtwork.width = 512;
+    clickerArtwork.height = 512;
+    const clickerIconUrl = preview ? '../extension/strafe-clicker-icon.png' : globalThis.chrome?.runtime?.getURL('strafe-clicker-icon.png');
+    if (clickerIconUrl) clickerArtwork.src = clickerIconUrl;
+    const clicker = anchor('lxp-clicker-link', 'https://clicker.strafe-mc.com/#/clicker',
+      element('span', 'lxp-clicker-name', 'Strafe', element('span', '', 'Clicker')),
+      clickerArtwork, icon('external'));
+    clicker.target = '_blank';
+    clicker.rel = 'noopener noreferrer';
+    clicker.setAttribute('aria-label', 'Strafe Clicker (åbner i en ny fane)');
+    overview.replaceChildren(hero, summaries, details, clicker);
   }
 
   function showDialog(dialog, focusTarget) {
