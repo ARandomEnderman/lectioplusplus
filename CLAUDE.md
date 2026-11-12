@@ -14,6 +14,7 @@ There is no root workspace: each app under `apps/` is independent with its own `
 | `apps/api` | Python Flask | Lectio REST API (`api.betterlectio.dk`) that scrapes Lectio HTML |
 | `apps/auth-sync-server` | SvelteKit (server routes) | `auth.betterlectio.dk`: Google OAuth, Google Calendar/Tasks sync, latest app release info |
 | `apps/landing-page` | SvelteKit | Marketing site |
+| `apps/lectioplus` | Plain JS/CSS, Manifest V3 | LectioPlus+ browser extension (Chrome/Edge/Safari) that restyles lectio.dk itself |
 | `apps/depricated` | SvelteKit (JS) | Old app, kept for reference; don't develop here |
 
 ## Commands
@@ -29,7 +30,7 @@ There is no root workspace: each app under `apps/` is independent with its own `
 
 `apps/api`: `pip install -r requirements.txt && python app.py` (port 5000), or `docker compose up`.
 
-Releases: pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which builds Tauri bundles for Windows and Ubuntu with bun (`bun tauri`).
+Releases are for the extension only. Bump `version` in `apps/lectioplus/extension/manifest.json`, commit, then push a matching `vX.Y.Z` tag. `.github/workflows/release.yml` then zips the extension for Chrome, converts it with `safari-web-extension-converter` and builds an ad-hoc-signed macOS Safari app, and publishes both zips as a GitHub release. The workflow fails if the tag and manifest versions differ. The Tauri desktop/Android build is not in use and has no workflow.
 
 ## Frontend architecture (`apps/frontend`)
 
@@ -43,7 +44,7 @@ Releases: pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which bui
 
 ### Theming
 
-The design system (palette, colour designs, density) was ported from the former LectioPlus+ extension:
+The design system (palette, colour designs, density) was ported from the LectioPlus+ extension (`apps/lectioplus/extension/theme.css`, which uses hex `--lxp-*` variables). Keep both in sync when changing the palette:
 - `src/app.pcss` defines all tokens as HSL triplets (`--primary: 240 45% 50%`) because `tailwind.config.js` wraps them as `hsl(var(--x) / <alpha-value>)`. Never use hex in these variables.
 - Light/dark is the `.dark` class on `<html>`, managed by `mode-watcher`.
 - The colour design is `data-design` on `<html>`. Each `:root[data-design=…]` block only sets `--design-accent-light/-dark`, `--design-tint-light/-dark` and `--design-mark`. `:root`/`.dark` then map those onto `--primary`, `--accent` and `--ring`.
@@ -54,3 +55,12 @@ The design system (palette, colour designs, density) was ported from the former 
 ## API architecture (`apps/api`)
 
 `app.py` holds all Flask routes. Each route builds a `lectio.sdk` client from the `lectio-cookie` header (or credentials on `/auth`), then calls a method on it. `lectio/lectio.py`'s `sdk` class only delegates: each feature lives in its own `lectio/_<feature>.py` module (e.g. `_skema.py`, `_opgaver.py`), which scrapes Lectio pages with BeautifulSoup. Unhandled exceptions are returned as `{"backend_error": <traceback>}` with status 500.
+
+## Extension architecture (`apps/lectioplus`)
+
+No build step: `extension/` is loaded as-is (`chrome://extensions` → Developer mode → Load unpacked). Open `preview/index.html` in a browser to try the UI with sample data; it loads the same files from `../extension`.
+
+- Scripts share code through globals rather than modules (`globalThis.lectioPlusAppearance`, `lectioPlusBoot`, `lectioPlusData`, `lectioPlusWorkspace`, `lectioPlusIcon`, `lectioPlusHints`). Load order is set by the three `content_scripts` entries in `manifest.json`, so a new script must be listed after the ones it depends on.
+- `appearance.js` and `boot.js` run at `document_start` to apply the theme and hide the page until the UI is ready, avoiding a flash of unstyled Lectio. `native-theme.js` restyles Lectio's own pages and iframes at `document_end`. `content.js` builds the app shell (sidebar, top bar, Ctrl+K search) and handles in-page navigation with `history.pushState` and same-origin `fetch` of Lectio pages. `workspace.js` renders the task, homework and message views, and `lectio-data.js` parses Lectio's HTML (dates in Europe/Copenhagen).
+- The only stored state is appearance preferences in `chrome.storage.local`. Login, logout and exam pages are skipped by path regex in `boot.js`, `native-theme.js` and `content.js`.
+- All CSS classes and variables are prefixed `lxp-`, so they don't collide with Lectio's own styles.

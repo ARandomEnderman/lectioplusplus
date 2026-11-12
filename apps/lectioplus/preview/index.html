@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LectioPlus+ · Forhåndsvisning</title>
+  <link rel="stylesheet" href="../extension/theme.css">
+  <link rel="stylesheet" href="../extension/styles.css">
+  <link rel="stylesheet" href="../extension/workspace.css">
+  <link rel="stylesheet" href="../extension/native.css">
+  <link rel="stylesheet" href="preview.css">
+  <script src="../extension/appearance.js" defer></script>
+  <script src="../extension/icons.js" defer></script>
+  <script src="../extension/hints.js" defer></script>
+  <script src="../extension/lectio-data.js" defer></script>
+  <script src="../extension/workspace.js" defer></script>
+  <script src="../extension/content.js" defer></script>
+</head>
+<body data-lxp-preview data-lxp-preview-date="2026-11-12T12:00:00+01:00">
+  <main id="masterContent" class="preview-native">
+    <header class="preview-native-header">
+      <p class="ls-master-header-institution-name">Eksempelgymnasiet</p>
+      <nav data-lxp-nav aria-label="Lectio">
+        <a data-page="home" href="#home">Forside</a>
+        <a data-page="schedule" href="#schedule">Skema</a>
+        <a data-page="tasks" href="#tasks">Opgaver</a>
+        <a data-page="homework" href="#homework">Lektier</a>
+        <a data-page="messages" href="#messages">Beskeder</a>
+        <a data-page="attendance" href="#attendance">Fravær</a>
+        <a data-page="grades" href="#grades">Karakterer</a>
+        <a data-page="study" href="#study">Studieplan</a>
+        <a data-page="documents" href="#documents">Dokumenter</a>
+        <a data-page="profile" href="#profile">Profil</a>
+        <a data-page="school" href="#school">Hovedmenu</a>
+      </nav>
+    </header>
+
+    <div data-lxp-view="home">
+      <section data-front-panel>
+        <h2>Dagens skema</h2>
+        <ul>
+          <li><time>08:15–09:45</time> <a href="#schedule/matematik">Matematik A</a> <span data-item-detail>2.g MA · Lokale B204</span><span data-item-tag>1. modul</span></li>
+          <li><time>10:00–11:30</time> <a href="#schedule/dansk">Dansk A</a> <span data-item-detail>2.g DA · Lokale A103</span><span data-item-tag>2. modul</span></li>
+          <li><time>12:00–13:30</time> <a href="#schedule/fysik">Fysik B</a> <span data-item-detail>2.g FY · Fysiklokalet</span><span data-item-tag>3. modul</span></li>
+        </ul>
+      </section>
+      <section data-front-panel>
+        <h2>Næste afleveringer</h2>
+        <ul>
+          <li><a href="#tasks/analyse">Analyse af en kortfilm</a> <span data-item-detail>Dansk A</span><time datetime="2026-11-13">13. nov.</time></li>
+          <li><a href="#tasks/funktioner">Funktioner og modeller</a> <span data-item-detail>Matematik A</span><time datetime="2026-11-17">17. nov.</time></li>
+          <li><a href="#tasks/rapport">Rapport om energi</a> <span data-item-detail>Fysik B</span><time datetime="2026-11-20">20. nov.</time></li>
+        </ul>
+      </section>
+      <section data-front-panel>
+        <h2>Ulæste beskeder</h2>
+        <ul>
+          <li><a href="#messages/vejledning">Tider til studievejledning</a></li>
+          <li><a href="#messages/bibliotek">Bibliotekets åbningstider</a></li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="preview-page" data-lxp-view="schedule" hidden>
+      <h1>Ugens skema</h1>
+      <p class="s2weekHeader">Uge 46 – 2026</p>
+      <div class="preview-table-scroll" data-lxp-schedule>
+        <table class="preview-table preview-week">
+          <thead><tr><th scope="col">Tid</th><th scope="col" data-lxp-day="2026-11-09">Mandag</th><th scope="col" data-lxp-day="2026-11-10">Tirsdag</th><th scope="col" data-lxp-day="2026-11-11">Onsdag</th><th scope="col" data-lxp-day="2026-11-12">Torsdag</th><th scope="col" data-lxp-day="2026-11-13">Fredag</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">08:15–09:45</th>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-09" data-lxp-time="08:15–09:45" data-tooltip="Lokale: C102"><span data-lxp-lesson-title>Engelsk A</span><small>C102</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-10" data-lxp-time="08:15–09:45" data-tooltip="Lokale: A103"><span data-lxp-lesson-title>Dansk A</span><small>A103</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-11" data-lxp-time="08:15–09:45" data-tooltip="Lokale: B204"><span data-lxp-lesson-title>Matematik A</span><small>B204</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-12" data-lxp-time="08:15–09:45" data-tooltip="Lokale: B204" id="matematik"><span data-lxp-lesson-title>Matematik A</span><small>B204</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-13" data-lxp-time="08:15–09:45" data-tooltip="Lokale: A105"><span data-lxp-lesson-title>Historie A</span><small>A105</small></div></td>
+            </tr>
+            <tr><th scope="row">10:00–11:30</th>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-09" data-lxp-time="10:00–11:30" data-tooltip="Lokale: A105"><span data-lxp-lesson-title>Historie A</span><small>A105</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-10" data-lxp-time="10:00–11:30" data-tooltip="Lokale: Fysiklokalet"><span data-lxp-lesson-title>Fysik B</span><small>Fysiklokalet</small></div></td>
+              <td><div data-lxp-lesson class="s2cancelled" data-lxp-date="2026-11-11" data-lxp-time="10:00–11:30" data-tooltip="Lokale: C102"><span data-lxp-lesson-title>Engelsk A</span><small>Aflyst</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-12" data-lxp-time="10:00–11:30" data-tooltip="Lokale: A103" id="dansk"><span data-lxp-lesson-title>Dansk A</span><small>A103</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-13" data-lxp-time="10:00–11:30" data-tooltip="Lokale: B204"><span data-lxp-lesson-title>Matematik A</span><small>B204</small></div></td>
+            </tr>
+            <tr><th scope="row">12:00–13:30</th><td></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-10" data-lxp-time="12:00–13:30" data-tooltip="Lokale: Hallen"><span data-lxp-lesson-title>Idræt C</span><small>Hallen</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-11" data-lxp-time="12:00–13:30" data-tooltip="Lokale: A103"><span data-lxp-lesson-title>Dansk A</span><small>A103</small></div></td>
+              <td><div data-lxp-lesson data-lxp-date="2026-11-12" data-lxp-time="12:00–13:30" data-tooltip="Lokale: Fysiklokalet" id="fysik"><span data-lxp-lesson-title>Fysik B</span><small>Fysiklokalet</small></div></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="preview-page" data-lxp-view="tasks" hidden>
+      <h1>Opgaver</h1>
+      <div class="preview-table-scroll" data-lxp-table>
+        <table class="preview-table">
+          <thead><tr><th scope="col">Opgave</th><th scope="col">Fag</th><th scope="col">Afleveringsfrist</th><th scope="col">Status</th><th scope="col">Elevtid</th></tr></thead>
+          <tbody>
+            <tr id="analyse"><td>Analyse af en kortfilm</td><td>Dansk A</td><td><time datetime="2026-11-13T23:59:00">13. nov.</time></td><td>Ikke afleveret</td><td>3 timer</td></tr>
+            <tr id="funktioner"><td>Funktioner og modeller</td><td>Matematik A</td><td><time datetime="2026-11-17T23:59:00">17. nov.</time></td><td>Åben</td><td>2 timer</td></tr>
+            <tr id="rapport"><td>Rapport om energi</td><td>Fysik B</td><td><time datetime="2026-11-20T23:59:00">20. nov.</time></td><td>Åben</td><td>4 timer</td></tr>
+            <tr><td>Historieopgave</td><td>Historie A</td><td><time datetime="2026-11-10T22:00:00">10. nov.</time></td><td>Afleveret</td><td>2 timer</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="preview-page" data-lxp-view="homework" hidden>
+      <h1>Lektier</h1>
+      <div class="preview-table-scroll" data-lxp-table>
+        <table class="preview-table">
+          <thead><tr><th scope="col">Fag</th><th scope="col">Lektie</th><th scope="col">Til</th></tr></thead>
+          <tbody>
+            <tr><td>Matematik A</td><td>Læs om vækstmodeller, s. 34–40.</td><td>Fredag</td></tr>
+            <tr><td>Historie A</td><td>Læs kilden om industrialiseringen.</td><td>Fredag</td></tr>
+            <tr><td>Engelsk A</td><td>Forbered tre spørgsmål til teksten.</td><td>Mandag</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="preview-page" data-lxp-view="messages" hidden>
+      <h1>Beskeder</h1>
+      <div class="preview-table-scroll" data-lxp-table>
+        <table class="preview-table">
+          <thead><tr><th scope="col">Emne</th><th scope="col">Seneste besked</th></tr></thead>
+          <tbody>
+            <tr id="vejledning"><td>Tider til studievejledning</td><td>Der er ledige tider på tirsdag.</td></tr>
+            <tr id="bibliotek"><td>Bibliotekets åbningstider</td><td>Biblioteket lukker kl. 14 på fredag.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="preview-page" data-lxp-view="attendance" hidden>
+      <h1>Fravær</h1>
+      <section class="preview-secondary"><h2>Samlet fravær</h2><p>2 af 84 moduler</p></section>
+      <section class="preview-secondary"><h2>Fravær pr. fag</h2><table class="preview-table"><thead><tr><th scope="col">Fag</th><th scope="col">Fravær</th></tr></thead><tbody><tr><td>Dansk A</td><td>1 af 22 moduler</td></tr><tr><td>Matematik A</td><td>1 af 24 moduler</td></tr></tbody></table></section>
+    </section>
+    <section class="preview-page" data-lxp-view="grades" hidden>
+      <h1>Karakterer</h1>
+      <section class="preview-secondary"><h2>Standpunktskarakterer</h2><table class="preview-table"><thead><tr><th scope="col">Fag</th><th scope="col">Karakter</th></tr></thead><tbody><tr><td>Dansk A</td><td>7</td></tr><tr><td>Matematik A</td><td>10</td></tr></tbody></table></section>
+    </section>
+    <section class="preview-page" data-lxp-view="study" hidden><h1>Studieplan</h1><section class="preview-secondary"><h2>Undervisningsforløb</h2><p>Matematik A · Funktioner og modeller</p></section></section>
+    <section class="preview-page" data-lxp-view="documents" hidden><h1>Dokumenter</h1><section class="preview-secondary"><h2>Materiale til undervisningen</h2><p>Vejledning til den næste fysikrapport</p></section></section>
+    <section class="preview-page" data-lxp-view="profile" hidden><h1>Profil</h1><section class="preview-secondary"><h2>Elevoplysninger</h2><p>Sofie Jensen · 2.g · Eksempelgymnasiet</p></section></section>
+    <section class="preview-page" data-lxp-view="school" hidden><h1>Hovedmenu</h1><p><a href="#home">Gå til din forside</a></p></section>
+  </main>
+</body>
+</html>

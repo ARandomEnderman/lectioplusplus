@@ -1,65 +1,101 @@
-name: 'publish'
+name: 'release extension'
+
+# Push a tag like v0.1.0 to build the LectioPlus+ extension for Chrome and Safari
+# and publish both builds as a GitHub release. The tag must match
+# "version" in apps/lectioplus/extension/manifest.json.
 on:
   push:
     tags:
-      - 'v\d+\.\d+\.\d+'
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+env:
+  EXTENSION_DIR: apps/lectioplus/extension
 
 jobs:
-  publish-tauri:
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [windows-latest, ubuntu-latest] # when suport is added  #[macos-latest, ubuntu-latest, windows-latest]
-
-    runs-on: ${{ matrix.platform }}
+  chrome:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Get version
-        id: get_version
-        uses: battila7/get-version-action@v2
+      - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 18
-      - name: Install bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-      - name: Install Rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install webkit2gtk (ubuntu only)
-        if: matrix.platform == 'ubuntu-latest'
+      - name: Check manifest version matches tag
         run: |
-          sudo apt-get update
-          sudo apt-get install -y webkit2gtk-4.0
-      - name: Install dependencies
-        run: bun install
+          manifest_version=$(jq -r .version "$EXTENSION_DIR/manifest.json")
+          if [ "v$manifest_version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::manifest.json version ($manifest_version) does not match tag ($GITHUB_REF_NAME)"
+            exit 1
+          fi
 
-      - name: Adjust version number
-        uses: RadovanPelka/github-action-json@main
-        with:
-          replaceWith: |
-            {
-              "version": "${{ steps.get_version.outputs.version-without-v }}"
-            }
+      - name: Package for Chrome and Edge
+        run: |
+          mkdir -p dist
+          (cd "$EXTENSION_DIR" && zip -r -X "$GITHUB_WORKSPACE/dist/lectioplus-chrome-$GITHUB_REF_NAME.zip" .)
 
-      - uses: tauri-apps/tauri-action@dev
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
         with:
-          tauriScript: 'bun tauri'
-          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: 'BetterLectio v__VERSION__'
-          releaseBody: 'Tidlig beta af BetterLectio appen. Felj og mangler kan forekomme.'
-          releaseDraft: false
-          prerelease: false
+          name: chrome
+          path: dist/*.zip
+
+  safari:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Convert to a Safari web extension project
+        run: |
+          xcrun safari-web-extension-converter "$EXTENSION_DIR" \
+            --project-location build \
+            --app-name LectioPlus \
+            --bundle-identifier io.github.arandomenderman.lectioplus \
+            --swift --macos-only --copy-resources \
+            --no-open --no-prompt --force
+
+      - name: Build the Safari app (ad-hoc signed)
+        run: |
+          project=$(find build -maxdepth 2 -name '*.xcodeproj' | head -n 1)
+          xcodebuild -project "$project" -alltargets -configuration Release \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            SYMROOT="$GITHUB_WORKSPACE/build/products"
+
+      - name: Package for Safari
+        run: |
+          mkdir -p dist
+          app=$(find build/products -maxdepth 3 -name 'LectioPlus.app' | head -n 1)
+          ditto -c -k --keepParent "$app" "dist/lectioplus-safari-macos-$GITHUB_REF_NAME.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safari
+          path: dist/*.zip
+
+  release:
+    needs: [chrome, safari]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: LectioPlus+ ${{ github.ref_name }}
+          files: dist/*.zip
+          body: |
+            ## Chrome og Edge
+            1. Hent `lectioplus-chrome-${{ github.ref_name }}.zip` og pak den ud.
+            2. Åbn `chrome://extensions` (eller `edge://extensions`), og slå **Udviklertilstand** til.
+            3. Vælg **Indlæs udpakket**, og vælg den udpakkede mappe.
+            4. Genindlæs dine Lectio-faner.
+
+            ## Safari (macOS)
+            Safari-appen er ikke signeret af Apple, så Safari skal tillade usignerede udvidelser:
+            1. Hent `lectioplus-safari-macos-${{ github.ref_name }}.zip`, pak den ud, og flyt `LectioPlus.app` til Programmer.
+            2. Kør `xattr -dr com.apple.quarantine /Applications/LectioPlus.app` i Terminal, og åbn appen én gang.
+            3. I Safari: **Indstillinger → Avanceret →** slå **Vis funktioner til webudviklere** til.
+            4. Vælg **Udvikler → Tillad usignerede udvidelser** (skal gøres igen, hver gang Safari genstartes).
+            5. Slå LectioPlus+ til under **Indstillinger → Udvidelser**.
+
+            Kræver Safari 16 eller nyere.
