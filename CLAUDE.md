@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules for every agent (Claude Code, Codex, …)
+
+This repository is a public fork: everything pushed is public. Never put personal information in git. That covers commits, commit messages, branch and tag names, code, comments, config, docs, release notes and fixtures:
+- No real names, email addresses, usernames/handles, or school names/IDs of the maintainer or anyone else.
+- No Lectio credentials, session cookies, student/teacher IDs, or real Lectio data (schedules, grades, absence, messages, assignments). Use made-up sample data, as `apps/lectioplus/preview/index.html` does.
+- No screenshots or saved HTML from a logged-in Lectio session.
+- No secrets or tokens. They belong in untracked `.env` files or CI secrets.
+- Commit with a neutral identity (a noreply address), never a personal email. Check `git config user.name`/`user.email` before committing.
+- Identifiers that need an owner or reverse-domain name (e.g. the Safari bundle ID) use the project name, not a person's.
+
 ## Overview
 
 BetterLectio monorepo: an alternative client for Lectio (Danish school system). Code, identifiers, routes and UI text are largely in Danish (`skema` = schedule, `opgaver` = assignments, `lektier` = homework, `beskeder` = messages, `fravær` = absence, `karakterer` = grades, `indstillinger` = settings). Keep new UI text in Danish.
