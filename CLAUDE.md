@@ -27,6 +27,10 @@ There is no root workspace: each app under `apps/` is independent with its own `
 | `apps/lectioplus` | Plain JS/CSS, Manifest V3 | LectioPlus+ browser extension (Chrome/Edge/Safari) that restyles lectio.dk itself |
 | `apps/depricated` | SvelteKit (JS) | Old app, kept for reference; don't develop here |
 
+## Git
+
+Always merge changes into `main` and push the result to `origin/main`.
+
 ## Commands
 
 `apps/frontend`:
