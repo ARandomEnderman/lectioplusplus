@@ -46,6 +46,17 @@
 		/>
 		<meta name="description" content="Den Ultimate Lectio Forbedring" />
 		<script>
+			// Apply the saved colour design and density before first paint (see src/lib/appearance.ts).
+			(function () {
+				var root = document.documentElement;
+				var value = {};
+				try {
+					value = JSON.parse(localStorage.getItem('appearance') || '{}') || {};
+				} catch (e) {}
+				root.dataset.design = typeof value.design === 'string' ? value.design : 'indigo';
+				root.dataset.density = value.density === 'compact' ? 'compact' : 'comfortable';
+			})();
+
 			document.addEventListener('gesturestart', function (e) {
 				e.preventDefault();
 				document.body.style.zoom = 0.99;

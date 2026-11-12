@@ -22,6 +22,10 @@
 	import mixpanel from 'mixpanel-browser';
 	import { decodeUserID } from '$lib/utils/other';
 	import type { GoogleSyncObject } from '$lib/types/google';
+	import { appearanceStore, applyAppearance } from '$lib/appearance';
+
+	// Direct subscription (not a `$:` statement) so it keeps working even if another update in this layout throws.
+	onMount(() => appearanceStore.subscribe((value) => applyAppearance(document.documentElement, value)));
 
 	mixpanel.init('a2ad640012db6ad2671eb150f2629cb3', {
 		debug: true,

@@ -1,51 +1,163 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens ported from the LectioPlus+ extension.
+ * Values are HSL triplets so Tailwind's `hsl(var(--x) / <alpha-value>)` works.
+ * The colour design (data-design on <html>) only sets the --design-* values;
+ * light/dark (the `dark` class set by mode-watcher) decides which of them are used.
+ */
 @layer base {
+  :root,
+  :root[data-design='indigo'] {
+    --design-accent-light: 240.5 45.7% 49.8%;
+    --design-accent-dark: 239 100% 87.8%;
+    --design-tint-light: 236.5 100% 96.7%;
+    --design-tint-dark: 234.4 29.7% 28.4%;
+    --design-mark: 241 56.1% 58%;
+  }
+  :root[data-design='ocean'] {
+    --design-accent-light: 200.3 87.6% 28.4%;
+    --design-accent-dark: 197.4 90.9% 78.4%;
+    --design-tint-light: 204.4 100% 94.7%;
+    --design-tint-dark: 204.2 48.1% 21.2%;
+    --design-mark: 197.5 81.9% 36.9%;
+  }
+  :root[data-design='forest'] {
+    --design-accent-light: 154.6 45% 25.7%;
+    --design-accent-dark: 146.9 54.5% 75.9%;
+    --design-tint-light: 137.1 41.2% 93.3%;
+    --design-tint-dark: 160 29.4% 20%;
+    --design-mark: 149.6 43% 35.1%;
+  }
+  :root[data-design='teal'] {
+    --design-accent-light: 177.9 79.8% 21.4%;
+    --design-accent-dark: 172.3 65% 76.5%;
+    --design-tint-light: 174.3 53.8% 92.4%;
+    --design-tint-dark: 188.8 39.8% 20.2%;
+    --design-mark: 177.2 72% 29.4%;
+  }
+  :root[data-design='slate'] {
+    --design-accent-light: 211.2 28.9% 32.5%;
+    --design-accent-dark: 213.5 53.1% 84.1%;
+    --design-tint-light: 210 43.8% 93.7%;
+    --design-tint-dark: 217.1 26.2% 25.5%;
+    --design-mark: 211.3 22.6% 41.6%;
+  }
+  :root[data-design='lavender'] {
+    --design-accent-light: 263.4 41.9% 44.5%;
+    --design-accent-dark: 265.3 100% 88.8%;
+    --design-tint-light: 265.7 100% 95.9%;
+    --design-tint-dark: 261.5 27.3% 28%;
+    --design-mark: 265.4 44.4% 54.1%;
+  }
+  :root[data-design='raspberry'] {
+    --design-accent-light: 327 48.7% 36.7%;
+    --design-accent-dark: 329.5 100% 87.6%;
+    --design-tint-light: 325.3 76% 95.1%;
+    --design-tint-dark: 307.7 25.6% 23.7%;
+    --design-mark: 328.3 43.2% 49%;
+  }
+  :root[data-design='ruby'] {
+    --design-accent-light: 344.9 52.3% 38.6%;
+    --design-accent-dark: 351.2 100% 86.7%;
+    --design-tint-light: 350.5 76% 95.1%;
+    --design-tint-dark: 332 25% 23.5%;
+    --design-mark: 349.2 46.2% 49.6%;
+  }
+  :root[data-design='coral'] {
+    --design-accent-light: 14.4 55.9% 36.5%;
+    --design-accent-dark: 19.5 100% 83.1%;
+    --design-tint-light: 20.9 100% 95.5%;
+    --design-tint-dark: 12.9 23% 23.9%;
+    --design-mark: 15.5 52.9% 47.5%;
+  }
+  :root[data-design='amber'] {
+    --design-accent-light: 39.8 84.3% 24.9%;
+    --design-accent-dark: 39.6 90.1% 76.3%;
+    --design-tint-light: 41.1 100% 92.5%;
+    --design-tint-dark: 35.2 25.2% 22.5%;
+    --design-mark: 42.3 69.3% 34.5%;
+  }
+
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 222.9 41.2% 96.7%;
+    --foreground: 222 37.5% 15.7%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 37.5% 15.7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 72.22% 50.59%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --popover-foreground: 222 37.5% 15.7%;
+    --primary: var(--design-accent-light);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222.9 53.8% 97.5%;
+    --secondary-foreground: 222 37.5% 15.7%;
+    --muted: 222.9 53.8% 97.5%;
+    --muted-foreground: 218.5 19.2% 39.8%;
+    --accent: var(--design-tint-light);
+    --accent-foreground: var(--design-accent-light);
+    --destructive: 346.2 59.4% 38.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217.5 33.3% 90.6%;
+    --input: 217.5 33.3% 90.6%;
+    --ring: var(--design-mark);
     --radius: 0.5rem;
+    --shadow: 0 2px 7px #17294a0b;
+
+    --tooltip: 220.6 35.6% 17.1%;
+    --tooltip-foreground: 231.4 100% 98.6%;
+
+    --tone-blue: 210.2 65.4% 36.3%;
+    --tone-blue-bg: 211.3 100% 95.5%;
+    --tone-amber: 36.2 87.4% 24.9%;
+    --tone-amber-bg: 36.9 100% 92.4%;
+    --tone-green: 158.6 53.8% 25.5%;
+    --tone-green-bg: 153 50% 92.2%;
+    --tone-red: 346.2 59.4% 38.6%;
+    --tone-red-bg: 348 83.3% 95.3%;
+    --tone-teal: 183.7 69.5% 23.1%;
+    --tone-teal-bg: 176.8 46.3% 92%;
+    --tone-plum: 282.9 39.9% 37.8%;
+    --tone-plum-bg: 280 69.2% 94.9%;
   }
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 68% 45%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 227.4 33.3% 11.2%;
+    --foreground: 230.8 61.9% 95.9%;
+    --card: 225 29.3% 16.1%;
+    --card-foreground: 230.8 61.9% 95.9%;
+    --popover: 225 29.3% 16.1%;
+    --popover-foreground: 230.8 61.9% 95.9%;
+    --primary: var(--design-accent-dark);
+    --primary-foreground: 227.4 33.3% 11.2%;
+    --secondary: 223.4 28.2% 20.2%;
+    --secondary-foreground: 230.8 61.9% 95.9%;
+    --muted: 223.4 28.2% 20.2%;
+    --muted-foreground: 220.6 28.3% 76.5%;
+    --accent: var(--design-tint-dark);
+    --accent-foreground: var(--design-accent-dark);
+    --destructive: 347.2 100% 85.3%;
+    --destructive-foreground: 227.4 33.3% 11.2%;
+    --border: 222.6 21.1% 28.8%;
+    --input: 222.6 21.1% 28.8%;
+    --ring: var(--design-accent-dark);
+    --shadow: none;
+
+    --tooltip: 228.8 100% 96.9%;
+    --tooltip-foreground: 222 37.5% 15.7%;
+
+    --tone-blue: 209.6 100% 83.3%;
+    --tone-blue-bg: 213.5 36.1% 23.3%;
+    --tone-amber: 38 87.5% 78%;
+    --tone-amber-bg: 32.9 31.3% 19.4%;
+    --tone-green: 158.4 49.6% 75.9%;
+    --tone-green-bg: 166.2 26.5% 19.2%;
+    --tone-red: 347.2 100% 85.3%;
+    --tone-red-bg: 333.1 25.2% 22.5%;
+    --tone-teal: 177.4 60.3% 77.3%;
+    --tone-teal-bg: 190.8 37.9% 20.2%;
+    --tone-plum: 279.3 87.3% 87.6%;
+    --tone-plum-bg: 280 23.4% 25.1%;
   }
 }
 
@@ -56,6 +168,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  :focus-visible {
+    outline-color: hsl(var(--ring));
+  }
 }
 
 .page-container {
@@ -64,6 +179,15 @@
 
 .page-container-x {
   @apply container mx-auto px-4 xl:px-10;
+}
+
+/* Kompakt density from LectioPlus+ */
+:root[data-density='compact'] .page-container {
+  @apply p-3 xl:p-6 space-y-6;
+}
+
+:root[data-density='compact'] .page-container-x {
+  @apply px-3 xl:px-6;
 }
 
 h1:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
@@ -111,7 +235,7 @@ a:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
 }
 
 .event-cancelled {
-  @apply border-2 !border-[#ff3f3f];
+  @apply border-2 !border-tone-red;
 }
 
 :is(.event-cancelled .fc-event-title) {
@@ -123,11 +247,11 @@ a:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
 }
 
 :is(.event-cancelled .fc-event-title) {
-  @apply text-[#ff3f3f];
+  @apply text-tone-red;
 }
 
 :is(.event-cancelled .fc-event-time) {
-  @apply text-[#ff3f3f];
+  @apply text-tone-red;
 }
 
 .fc .fc-button {
@@ -154,7 +278,7 @@ a:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
   border-width: 5px 0px 5px 6px !important;
   border-bottom-color: transparent !important;
   border-top-color: transparent !important;
-  @apply border-black dark:border-white;
+  @apply border-primary;
 }
 
 .fc .fc-timegrid-now-indicator-line {
@@ -193,7 +317,8 @@ a:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
 
 .tippy-box {
   position: relative;
-  @apply z-50 w-64 rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-none;
+  @apply z-50 w-64 rounded-md border bg-popover p-2 text-popover-foreground outline-none;
+  box-shadow: var(--shadow);
   font-size: 14px;
   line-height: 1.4;
   white-space: normal;
@@ -209,7 +334,7 @@ a:not(:where([class~='unstyled'], [class~='unstyled'] *)) {
   bottom: -7px;
   left: 0;
   border-width: 8px 8px 0;
-  @apply border-t-white dark:border-t-[#1E1E1E];
+  border-top-color: hsl(var(--popover));
   transform-origin: center top;
 }
 

@@ -49,7 +49,41 @@ const config = {
 				card: {
 					DEFAULT: "hsl(var(--card) / <alpha-value>)",
 					foreground: "hsl(var(--card-foreground) / <alpha-value>)"
+				},
+				tooltip: {
+					DEFAULT: "hsl(var(--tooltip) / <alpha-value>)",
+					foreground: "hsl(var(--tooltip-foreground) / <alpha-value>)"
+				},
+				// Status tones from LectioPlus+, e.g. `bg-tone-green-bg text-tone-green`
+				tone: {
+					blue: {
+						DEFAULT: "hsl(var(--tone-blue) / <alpha-value>)",
+						bg: "hsl(var(--tone-blue-bg) / <alpha-value>)"
+					},
+					amber: {
+						DEFAULT: "hsl(var(--tone-amber) / <alpha-value>)",
+						bg: "hsl(var(--tone-amber-bg) / <alpha-value>)"
+					},
+					green: {
+						DEFAULT: "hsl(var(--tone-green) / <alpha-value>)",
+						bg: "hsl(var(--tone-green-bg) / <alpha-value>)"
+					},
+					red: {
+						DEFAULT: "hsl(var(--tone-red) / <alpha-value>)",
+						bg: "hsl(var(--tone-red-bg) / <alpha-value>)"
+					},
+					teal: {
+						DEFAULT: "hsl(var(--tone-teal) / <alpha-value>)",
+						bg: "hsl(var(--tone-teal-bg) / <alpha-value>)"
+					},
+					plum: {
+						DEFAULT: "hsl(var(--tone-plum) / <alpha-value>)",
+						bg: "hsl(var(--tone-plum-bg) / <alpha-value>)"
+					}
 				}
+			},
+			boxShadow: {
+				soft: "var(--shadow)"
 			},
 			borderRadius: {
 				lg: "var(--radius)",
@@ -57,7 +91,7 @@ const config = {
 				sm: "calc(var(--radius) - 4px)"
 			},
 			fontFamily: {
-				sans: ["Poppins", ...fontFamily.sans]
+				sans: ["Inter", "Segoe UI Variable", "Segoe UI", ...fontFamily.sans]
 			},
 			animation: {
 				progress: 'progress 1s infinite linear',

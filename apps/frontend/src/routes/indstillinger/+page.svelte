@@ -19,6 +19,7 @@
   import Setup from './_components/Setup.svelte';
   import CheckToken from './_components/CheckToken.svelte';
   import SyncSettings from './_components/SyncSettings.svelte';
+  import AppearanceSettings from './_components/AppearanceSettings.svelte';
 
   let showAccountError =
     $authStore.username === null || $authStore.password === null || $authStore.school === null;
@@ -115,6 +116,11 @@
       </div>
       <Separator />
     {/if}
+    <div>
+      <h3 class="mb-2 text-lg font-semibold scroll-m-20">Udseende</h3>
+      <AppearanceSettings />
+    </div>
+    <Separator />
     <div>
       <h3 class="text-lg font-semibold scroll-m-20">Lectio Konto</h3>
       {#if showAccountError}
