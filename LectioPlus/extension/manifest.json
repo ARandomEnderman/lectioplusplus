@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "LectioPlus+",
+  "version": "0.8.0",
+  "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
+  "permissions": ["storage"],
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "action": {
+    "default_title": "LectioPlus+",
+    "default_icon": { "16": "icon-16.png", "32": "icon-32.png" },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
+      "js": ["appearance.js", "boot.js"],
+      "css": ["theme.css", "styles.css", "workspace.css", "native.css"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
+      "js": ["native-theme.js"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
+      "js": ["icons.js", "hints.js", "lectio-data.js", "workspace.js", "content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
