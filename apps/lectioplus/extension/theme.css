@@ -39,6 +39,36 @@
   html.lxp-starting body { visibility: hidden !important; }
 }
 
+:root[data-lxp-design='strafe'], .lxp-design-swatch[data-swatch='strafe'] {
+  /* Colours and font from Strafe Clicker (clicker.strafe-mc.com) */
+  --lxp-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --lxp-accent-light: #9a5b00;
+  --lxp-accent-dark: #f5a524;
+  --lxp-tint-light: #fff1d6;
+  --lxp-tint-dark: #2a2316;
+  --lxp-design-mark: #f5a524;
+  --lxp-on-mark: #1a1203;
+}
+
+/* In dark mode the Strafe design also takes over Strafe Clicker's surfaces. */
+:root[data-lxp-mode='dark'][data-lxp-design='strafe'] {
+  --lxp-bg: #0d0f14;
+  --lxp-surface: #141821;
+  --lxp-subtle: #1c2130;
+  --lxp-text: #e6e9f0;
+  --lxp-muted: #8b93a7;
+  --lxp-border: #262c3d;
+  --lxp-rail-bg: #141821;
+  --lxp-tooltip-bg: #e6e9f0;
+  --lxp-tooltip-text: #0d0f14;
+  --lxp-green-bg: #0f2a1e;
+  --lxp-green: #3ecf8e;
+  --lxp-red-bg: #3a2228;
+  --lxp-red: #ef5b5b;
+  --lxp-amber-bg: #2a2316;
+  --lxp-amber: #f5a524;
+}
+
 :root[data-lxp-design='ocean'], .lxp-design-swatch[data-swatch='ocean'] {
   --lxp-accent-light: #095d88;
   --lxp-accent-dark: #96ddfa;

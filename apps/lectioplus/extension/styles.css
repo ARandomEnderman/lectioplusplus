@@ -1,4 +1,5 @@
 body.lxp-enabled {
+  box-sizing: border-box; /* Lectio can set body width to 100%/100dvw; keep the rail padding inside it */
   margin: 0;
   padding-inline-start: var(--lxp-rail);
   background: var(--lxp-bg);
@@ -40,9 +41,9 @@ body.lxp-enabled {
   width: 36px;
   height: 36px;
   border-radius: 11px;
-  background: #644ad9;
-  color: #fff;
-  box-shadow: 0 3px 7px #6042c03b;
+  background: var(--lxp-design-mark, #644ad9);
+  color: var(--lxp-on-mark, #fff);
+  box-shadow: 0 3px 7px color-mix(in srgb, var(--lxp-design-mark, #644ad9) 23%, transparent);
 }
 .lxp-brand-icon .lxp-icon { width: 22px; height: 22px; }
 .lxp-brand-name { color: var(--lxp-text); font-size: 21px; font-weight: 740; letter-spacing: -.75px; }
@@ -150,8 +151,9 @@ body.lxp-enabled {
 .lxp-clicker-name { font-size: clamp(19px, 4vw, 42px); font-weight: 900; letter-spacing: -.035em; line-height: 1.1; overflow-wrap: anywhere; }
 .lxp-clicker-name span, .lxp-clicker-link > .lxp-icon { color: var(--lxp-clicker-accent); }
 .lxp-clicker-art { display: block; width: clamp(54px, 14vw, 136px); height: auto; }
-.lxp-clicker-view { padding: 20px clamp(16px, 3vw, 46px); }
-.lxp-clicker-frame { display: block; width: 100%; height: calc(100vh - 68px - 40px); height: calc(100dvh - 68px - 40px); min-height: 420px; border: 1px solid var(--lxp-border); border-radius: 10px; background: #0d0f14; }
+/* Pinned to the visible area so Lectio's own body width/overflow rules cannot crop the game. */
+.lxp-clicker-view { position: fixed; inset: 68px 0 0 var(--lxp-rail); z-index: 1; padding: 20px clamp(16px, 3vw, 46px); }
+.lxp-clicker-frame { display: block; width: 100%; height: 100%; border: 1px solid var(--lxp-border); border-radius: 10px; background: #0d0f14; }
 .lxp-violet { background: var(--lxp-active); color: var(--lxp-accent); }
 .lxp-blue { background: var(--lxp-blue-bg); color: var(--lxp-blue); }
 .lxp-green { background: var(--lxp-green-bg); color: var(--lxp-green); }
@@ -210,7 +212,7 @@ body.lxp-enabled {
 .lxp .lxp-select, .lxp .lxp-secondary-button { min-height: 36px; padding: 7px 10px; border: 1px solid var(--lxp-border); border-radius: 8px; background: var(--lxp-subtle); color: var(--lxp-text); }
 .lxp .lxp-secondary-button { display: inline-flex; align-items: center; gap: 7px; }
 .lxp .lxp-secondary-button .lxp-icon { width: 16px; height: 16px; }
-.lxp-restore { position: fixed; z-index: 1001; right: 15px; bottom: 15px; padding: 9px 12px; border: 0; border-radius: 8px; background: #644ad9; color: #fff; cursor: pointer; }
+.lxp-restore { position: fixed; z-index: 1001; right: 15px; bottom: 15px; padding: 9px 12px; border: 0; border-radius: 8px; background: var(--lxp-design-mark, #644ad9); color: var(--lxp-on-mark, #fff); cursor: pointer; }
 
 /* Lectio's own forms, tables and calendar remain the source of page actions. */
 body.lxp-enabled #masterContent { min-width: 0; max-width: 100%; background: transparent; color: var(--lxp-text); }
@@ -248,6 +250,7 @@ body.lxp-enabled #aspnetForm .ls-table-base > :is(thead, tbody) > tr > th:not([s
   .lxp-sidebar:not(.lxp-sidebar-open) { display: none; }
   .lxp-brand { margin-bottom: 24px; }
   .lxp-topbar { min-height: 62px; }
+  .lxp-clicker-view { inset: 62px 0 0 0; padding: 12px; }
   .lxp button.lxp-menu-button { display: inline-flex; flex-shrink: 0; }
   .lxp-breadcrumb { display: none; }
   .lxp-overview { padding-top: 17px; }

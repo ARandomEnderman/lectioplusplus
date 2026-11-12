@@ -1,8 +1,9 @@
 (() => {
   'use strict';
 
-  const defaults = { enabled: true, theme: 'system', design: 'indigo', density: 'comfortable', hideProfilePhoto: false };
+  const defaults = { enabled: true, theme: 'dark', design: 'strafe', density: 'comfortable', hideProfilePhoto: false };
   const designs = [
+    ['strafe', 'Strafe'],
     ['indigo', 'Indigo'], ['ocean', 'Havblå'], ['forest', 'Skovgrøn'], ['teal', 'Turkis'], ['slate', 'Skifer'],
     ['lavender', 'Lavendel'], ['raspberry', 'Hindbær'], ['ruby', 'Rubin'], ['coral', 'Koral'], ['amber', 'Rav']
   ];
