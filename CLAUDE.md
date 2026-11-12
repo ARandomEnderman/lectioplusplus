@@ -44,7 +44,7 @@ Always merge changes into `main` and push the result to `origin/main`.
 
 `apps/api`: `pip install -r requirements.txt && python app.py` (port 5000), or `docker compose up`.
 
-Releases are for the extension only. Bump `version` in `apps/lectioplus/extension/manifest.json`, commit, then push a matching `vX.Y.Z` tag. `.github/workflows/release.yml` then zips the extension for Chrome, converts it with `safari-web-extension-converter` and builds an ad-hoc-signed macOS Safari app, and publishes both zips as a GitHub release. The workflow fails if the tag and manifest versions differ. The Tauri desktop/Android build is not in use and has no workflow.
+Releases are for the extension only. Bump `version` in `apps/lectioplus/extension/manifest.json`, commit, then push a matching `vX.Y.Z` tag. `.github/workflows/release.yml` then zips the extension for Chrome, converts it with `safari-web-extension-converter` and builds an ad-hoc-signed macOS Safari app, and publishes both zips as a GitHub release. The workflow fails if the tag and manifest versions differ. Release asset names are unversioned (`lectioplus-chrome.zip`, `lectioplus-safari-macos.zip`, `install-safari.sh`), so `releases/latest/download/…` URLs always point at the newest build. `apps/lectioplus/safari/install.sh` installs or updates the Safari app from there, and the popup (`popup.js`) shows a notice when a newer release exists. Both contain the placeholder `__GITHUB_REPOSITORY__`, which the workflow replaces at build time so the owner name is never committed. Leave the placeholder in git; unpacked dev copies skip the update check. The Tauri desktop/Android build is not in use and has no workflow.
 
 ## Frontend architecture (`apps/frontend`)
 

@@ -3,6 +3,8 @@ name: 'release extension'
 # Push a tag like v0.1.0 to build the LectioPlus+ extension for Chrome and Safari
 # and publish both builds as a GitHub release. The tag must match
 # "version" in apps/lectioplus/extension/manifest.json.
+# Asset names carry no version, so .../releases/latest/download/<name> always
+# points at the newest build (the Safari install script relies on this).
 on:
   push:
     tags:
@@ -28,20 +30,28 @@ jobs:
             exit 1
           fi
 
+      # The repo name is only filled in at build time so it is never committed.
+      - name: Fill in repository for update checks
+        run: sed -i "s|__GITHUB_REPOSITORY__|$GITHUB_REPOSITORY|g" "$EXTENSION_DIR/popup.js" apps/lectioplus/safari/install.sh
+
       - name: Package for Chrome and Edge
         run: |
           mkdir -p dist
-          (cd "$EXTENSION_DIR" && zip -r -X "$GITHUB_WORKSPACE/dist/lectioplus-chrome-$GITHUB_REF_NAME.zip" .)
+          (cd "$EXTENSION_DIR" && zip -r -X "$GITHUB_WORKSPACE/dist/lectioplus-chrome.zip" .)
+          cp apps/lectioplus/safari/install.sh dist/install-safari.sh
 
       - uses: actions/upload-artifact@v4
         with:
           name: chrome
-          path: dist/*.zip
+          path: dist/*
 
   safari:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Fill in repository for update checks
+        run: sed -i '' "s|__GITHUB_REPOSITORY__|$GITHUB_REPOSITORY|g" "$EXTENSION_DIR/popup.js"
 
       - name: Convert to a Safari web extension project
         run: |
@@ -63,7 +73,7 @@ jobs:
         run: |
           mkdir -p dist
           app=$(find build/products -maxdepth 3 -name 'LectioPlus.app' | head -n 1)
-          ditto -c -k --keepParent "$app" "dist/lectioplus-safari-macos-$GITHUB_REF_NAME.zip"
+          ditto -c -k --keepParent "$app" dist/lectioplus-safari-macos.zip
 
       - uses: actions/upload-artifact@v4
         with:
@@ -82,20 +92,24 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           name: LectioPlus+ ${{ github.ref_name }}
-          files: dist/*.zip
+          files: dist/*
           body: |
-            ## Chrome og Edge
-            1. Hent `lectioplus-chrome-${{ github.ref_name }}.zip` og pak den ud.
-            2. Åbn `chrome://extensions` (eller `edge://extensions`), og slå **Udviklertilstand** til.
-            3. Vælg **Indlæs udpakket**, og vælg den udpakkede mappe.
-            4. Genindlæs dine Lectio-faner.
-
-            ## Safari (macOS)
-            Safari-appen er ikke signeret af Apple, så Safari skal tillade usignerede udvidelser:
-            1. Hent `lectioplus-safari-macos-${{ github.ref_name }}.zip`, pak den ud, og flyt `LectioPlus.app` til Programmer.
-            2. Kør `xattr -dr com.apple.quarantine /Applications/LectioPlus.app` i Terminal, og åbn appen én gang.
-            3. I Safari: **Indstillinger → Avanceret →** slå **Vis funktioner til webudviklere** til.
-            4. Vælg **Udvikler → Tillad usignerede udvidelser** (skal gøres igen, hver gang Safari genstartes).
-            5. Slå LectioPlus+ til under **Indstillinger → Udvidelser**.
+            ## Safari (macOS): installér eller opdatér
+            Kør denne kommando i Terminal. Kør den igen, når der kommer en ny version:
+            ```
+            curl -fsSL https://github.com/${{ github.repository }}/releases/latest/download/install-safari.sh | bash
+            ```
+            Første gang skal Safari tillade usignerede udvidelser, fordi appen ikke er signeret af Apple:
+            1. **Safari → Indstillinger → Avanceret →** slå funktioner til webudviklere til.
+            2. Vælg **Udvikler → Tillad usignerede udvidelser** (skal gøres igen, hver gang Safari genstartes).
+            3. Slå LectioPlus+ til under **Indstillinger → Udvidelser**.
 
             Kræver Safari 16 eller nyere.
+
+            ## Chrome og Edge
+            1. Hent `lectioplus-chrome.zip`, og pak den ud.
+            2. Åbn `chrome://extensions` (eller `edge://extensions`), og slå **Udviklertilstand** til.
+            3. Vælg **Indlæs udpakket**, og vælg den udpakkede mappe.
+            4. Ved en ny version: pak den nye zip ud oven i den gamle mappe, og tryk **Genindlæs** på LectioPlus+.
+
+            LectioPlus+ viser en besked i udvidelsens menu, når der er en ny version.

@@ -50,4 +50,34 @@ async function start() {
   }
 }
 
+// Filled in by the release workflow; left as-is in unpacked development copies, which skips the check.
+const releaseRepo = '__GITHUB_REPOSITORY__';
+
+function newer(latest, current) {
+  const a = latest.split('.').map(Number);
+  const b = current.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+  }
+  return false;
+}
+
+async function checkForUpdate() {
+  if (releaseRepo.startsWith('__')) return;
+  try {
+    const response = await fetch(`https://api.github.com/repos/${releaseRepo}/releases/latest`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const release = await response.json();
+    const latest = String(release.tag_name || '').replace(/^v/, '');
+    if (!/^\d+\.\d+\.\d+$/.test(latest) || !newer(latest, chrome.runtime.getManifest().version)) return;
+    const link = document.getElementById('update');
+    link.href = release.html_url;
+    link.textContent = `Ny version ${latest} er klar – se hvordan du opdaterer`;
+    link.hidden = false;
+  } catch {
+    // Offline or rate-limited: no notice.
+  }
+}
+
 start();
+checkForUpdate();
