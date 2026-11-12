@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LectioPlus+",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
   "permissions": ["storage"],
   "icons": {
@@ -17,11 +17,18 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["strafe-clicker-icon.png"],
+      "resources": ["strafe-clicker-icon.png", "icon-32.png"],
       "matches": ["https://lectio.dk/*", "https://www.lectio.dk/*"]
     }
   ],
   "content_scripts": [
+    {
+      "matches": ["https://lectio.dk/*", "https://www.lectio.dk/*"],
+      "include_globs": ["https://*/", "https://*/?*", "https://*/lectio/login_list.aspx*"],
+      "js": ["appearance.js", "tab-branding.js", "school-picker.js"],
+      "css": ["theme.css", "school-picker.css"],
+      "run_at": "document_end"
+    },
     {
       "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
       "js": ["appearance.js", "boot.js"],
@@ -39,7 +46,7 @@
     },
     {
       "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
-      "js": ["icons.js", "hints.js", "lectio-data.js", "workspace.js", "content.js"],
+      "js": ["icons.js", "hints.js", "lectio-data.js", "workspace.js", "tab-branding.js", "content.js"],
       "run_at": "document_end"
     }
   ]

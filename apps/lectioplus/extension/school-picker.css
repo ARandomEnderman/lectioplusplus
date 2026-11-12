@@ -1,0 +1,50 @@
+body.lxp-school-enabled {
+  box-sizing: border-box; margin: 0; padding: 0; width: auto; min-height: 100vh;
+  overflow: auto; background: var(--lxp-bg); color: var(--lxp-text);
+  font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.lxp-school-picker, .lxp-school-picker * { box-sizing: border-box; }
+body.lxp-school-enabled > .site-container,
+body.lxp-school-enabled > #schoolsdiv { display: none !important; }
+.lxp-school-picker [hidden], .lxp-school-picker[hidden] { display: none !important; }
+.lxp-school-picker { width: min(1080px, 100%); margin: auto; padding: 20px 28px 28px; font-size: 14px; }
+.lxp-school-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.lxp-school-brand { font-size: 19px; font-weight: 800; letter-spacing: -.8px; }
+.lxp-school-brand span { color: var(--lxp-accent); }
+.lxp-school-settings { position: relative; }
+.lxp-school-settings summary { cursor: pointer; padding: 6px 11px; font-size: 12px; border: 1px solid var(--lxp-border); border-radius: 10px; background: var(--lxp-surface); }
+.lxp-school-settings .lxp-appearance { position: absolute; right: 0; top: 48px; z-index: 3; width: min(350px, 85vw); padding: 20px; border: 1px solid var(--lxp-border); border-radius: 14px; background: var(--lxp-surface); box-shadow: 0 16px 40px #0003; }
+.lxp-school-settings .lxp-photo-setting { display: none; }
+.lxp-school-hero { max-width: 600px; padding: 32px 0 16px; }
+.lxp-school-eyebrow { display: none; }
+.lxp-school-hero h1 { margin: 0; color: var(--lxp-text); font-size: 28px; line-height: 1.2; letter-spacing: -.7px; }
+.lxp-school-intro { margin: 10px 0 20px; color: var(--lxp-muted); font-size: 14px; max-width: 580px; }
+.lxp-school-label { display: block; font-size: 12px; font-weight: 650; margin-bottom: 6px; }
+.lxp-school-search-row { position: relative; }
+.lxp-school-picker input.lxp-school-search { display: block; width: 100%; height: 42px; padding: 0 64px 0 13px; border: 1px solid var(--lxp-border); border-radius: 9px; background: var(--lxp-surface); color: var(--lxp-text); font: inherit; font-size: 14px; }
+.lxp-school-search::placeholder { color: var(--lxp-muted); }
+.lxp-school-clear { position: absolute; right: 8px; top: 8px; padding: 3px 8px; background: var(--lxp-subtle); color: var(--lxp-text); border: 0; border-radius: 7px; cursor: pointer; font: inherit; }
+.lxp-school-status { margin: 4px 0 10px; color: var(--lxp-muted); font-size: 13px; }
+.lxp-school-results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; list-style: none; padding: 0; margin: 0; }
+.lxp-school-results li { min-width: 0; list-style: none; margin: 0; padding: 0; }
+.lxp-school-picker a.lxp-school-card { display: flex; align-items: center; gap: 10px; height: 100%; min-height: 52px; padding: 10px 12px; font-size: 13px; line-height: 1.4; border: 1px solid var(--lxp-border); border-radius: 8px; background: var(--lxp-surface); color: var(--lxp-text); text-decoration: none; }
+.lxp-school-card:hover { border-color: var(--lxp-accent) !important; background: var(--lxp-subtle) !important; }
+.lxp-school-mark { display: grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px; font-size: 12px; background: var(--lxp-active); color: var(--lxp-accent); font-weight: 750; }
+.lxp-school-name { flex: 1; overflow-wrap: anywhere; font-weight: 500; }
+.lxp-school-arrow { color: var(--lxp-muted); }
+.lxp-school-picker :is(a, button, input, summary, select):focus-visible { outline: 2px solid var(--lxp-accent); outline-offset: 3px; }
+.lxp-school-empty { padding: 28px 16px; text-align: center; border: 1px dashed var(--lxp-border); border-radius: 14px; }
+.lxp-school-empty h2 { font-size: 17px; color: var(--lxp-text); }
+.lxp-school-empty p { color: var(--lxp-muted); }
+.lxp-school-footer { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--lxp-border); font-size: 13px; color: var(--lxp-muted); }
+.lxp-school-footer span { flex: 1; }
+.lxp-school-footer a, .lxp-school-footer button { color: var(--lxp-muted); text-decoration: underline; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+[data-lxp-density='compact'] .lxp-school-picker a.lxp-school-card { min-height: 44px; padding: 7px 10px; }
+[data-lxp-density='compact'] .lxp-school-results { gap: 5px; }
+@media (max-width: 900px) { .lxp-school-results { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 580px) {
+  .lxp-school-picker { padding: 16px 16px 24px; }
+  .lxp-school-hero { padding-top: 24px; }
+  .lxp-school-results { grid-template-columns: 1fr; }
+  .lxp-school-footer span { flex-basis: 100%; }
+}

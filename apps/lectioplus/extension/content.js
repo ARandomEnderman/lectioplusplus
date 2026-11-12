@@ -36,6 +36,7 @@
   const lectio = globalThis.lectioPlusData;
   const initialUrl = location.href;
   const initialTitle = document.title;
+  let sourceTitle = initialTitle;
   const fastPages = new Set(['home', 'schedule', 'tasks', 'homework', 'messages', 'school']);
   const navigationSelector = '#m_mastermenu, #m_MobilMenuNav, #mobilMereSheetMenu, nav, [role="navigation"], [role="tablist"], .ls-master-header-container, .ls-subnav-container, .ls-subnav1, .ls-subnav2, [id*="menutab" i], [class*="menutab" i]';
   const activityPage = { key: 'activity', label: 'Aktivitet', icon: 'calendar' };
@@ -165,9 +166,9 @@
     if (preview) return pages.find(({ key }) => `#${key}` === location.hash.split('/')[0]) || pages[0];
     const url = new URL(sourceUrl);
     const name = url.pathname.split('/').pop();
-    const documentTitle = document.title.split(/\s+[-–|]\s+/);
-    const feedbackPage = /^(?:elevfeedback|aktivitets?feedback)\d*\.aspx$/i.test(name) || /\belevfeedback\b/i.test(document.title);
-    if (feedbackPage || /\baktivitetsforside\b/i.test(document.title) || /^(?:aktivitet|aktivitetsforside|aktivitetforside)\d*\.aspx$/i.test(name)) {
+    const documentTitle = sourceTitle.split(/\s+[-–|]\s+/);
+    const feedbackPage = /^(?:elevfeedback|aktivitets?feedback)\d*\.aspx$/i.test(name) || /\belevfeedback\b/i.test(sourceTitle);
+    if (feedbackPage || /\baktivitetsforside\b/i.test(sourceTitle) || /^(?:aktivitet|aktivitetsforside|aktivitetforside)\d*\.aspx$/i.test(name)) {
       const selectedTabs = source.querySelectorAll(':is([role="tablist"], .lectioTabToolbar, .ls-subnav2) :is([aria-selected="true"], [aria-current="page"], [aria-current="true"], [current-page], .ls-subnav-active, .selected, .sel)');
       const feedbackTab = [...selectedTabs].some((tab) => normalize(navigationText(tab)) === 'elevfeedback');
       return feedbackPage || feedbackTab ? { ...activityPage, label: 'Elevfeedback' } : activityPage;
@@ -402,7 +403,8 @@
       source = result.scope;
       sourceUrl = href;
       showNative = false;
-      document.title = result.title || `${page.label} – Lectio`;
+      sourceTitle = result.title || `${page.label} – Lectio`;
+      document.title = sourceTitle;
       refresh();
       if (source !== native && page.key !== 'home' && !workspaceReady) {
         location.reload();
@@ -751,6 +753,7 @@
   }
 
   function applyPreferences() {
+    if (!preferences.enabled) globalThis.lectioPlusTab?.apply('', false, sourceTitle);
     hideHints();
     document.body.classList.toggle('lxp-enabled', preferences.enabled);
     appearance.apply(document.documentElement, preferences, darkMode.matches, preferences.enabled);
@@ -815,6 +818,7 @@
     const previousPage = activePage;
     links = getNavigation();
     activePage = pageInfo();
+    globalThis.lectioPlusTab?.apply(activePage.label, true, sourceTitle);
     if (previousPage && previousPage.key !== activePage.key) {
       hideHints();
       showNative = false;
@@ -918,6 +922,7 @@
   }
 
   void start().catch(() => {
+    globalThis.lectioPlusTab?.apply('', false, sourceTitle);
     root.hidden = true;
     document.body.classList.remove('lxp-enabled', 'lxp-native-hidden', 'lxp-native-heading', 'lxp-inline-native', 'lxp-activity-page');
     appearance.apply(document.documentElement, defaults, darkMode.matches, false);
