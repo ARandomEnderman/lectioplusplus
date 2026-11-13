@@ -206,6 +206,13 @@
   const clickerView = element('main', 'lxp-clicker-view');
   clickerView.id = 'lxp-clicker';
   clickerView.hidden = true;
+  const clickerExternal = anchor('lxp-secondary-button lxp-clicker-external', clickerUrl,
+    'Åbn i ny fane', icon('external'));
+  clickerExternal.target = '_blank';
+  clickerExternal.rel = 'noopener noreferrer';
+  clickerExternal.setAttribute('aria-label', 'Åbn Strafe Clicker i ny fane');
+  clickerView.append(element('div', 'lxp-clicker-toolbar',
+    element('span', '', 'Forsvinder dit login? Åbn spillet i en ny fane, og log ind der.'), clickerExternal));
   const workspace = globalThis.lectioPlusWorkspace({
     ui: { element, button, anchor, icon }, data: lectio, narrow, safeHref, revealOriginal
   });
@@ -288,7 +295,7 @@
     overview.hidden = !enhanced || !home;
     workspace.node.hidden = !enhanced || home;
     clickerView.hidden = !clickerOpen;
-    if (clickerOpen && !clickerView.firstChild) {
+    if (clickerOpen && !clickerView.querySelector('iframe')) {
       // Created on first open and kept afterwards, so the game keeps running while other tabs are shown.
       const frame = element('iframe', 'lxp-clicker-frame');
       frame.src = clickerUrl;

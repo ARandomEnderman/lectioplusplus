@@ -153,7 +153,10 @@ body.lxp-enabled {
 .lxp-clicker-art { display: block; width: clamp(54px, 14vw, 136px); height: auto; }
 /* Pinned to the visible area so Lectio's own body width/overflow rules cannot crop the game. */
 .lxp-clicker-view { position: fixed; inset: 68px 0 0 var(--lxp-rail); z-index: 1; padding: 20px clamp(16px, 3vw, 46px); }
-.lxp-clicker-frame { display: block; width: 100%; height: 100%; border: 1px solid var(--lxp-border); border-radius: 10px; background: #0d0f14; }
+.lxp-clicker-view:not([hidden]) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+.lxp-clicker-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; color: var(--lxp-muted); font-size: 13px; }
+.lxp a.lxp-clicker-external:hover { border-color: var(--lxp-accent); color: var(--lxp-accent); }
+.lxp-clicker-frame { display: block; width: 100%; height: 100%; min-height: 0; border: 1px solid var(--lxp-border); border-radius: 10px; background: #0d0f14; }
 .lxp-violet { background: var(--lxp-active); color: var(--lxp-accent); }
 .lxp-blue { background: var(--lxp-blue-bg); color: var(--lxp-blue); }
 .lxp-green { background: var(--lxp-green-bg); color: var(--lxp-green); }
