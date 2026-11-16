@@ -1,0 +1,83 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const { JSDOM, VirtualConsole } = require('jsdom');
+const root = require('node:path').resolve(__dirname, '..');
+const scripts = ['appearance','privacy','icons','hints','lectio-data','workspace','native-layout','tab-branding','settings-transfer','settings-extras','settings','school-math','school-elements','school-chemistry','school-lab-core','school-writing','translation','school-catalog','school-language','school-visuals','school-molecule-builder','school-lab','school-special','school-tools','content'];
+const pause = () => new Promise(r => setTimeout(r,90));
+let checks = 0;
+function ok(condition, message) { assert.ok(condition,message); checks++; console.log('PASS',message); }
+function setup({html=fs.readFileSync(root+'/preview/index.html','utf8'), hash='#schedule', narrow=false, url='https://example.test/preview/index.html'}={}) {
+ const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/CSS stylesheet/.test(e.message))errors.push(e)});
+ const dom=new JSDOM(html,{url:url+hash,runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc});
+ const w=dom.window; w.structuredClone=structuredClone;
+ w.matchMedia=q=>({matches:q.includes('760')?narrow:q.includes('dark'),addEventListener(){},removeEventListener(){}});
+ w.HTMLCanvasElement.prototype.getContext=()=>null; w.scrollTo=()=>{}; w.HTMLElement.prototype.scrollIntoView=()=>{};
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
+ for(const script of scripts)w.eval(fs.readFileSync(root+'/extension/'+script+'.js','utf8'));
+ return {dom,w,d:w.document,errors};
+}
+(async()=>{
+ const {dom,w,d,errors}=setup({hash:'#home'});await pause();
+ const ctrl=label=>[...d.querySelectorAll('[aria-label]')].find(x=>x.getAttribute('aria-label')===label);
+ const change=(label,value)=>{const x=ctrl(label);if(x.type==='checkbox')x.checked=value;else x.value=value;x.dispatchEvent(new w.Event('change'));};
+ const prefs=()=>w.lectioPlusAppearance.normalize(JSON.parse(w.localStorage.getItem('lectioPlusPreview')||'{}'));
+ const save=async()=>{ctrl('Gem layout').click();await pause()};
+ ctrl('Tilpas overblik').click();
+ const live=()=>d.querySelector('.lxp-overview .lxp-hero h1').textContent;
+ const draft=()=>d.querySelector('.lxp-widget-preview .lxp-hero h1').textContent;
+ const realSchedule=d.querySelector('.lxp-overview [data-widget=schedule] .lxp-detail-list').textContent;
+ ok(d.querySelector('.lxp-widget-slot[data-widget=schedule] .lxp-detail-list').textContent===realSchedule,'editor uses exactly the live dashboard lesson content');
+ ok(!d.querySelector('.lxp-widget-preview a[href]')&&!d.querySelector('.lxp-widget-preview [id]'),'real widget previews cannot navigate and contain no duplicate IDs');
+ change('Overskrift på overblik','Kladde A');change('Overskrift på overblik','Kladde B');
+ ok(draft()==='Kladde B'&&live()==='Dit overblik'&&prefs().dashboard.title==='Dit overblik','draft changes do not alter the page or saved configuration');
+ ctrl('Fortryd layoutændring').click();ok(draft()==='Kladde A','undo returns to previous draft');
+ ctrl('Gentag layoutændring').click();ok(draft()==='Kladde B','redo restores draft');
+ ctrl('Luk indstillinger').click();ok(d.querySelector('.lxp-settings').open&&d.querySelector('.lxp-settings-status').textContent.includes('Gem layout'),'close preserves an unsaved draft with clear action');
+ const cancelEvent=new w.Event('cancel',{cancelable:true});d.querySelector('.lxp-settings').dispatchEvent(cancelEvent);ok(cancelEvent.defaultPrevented,'Escape cannot silently discard draft');
+ ok(ctrl('Eksportér indstillinger').disabled&&ctrl('Vælg backupfil').disabled,'backup waits for the layout draft to be saved or cancelled');
+ ctrl('Annullér layoutændringer').click();ok(draft()==='Dit overblik'&&ctrl('Fortryd layoutændring').disabled&&ctrl('Gentag layoutændring').disabled,'Cancel clears draft and history');
+ change('Overskrift på overblik','Min gemte dag');await save();ok(live()==='Min gemte dag'&&prefs().dashboard.title==='Min gemte dag'&&ctrl('Gem layout').disabled,'Save commits layout and resets dirty state');
+ change('Overskrift på overblik','Ny kladde');ctrl('Fortryd layoutændring').click();change('Overskrift på overblik','Anden retning');ok(ctrl('Gentag layoutændring').disabled,'editing after undo clears redo branch');ctrl('Annullér layoutændringer').click();
+ d.querySelector('#lxp-settings-tab-navigation').click();
+ change('Vis Beskeder i sidebjælken',false);await pause();ok(!d.querySelector('.lxp-nav-link[href="#messages"]')&&!prefs().navigation.find(x=>x.id==='messages').visible,'hidden sidebar item is saved and removed');
+ change('Vis Beskeder i sidebjælken',true);await pause();ctrl('Favorit: Beskeder').click();await pause();
+ ok(d.querySelector('.lxp-nav-heading').textContent==='Favoritter'&&d.querySelector('.lxp-nav-link').getAttribute('href')==='#messages','pinned item appears first under Favorites');
+ ok(ctrl('Favorit: Beskeder').getAttribute('aria-pressed')==='true','favorite state is visible and accessible');
+ ctrl('Flyt Skema op i menuen').click();await pause();ok(prefs().navigation[0].id==='schedule','menu arrows persist ordering');
+ const navLinks=[...d.querySelectorAll('.lxp-nav-link')].map(x=>x.getAttribute('href'));
+ ok(navLinks[1]==='#schedule'&&new Set(navLinks).size===navLinks.length,'custom menu order follows favorites with no duplicates');
+ ctrl('Gendan standardmenu').click();await pause();ok(d.querySelector('.lxp-nav-heading').textContent==='Skole'&&prefs().navigation.every(x=>x.visible&&!x.pinned),'default menu restores groups, visibility and favorites');
+ const T=w.lectioPlusSettingsTransfer;
+ const withOwn=w.lectioPlusAppearance.normalize({...prefs(),dashboard:{...prefs().dashboard,custom:[{id:'custom-backup',type:'note',title:'Egen note',text:'Mit eget indhold',url:''}]}});
+ const encoded=T.serialize(withOwn),decoded=T.parse(encoded);
+ ok(JSON.stringify(decoded.dashboard)===JSON.stringify(withOwn.dashboard)&&!Object.hasOwn(decoded,'enabled'),'backup round-trips own content without activation flag');
+ ok(!encoded.includes(realSchedule)&&!encoded.includes('data-front-panel'),'backup contains configuration rather than copied school content');
+ for(const [name,payload] of [['bad JSON','{'],['unknown version',JSON.stringify({format:'LectioPlus+',version:8,preferences:{theme:'dark'}})],['unknown preference',JSON.stringify({format:'LectioPlus+',version:1,preferences:{secret:'x'}})],['unsafe URL',encoded.replace('"url": ""','"url": "javascript:alert(1)"')],['oversized','x'.repeat(w.lectioPlusSettingsTransfer.maxBytes+1)]]) {
+   assert.throws(()=>T.parse(payload));checks++;console.log('PASS',name+' rejected');
+ }
+ d.querySelector('#lxp-settings-tab-backup').click();
+ const file=ctrl('Vælg backupfil');Object.defineProperty(file,'files',{configurable:true,value:[new w.File([encoded],'settings.json',{type:'application/json'})]});file.dispatchEvent(new w.Event('change'));await pause();
+ ok(!d.querySelector('.lxp-import-review').hidden&&!prefs().dashboard.custom.length,'file selection shows review without changing saved data');
+ ctrl('Importér den valgte opsætning').click();await pause();ok(prefs().dashboard.custom[0].text==='Mit eget indhold'&&d.querySelector('.lxp-dashboard-widget[data-widget=custom-backup]'),'reviewed import applies and renders own content');
+ ctrl('Fortryd import').click();await pause();ok(!prefs().dashboard.custom.length&&!d.querySelector('.lxp-dashboard-widget[data-widget=custom-backup]'),'undo import restores prior configuration');
+ d.querySelector('#lxp-settings-tab-dashboard').click();change('Overskrift på overblik','Bevar min kladde');
+ const setItem=w.Storage.prototype.setItem;
+ Object.defineProperty(w.Storage.prototype,'setItem',{configurable:true,value(){throw Error('blocked')}});
+ await save();ok(live()==='Min gemte dag'&&prefs().dashboard.title==='Min gemte dag'&&draft()==='Bevar min kladde'&&d.querySelector('.lxp-settings-status').textContent.includes('kladde er bevaret'),'failed layout save leaves live state unchanged and preserves draft');
+ Object.defineProperty(w.Storage.prototype,'setItem',{configurable:true,value:setItem});await save();ok(live()==='Bevar min kladde','failed save can be retried successfully');
+ // External storage changes must not be overwritten by an open draft.
+ let saved=w.lectioPlusAppearance.normalize({}), writes=0;
+ const el=(tag,cls='',...children)=>{const x=d.createElement(tag);x.className=cls;x.append(...children);return x};
+ const ui={element:el,icon:()=>el('span'),button:(cls,label,fn,...children)=>{const x=el('button',cls,...children);x.type='button';x.setAttribute('aria-label',label);x.addEventListener('click',fn);return x}};
+ const isolated=w.lectioPlusSettings({ui,getPreferences:()=>saved,onChange:async changes=>{writes++;saved=w.lectioPlusAppearance.normalize({...saved,...changes});isolated.sync(saved);return true}});
+ isolated.sync(saved);d.body.append(isolated.node);
+ const iso=label=>[...isolated.node.querySelectorAll('[aria-label]')].find(x=>x.getAttribute('aria-label')===label);
+ iso('Overskrift på overblik').value='Min lokale kladde';iso('Overskrift på overblik').dispatchEvent(new w.Event('change'));
+ saved=w.lectioPlusAppearance.normalize({...saved,dashboard:{...saved.dashboard,title:'Fra anden fane'}});isolated.sync(saved);
+ iso('Gem layout').click();await pause();
+ ok(writes===0&&isolated.node.querySelector('.lxp-settings-status').textContent.includes('anden fane'),'external layout changes block stale draft overwrite');
+ iso('Annullér layoutændringer').click();ok(iso('Overskrift på overblik').value==='Fra anden fane','Cancel loads the newest external layout');
+ isolated.node.remove();
+ ok(!errors.length,'new controls complete without runtime errors');
+ dom.window.close();console.log('TOTAL',checks,'transaction, menu and backup checks');
+})().catch(e=>{console.error(e);process.exit(1)});

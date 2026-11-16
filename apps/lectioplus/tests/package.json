@@ -1,0 +1,10 @@
+{
+  "name": "lectioplus-dom-checks",
+  "private": true,
+  "scripts": {
+    "test": "node navigation.cjs && node weeks.cjs && node native-routes.cjs && node customization.cjs && node visual-editor.cjs && node toggles.cjs && node transactions.cjs && node school-core.cjs && node tool-audit.cjs && node tool-visuals.cjs && node school-ui.cjs && node transitions.cjs && node extension-audit.cjs && node startup-recovery.cjs && node homework.cjs && node calculator-extras.cjs && node atoms.cjs && node lab.cjs && node translation.cjs && node privacy.cjs && node test14.cjs && node test15.cjs && node test17.cjs && node punctuation-model.cjs && node punctuation-ui.cjs && node punctuation-transport.cjs && node punctuation-startup.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
