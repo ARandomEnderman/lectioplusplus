@@ -1,4 +1,6 @@
-<img src="https://github.com/BetterLectio/betterLectio/blob/main/banner.png?raw=true">
+<p align="center">
+  <img src="banner.png" alt="LectioPlus+ – en åben bog med et blåt flueben" width="720">
+</p>
 
 [![Version](https://img.shields.io/github/v/release/BetterLectio/betterlectio?style=for-the-badge)]()
 [![GitHub Downloads](https://img.shields.io/github/downloads/BetterLectio/betterlectio/total?style=for-the-badge)]()
