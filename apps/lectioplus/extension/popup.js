@@ -1,13 +1,17 @@
 const appearance = globalThis.lectioPlusAppearance;
 const enabled = document.getElementById('enabled');
+const showClicker = document.getElementById('show-clicker');
 const status = document.getElementById('status');
 const system = matchMedia('(prefers-color-scheme: dark)');
 let preferences = appearance.defaults;
 const controls = appearance.controls(save);
+const enabledToggle = appearance.toggle(enabled);
+const clickerToggle = appearance.toggle(showClicker);
 
 function render() {
   appearance.apply(document.documentElement, preferences, system.matches);
-  enabled.checked = preferences.enabled;
+  enabledToggle.sync(preferences.enabled);
+  clickerToggle.sync(preferences.showClicker);
   controls.sync(preferences);
 }
 
@@ -33,6 +37,8 @@ async function start() {
     preferences = appearance.normalize(await chrome.storage.local.get(appearance.defaults));
     document.getElementById('preferences').append(controls.node);
     enabled.disabled = false;
+    showClicker.disabled = false;
+    showClicker.addEventListener('change', () => save({ showClicker: showClicker.checked }));
     enabled.addEventListener('change', () => save({ enabled: enabled.checked }));
     system.addEventListener('change', render);
     chrome.storage.onChanged.addListener((changes, area) => {

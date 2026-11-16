@@ -3,17 +3,21 @@
 
   if (window !== window.top || !['/', '/lectio/login_list.aspx'].includes(location.pathname.toLowerCase())) return;
   const appearance = globalThis.lectioPlusAppearance;
+  const boot = globalThis.lectioPlusBoot;
   if (!appearance || document.getElementById('lxp-school-picker')) return;
   const media = matchMedia('(prefers-color-scheme: dark)');
   const storage = globalThis.chrome?.storage;
-  const original = document.querySelector('.site-container') || document.getElementById('schoolsdiv');
-  if (!original) return;
+  let mounted=false;
+  function mount(){const original=document.querySelector('.site-container')||document.getElementById('schoolsdiv');if(mounted||!original)return false;mounted=true;initialize(original);return true;}
+  if(!mount()){const observer=new MutationObserver(()=>{if(mount())observer.disconnect();});observer.observe(document,{childList:true,subtree:true});}
+  function initialize(original){
   const originalHidden = original.hidden;
   let preferences = { ...appearance.defaults };
   let root;
   let controls;
   let schools;
   let pending;
+  let saveStatus;
 
   function element(tag, className, text) {
     const node = document.createElement(tag);
@@ -30,9 +34,9 @@
   function readSchools(scope) {
     const unique = new Map();
     for (const link of scope.querySelectorAll('#schoolsdiv a[href]')) {
-      const url = new URL(link.getAttribute('href'), location.origin);
+      let url;try{url=new URL(link.getAttribute('href'),location.origin);}catch{continue;}
       const name = link.textContent.replace(/\s+/g, ' ').trim();
-      if (url.origin !== location.origin || !/^\/lectio\/\d+\/default\.aspx$/i.test(url.pathname) || !name) continue;
+      if (url.origin !== location.origin || url.username || url.password || !/^\/lectio\/\d+\/default\.aspx$/i.test(url.pathname) || !name) continue;
       if (!unique.has(url.href)) unique.set(url.href, { name, href: url.href, search: normalize(name) });
     }
     return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name, 'da'));
@@ -48,10 +52,10 @@
     return readSchools(new DOMParser().parseFromString(await response.text(), 'text/html'));
   }
 
-  async function save(changes) {
-    preferences = appearance.normalize({ ...preferences, ...changes });
-    apply();
-    try { await storage?.local.set(changes); } catch { /* Keep this page usable without storage. */ }
+  async function save(changes){
+    const before=preferences,next=appearance.normalize({...preferences,...changes});preferences=next;apply();
+    try{await storage?.local.set(changes);if(saveStatus)saveStatus.textContent='Gemt på denne enhed.';return true;}
+    catch{if(preferences===next){preferences=before;apply();}if(saveStatus)saveStatus.textContent='Ændringen kunne ikke gemmes. Prøv igen.';return false;}
   }
 
   function build() {
@@ -64,7 +68,8 @@
     const settings = element('details', 'lxp-school-settings');
     settings.append(element('summary', '', 'Udseende'));
     controls = appearance.controls(save);
-    settings.append(controls.node);
+    saveStatus=element('p','lxp-school-save-status');saveStatus.setAttribute('role','status');
+    settings.append(controls.node,saveStatus);
     header.append(brand, settings);
     const hero = element('section', 'lxp-school-hero');
     hero.append(element('p', 'lxp-school-eyebrow', 'DIN SKOLEDAG STARTER HER'),
@@ -132,33 +137,35 @@
     classic.type = 'button';
     classic.addEventListener('click', () => save({ enabled: false }));
     footer.append(element('span', '', 'Skolelisten hentes fra Lectio.'), info, classic);
-    root.append(header, hero, status, list, empty, footer);
+    root.append(header, saveStatus, hero, status, list, empty, footer);
     original.before(root);
     filter();
   }
 
   function apply() {
     const enabled = preferences.enabled && Boolean(root);
-    globalThis.lectioPlusTab?.apply('Find din skole', enabled);
-    appearance.apply(document.documentElement, preferences, media.matches, enabled);
+    globalThis.lectioPlusTab?.apply('Find din skole', enabled && preferences.tabBranding);
+    appearance.apply(document.documentElement, preferences, media.matches, enabled || (Boolean(boot) && preferences.enabled && !root));
     document.body.classList.toggle('lxp-school-enabled', enabled);
     original.hidden = enabled || originalHidden;
     if (root) root.hidden = !enabled;
     controls?.sync(preferences);
+    if (root || !preferences.enabled) boot?.finish();
     if (preferences.enabled && !root && !pending) {
       pending = loadSchools().then(result => {
-        if (!result.length) return;
+        if (!result.length) { boot?.finish(); return; }
         schools = result;
         build();
         apply();
-      }).catch(() => { /* The original school picker stays visible if loading fails. */ })
+      }).catch(() => { boot?.finish(); /* Keep the original picker usable if loading fails. */ })
         .finally(() => { pending = undefined; });
     }
   }
 
   async function start() {
-    try { preferences = appearance.normalize(await storage?.local.get(appearance.defaults)); }
+    try { preferences = appearance.normalize(boot ? await boot.preferences : await storage?.local.get(appearance.defaults)); }
     catch { preferences = { ...appearance.defaults }; }
+    boot?.onPreferences?.(settings=>{preferences=appearance.normalize(settings);apply();});
     media.addEventListener('change', apply);
     storage?.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
@@ -171,5 +178,6 @@
     });
     apply();
   }
-  void start();
+  void start().catch(()=>boot?.finish());
+  }
 })();

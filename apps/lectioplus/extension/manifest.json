@@ -3,7 +3,9 @@
   "name": "LectioPlus+",
   "version": "0.1.3",
   "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
@@ -12,42 +14,121 @@
   },
   "action": {
     "default_title": "LectioPlus+",
-    "default_icon": { "16": "icon-16.png", "32": "icon-32.png" },
+    "default_icon": {
+      "16": "icon-16.png",
+      "32": "icon-32.png"
+    },
     "default_popup": "popup.html"
   },
   "web_accessible_resources": [
     {
-      "resources": ["strafe-clicker-icon.png", "icon-32.png"],
-      "matches": ["https://lectio.dk/*", "https://www.lectio.dk/*"]
+      "resources": [
+        "strafe-clicker-icon.png",
+        "icon-32.png",
+        "punctuation-frame.html"
+      ],
+      "matches": [
+        "https://lectio.dk/*",
+        "https://www.lectio.dk/*"
+      ]
     }
   ],
   "content_scripts": [
     {
-      "matches": ["https://lectio.dk/*", "https://www.lectio.dk/*"],
-      "include_globs": ["https://*/", "https://*/?*", "https://*/lectio/login_list.aspx*"],
-      "js": ["appearance.js", "tab-branding.js", "school-picker.js"],
-      "css": ["theme.css", "school-picker.css"],
-      "run_at": "document_end"
-    },
-    {
-      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
-      "js": ["appearance.js", "boot.js"],
-      "css": ["theme.css", "styles.css", "workspace.css", "native.css"],
+      "matches": [
+        "https://lectio.dk/*",
+        "https://www.lectio.dk/*"
+      ],
+      "js": [
+        "appearance.js",
+        "boot.js",
+        "privacy.js"
+      ],
+      "css": [
+        "theme.css",
+        "styles.css",
+        "workspace.css",
+        "native.css",
+        "native-pages.css",
+        "customization.css",
+        "school-tools.css",
+        "school-picker.css",
+        "school-lab.css",
+        "privacy.css"
+      ],
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_start"
     },
     {
-      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
-      "js": ["native-theme.js"],
+      "matches": [
+        "https://lectio.dk/*",
+        "https://www.lectio.dk/*"
+      ],
+      "include_globs": [
+        "https://*/",
+        "https://*/?*",
+        "https://*/lectio/login_list.aspx*"
+      ],
+      "js": [
+        "tab-branding.js",
+        "school-picker.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://lectio.dk/lectio/*",
+        "https://www.lectio.dk/lectio/*"
+      ],
+      "js": [
+        "native-theme.js"
+      ],
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_end"
     },
     {
-      "matches": ["https://lectio.dk/lectio/*", "https://www.lectio.dk/lectio/*"],
-      "js": ["icons.js", "hints.js", "lectio-data.js", "workspace.js", "tab-branding.js", "content.js"],
+      "matches": [
+        "https://lectio.dk/lectio/*",
+        "https://www.lectio.dk/lectio/*"
+      ],
+      "js": [
+        "icons.js",
+        "hints.js",
+        "lectio-data.js",
+        "workspace.js",
+        "native-layout.js",
+        "tab-branding.js",
+        "settings-transfer.js",
+        "settings-extras.js",
+        "settings.js",
+        "school-math.js",
+        "school-elements.js",
+        "school-chemistry.js",
+        "school-lab-core.js",
+        "punctuation-client.js",
+        "school-writing.js",
+        "translation.js",
+        "school-catalog.js",
+        "school-language.js",
+        "school-visuals.js",
+        "school-molecule-builder.js",
+        "school-lab.js",
+        "school-special.js",
+        "school-tools.js",
+        "content.js"
+      ],
       "run_at": "document_end"
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "translation-worker.js"
+  },
+  "host_permissions": [
+    "https://api.mymemory.translated.net/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 }

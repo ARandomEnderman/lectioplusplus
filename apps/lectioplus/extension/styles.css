@@ -1,6 +1,9 @@
 body.lxp-enabled {
   box-sizing: border-box; /* Lectio can set body width to 100%/100dvw; keep the rail padding inside it */
   margin: 0;
+  height: auto !important;
+  min-height: 100dvh;
+  overflow-y: auto !important;
   padding-inline-start: var(--lxp-rail);
   background: var(--lxp-bg);
   color: var(--lxp-text);
@@ -275,6 +278,20 @@ body.lxp-enabled #aspnetForm .ls-table-base > :is(thead, tbody) > tr > th:not([s
   .lxp-detail-time { flex-basis: 69px; font-size: 11px; }
 }
 @media print {
-  body.lxp-enabled { padding: 0; background: #fff; }
-  #lxp-root, .lxp-dialog, .lxp-restore { display: none !important; }
+  html[data-lxp-mode] { --lxp-bg:#fff; --lxp-surface:#fff; --lxp-text:#111; --lxp-muted:#444; --lxp-border:#ccc; --lxp-active:#eee; --lxp-subtle:#f4f4f4; --lxp-accent:#333; }
+  body.lxp-enabled { padding:0!important; width:auto!important; height:auto!important; overflow:visible!important; background:#fff; }
+  /* A fetched week lives in the modern workspace. Printing the retained native
+     form would otherwise print the first week instead of the selected week. */
+  body.lxp-enabled.lxp-native-hidden #masterContent { display:none!important; }
+  body.lxp-enabled.lxp-native-hidden #lxp-root { display:block!important; }
+  body.lxp-enabled:not(.lxp-native-hidden) #lxp-root,
+  .lxp-sidebar,.lxp-topbar,.lxp-section-nav,.lxp-navigation-status,.lxp-skip,.lxp-dialog,.lxp-restore,
+  .lxp-week-actions,.lxp-work-controls,.lxp-tool-topline,.lxp-tool-settings,.lxp-tool-notice,.lxp-tool-editor,
+  .lxp-tools-heading > button,.lxp-tooltip { display:none!important; }
+  #lxp-root[hidden],.lxp [hidden] { display:none!important; }
+  .lxp-workspace,.lxp-overview,.lxp-school-tools { padding:0!important; margin:0!important; max-width:none!important; }
+  .lxp-tool-workspace { padding:0; border:0; max-width:none; }
+  .lxp-tool-form:has(> .lxp-tool-editor) { display:block; }
+  .lxp-tool-visual,.lxp-tool-results > div { break-inside:avoid; }
+  .lxp-week-board { --lxp-hour-height:56px!important; min-width:0; }
 }
