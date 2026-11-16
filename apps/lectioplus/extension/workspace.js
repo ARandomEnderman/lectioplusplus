@@ -33,7 +33,7 @@
       [control.id, control.title, control.getAttribute('aria-label'), control.value, control.textContent].some((value) => value && labels.test(value.trim())));
   }
 
-  globalThis.lectioPlusWorkspace = ({ ui, data, narrow, safeHref, revealOriginal }) => {
+  globalThis.lectioPlusWorkspace = ({ ui, data, narrow, safeHref, revealOriginal, getPreferences = () => globalThis.lectioPlusAppearance.defaults, onPreferences = () => {}, getSourceUrl = () => location.href }) => {
     const { element, button, anchor, icon } = ui;
     const node = element('main', 'lxp-workspace');
     node.id = 'lxp-workspace';
@@ -46,7 +46,7 @@
       const href = safeHref(link);
       const raw = link?.getAttribute('href') || '';
       const week = className.includes('lxp-week-arrow');
-      if (week && href && raw !== '#' && !new URL(href, location.href).hash && /\/skema\.aspx$/i.test(new URL(href, location.href).pathname)) {
+      if (week && href && raw !== '#' && !new URL(href, location.href).hash && /\/(?:skema|skemany)\.aspx$/i.test(new URL(href, location.href).pathname)) {
         return anchor(className, href, ...children);
       }
       if (link && (link.hasAttribute('onclick') || /^javascript:/i.test(raw) || raw === '#' || link.matches('button, input'))) {
@@ -87,17 +87,19 @@
     }
 
     function lessonCard(lesson, list, courseColor) {
-      const accent = lesson.status === 'Aflyst' ? 'rose' : courseColor;
+      const accent = lesson.status === 'Aflyst' ? 'rose' : getPreferences().colorLessons ? courseColor : 'blue';
       const when = lesson.time && element('span', 'lxp-event-time', lesson.time);
-      const meta = list ? lesson.detail : lesson.room;
+      const meta = list ? lesson.detail : getPreferences().showLessonRoom ? lesson.room : '';
       const details = element('span', 'lxp-event-copy', element('strong', '', lesson.title));
       if (meta) details.append(element('span', 'lxp-event-meta', meta));
       const body = element('span', 'lxp-event-body', ...[when, details].filter(Boolean));
       if (lesson.status) body.append(element('span', `lxp-event-status lxp-${lesson.status === 'Aflyst' ? 'red' : 'amber'}`, lesson.status));
       const item = readSource(lesson.link, `lxp-event lxp-event-${accent}`, `Åbn ${lesson.title}`, body);
       if (lesson.node.id) item.dataset.lxpSourceId = lesson.node.id;
-      if (!list && lesson.detail) {
-        item.dataset.lxpHint = lesson.detail.split(' · ').join('\n');
+      if (!list) {
+        const description = [lesson.title, lesson.time, lesson.detail, lesson.status].filter(Boolean).join(' · ');
+        item.setAttribute('aria-label', description);
+        item.dataset.lxpHint = description.split(' · ').join('\n');
         if (!item.matches('a, button')) item.tabIndex = 0;
       }
       return item;
@@ -113,8 +115,11 @@
       const stage = element('div', 'lxp-view-stage');
       const status = element('span', 'lxp-work-count');
       status.setAttribute('role', 'status');
-      const mode = state.mode || (narrow.matches ? 'day' : 'week');
+      const prefs = getPreferences();
+      if (state.defaultView !== prefs.scheduleView) { state.mode = undefined; state.defaultView = prefs.scheduleView; }
+      const mode = state.mode || (prefs.scheduleView === 'auto' ? (narrow.matches ? 'day' : 'week') : prefs.scheduleView);
       state.mode = schedule.days.length ? mode : 'day';
+      if (state.day === undefined && narrow.matches) state.day = schedule.days.includes(today) ? today : schedule.days[0] || '';
       const day = select('Vælg dag', [['', 'Alle viste dage'], ...schedule.days.map((date) => [date, data.displayDay(date)])], state.day);
       state.day = day.value;
       const weekButton = button('lxp-segment-button', 'Ugevisning', () => changeMode('week'), 'Uge');
@@ -135,33 +140,73 @@
         search.querySelector('input').focus();
       }, 'Ryd filtre');
 
-      const weekActions = element('div', 'lxp-week-actions');
-      for (const [pattern, name, symbol] of [[/forrige uge|tilbage (en )?uge|prev(?:ious)?week/i, 'Forrige uge', 'left'],
-        [/næste uge|frem (en )?uge|nextweek/i, 'Næste uge', 'chevron']]) {
-        const control = findControl(scope, pattern);
-        if (!control) continue;
-        const action = readSource(control, 'lxp-work-button lxp-week-arrow', name, icon(symbol));
-        if (action.tagName === 'DIV') continue;
-        action.setAttribute('aria-label', name);
-        action.dataset.lxpHint = name;
-        weekActions.append(action);
+      const weekActions=element('nav','lxp-week-actions');weekActions.setAttribute('aria-label','Skift uge');
+      const preview=document.body.hasAttribute('data-lxp-preview'),base=getSourceUrl(),current=data.weekAt(schedule.days[0]||today),thisWeek=data.weekAt(today);
+      function previewWeek(date){state.previewWeek=data.weekAt(date).monday;state.day='';mounted=undefined;update(scope,'schedule',today);}
+      function weekLink(date,name,...children){
+        if(!data.weekAt(date))return null;
+        const href=preview?'#schedule':data.weekHref(base,date);
+        if(!href)return null;
+        const link=anchor('lxp-work-button lxp-week-navigation',href,...children);link.setAttribute('aria-label',name);link.dataset.lxpHint=name;
+        if(preview)link.addEventListener('click',event=>{event.preventDefault();previewWeek(date);});
+        return link;
       }
-      if (schedule.days.includes(today)) weekActions.append(jumpToday);
-      const original = button('lxp-work-button lxp-source-button', 'Åbn Lectios ugeplan', () => revealOriginal(), icon('external'), 'Lectios ugeplan');
-      original.dataset.lxpHint = 'Åbn Lectios ugevælger og oprindelige skema';
-      weekActions.append(original);
+      if(current){
+        for(const [offset,name,symbol] of [[-7,'Forrige uge','left'],[7,'Næste uge','chevron']]){
+          const date=data.shiftDate(current.monday,offset);let link=weekLink(date,name,icon(symbol));
+          if(!link){const control=findControl(scope,offset<0?/forrige uge|tilbage (en )?uge|prev(?:ious)?week/i:/næste uge|frem (en )?uge|nextweek/i);if(control)link=readSource(control,'lxp-work-button lxp-week-arrow',name,icon(symbol));}
+          if(link&&link.tagName!=='DIV'){link.classList.add('lxp-week-arrow');link.setAttribute('aria-label',name);weekActions.append(link);}
+        }
+        const currentLink=weekLink(thisWeek.monday,'Denne uge','Denne uge');if(currentLink)weekActions.append(currentLink);
+        const picker=element('input','lxp-select lxp-week-picker');picker.type='week';picker.value=current.value;picker.setAttribute('aria-label','Vælg uge');picker.min='2000-W01';picker.max=data.weekAt('2099-12-28').value;
+        const pickerLabel=element('label','lxp-week-picker-label',element('span','','Vælg uge'),picker);
+        const go=anchor('lxp-work-button',preview?'#schedule':data.weekHref(base,current.monday),'Vis uge');go.setAttribute('aria-label','Vis valgt uge');
+        function setWeek(){const date=data.weekDate(picker.value);go.setAttribute('aria-disabled',String(!date));if(date&&!preview)go.href=data.weekHref(base,date);else if(!date)go.removeAttribute('href');}
+        picker.addEventListener('input',setWeek);picker.addEventListener('change',setWeek);
+        picker.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();go.click();}});
+        go.addEventListener('click',event=>{const date=data.weekDate(picker.value);if(!date){event.preventDefault();picker.reportValidity();return;}if(preview){event.preventDefault();previewWeek(date);}});
+        if(preview||data.weekHref(base,current.monday))weekActions.append(pickerLabel,go);
+      }
+      if(schedule.days.includes(today))weekActions.append(jumpToday);
+      const original=button('lxp-work-button lxp-source-button','Åbn Lectios ugeplan',()=>revealOriginal(),icon('external'),'Lectios ugeplan');original.dataset.lxpHint='Åbn Lectios ugevælger og oprindelige skema';weekActions.append(original);
       heading.append(weekActions);
+      if(preview&&state.previewWeek)heading.querySelector('.lxp-page-subtitle').append(' · Demo: eksempelaktiviteter gentages');
       if (schedule.days.length) {
         const segment = element('div', 'lxp-segment', weekButton, dayButton);
         segment.setAttribute('role', 'group');
         segment.setAttribute('aria-label', 'Skemavisning');
         controls.append(segment);
       }
-      controls.append(search, day, clear, status);
+      const size = select('Skemaets størrelse', [['60', 'Kompakt'], ['76', 'Normal størrelse'], ['92', 'Mere plads']], getPreferences().scheduleSize);
+      size.addEventListener('change', () => { onPreferences({ scheduleSize: size.value }); });
+      controls.append(search, day, size, clear, status);
       day.addEventListener('change', () => { state.day = day.value; paint(); });
-      const dated = schedule.lessons.filter((lesson) => lesson.date);
-      const timeSlots = [...new Set(dated.map((lesson) => lesson.order || ''))].sort((a, b) => (a || '99').localeCompare(b || '99'));
-      const slots = timeSlots.length ? timeSlots : [''];
+      // One continuous clock shared by all days. Different starts must not create empty rows.
+      const timed = (lesson) => lesson.start !== null && lesson.end !== null && lesson.end - lesson.start <= 12 * 60;
+      const dated = schedule.lessons.filter((lesson) => lesson.date && timed(lesson));
+      const firstMinute = dated.length ? Math.floor(Math.min(...dated.map((lesson) => lesson.start)) / 60) * 60 : 8 * 60;
+      const lastMinute = dated.length ? Math.ceil(Math.max(...dated.map((lesson) => Math.max(lesson.end, lesson.start + 30))) / 60) * 60 : 16 * 60;
+      const duration = Math.max(60, lastMinute - firstMinute);
+      const clockLabel = (minute) => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+
+      // Overlapping activities share the width of their connected group, never cover each other.
+      function positions(lessons) {
+        const groups = [];
+        for (const lesson of lessons.filter(timed).sort((a, b) => a.start - b.start || b.end - a.end)) {
+          const visualEnd = Math.max(lesson.end, lesson.start + 30);
+          let group = groups.at(-1);
+          if (!group || lesson.start >= group.end) {
+            group = { end: visualEnd, items: [], lanes: [] };
+            groups.push(group);
+          }
+          let lane = group.lanes.findIndex((end) => end <= lesson.start);
+          if (lane < 0) lane = group.lanes.length;
+          group.lanes[lane] = visualEnd;
+          group.end = Math.max(group.end, visualEnd);
+          group.items.push({ lesson, lane, visualEnd });
+        }
+        return groups.flatMap((group) => group.items.map((item) => ({ ...item, lanes: group.lanes.length })));
+      }
       const courses = [...new Set(schedule.lessons.map((lesson) => lesson.subject))].sort((a, b) => a.localeCompare(b, 'da'));
       const colors = new Map(courses.map((course, index) => [course, courseAccents[index % courseAccents.length]]));
 
@@ -180,6 +225,7 @@
       function paint() {
         const list = state.mode === 'day';
         day.hidden = !list || !schedule.days.length;
+        size.hidden = list;
         clear.hidden = !state.query && !(list && state.day);
         weekButton.setAttribute('aria-pressed', String(!list));
         dayButton.setAttribute('aria-pressed', String(list));
@@ -191,11 +237,18 @@
         const board = element('div', list ? 'lxp-day-list' : 'lxp-week-board');
         if (!list) {
           board.style.setProperty('--lxp-days', String(dates.length));
-          board.style.setProperty('--lxp-slots', String(slots.length));
+          board.style.setProperty('--lxp-hours', String(duration / 60));
+          board.style.setProperty('--lxp-hour-height', `${size.value}px`);
           board.tabIndex = 0;
           board.setAttribute('aria-label', 'Ugeplan');
           const axis = element('div', 'lxp-week-axis', element('span', 'lxp-week-axis-heading', 'Tid'));
-          for (const slot of slots) axis.append(element('span', 'lxp-week-time', slot || (timeSlots.length ? 'Anden tid' : '—')));
+          const times = element('div', 'lxp-time-axis');
+          for (let minute = firstMinute; minute < firstMinute + duration; minute += 60) {
+            const tick = element('span', 'lxp-week-time', clockLabel(minute));
+            tick.style.top = `${(minute - firstMinute) / duration * 100}%`;
+            times.append(tick);
+          }
+          axis.append(times);
           board.append(axis);
         }
         for (const date of dates.filter(Boolean)) {
@@ -215,12 +268,34 @@
             if (!dayRows.length) events.append(element('p', 'lxp-day-empty', emptyText));
             column.append(events);
           } else {
-            for (const [index, slot] of slots.entries()) {
-              const events = element('div', 'lxp-week-slot');
-              for (const lesson of dayRows.filter((item) => item.order === slot)) events.append(lessonCard(lesson, false, colors.get(lesson.subject)));
-              if (!index && !dayRows.length) events.append(element('p', 'lxp-day-empty', emptyText));
-              column.append(events);
+            const events = element('div', 'lxp-day-timeline');
+            // Short gaps are shown in their actual place; filtering must never create fake breaks.
+            const occupied = dated.filter((lesson) => lesson.date === date).sort((a, b) => a.start - b.start);
+            let previousEnd = null;
+            for (const lesson of occupied) {
+              if (getPreferences().showBreaks && previousEnd !== null && lesson.start - previousEnd >= 10 && lesson.start - previousEnd <= 30) {
+                const gap = element('div', 'lxp-schedule-break', 'Pause');
+                const range = `${clockLabel(previousEnd)}–${clockLabel(lesson.start)}`;
+                gap.setAttribute('aria-label', `Pause ${range}`);
+                gap.title = `Pause · ${range}`;
+                gap.style.top = `${(previousEnd - firstMinute) / duration * 100}%`;
+                gap.style.height = `${(lesson.start - previousEnd) / duration * 100}%`;
+                events.append(gap);
+              }
+              previousEnd = Math.max(previousEnd ?? 0, lesson.end, lesson.start + 30);
             }
+            for (const { lesson, lane, lanes, visualEnd } of positions(dayRows)) {
+              const card = lessonCard(lesson, false, colors.get(lesson.subject));
+              card.style.top = `${(lesson.start - firstMinute) / duration * 100}%`;
+              card.style.height = `calc(${(visualEnd - lesson.start) / duration * 100}% - 3px)`;
+              card.style.insetInlineStart = `calc(${lane / lanes * 100}% + 3px)`;
+              card.style.width = `calc(${100 / lanes}% - 6px)`;
+              card.classList.toggle('lxp-event-short', lesson.end - lesson.start < 60);
+              card.classList.toggle('lxp-event-tiny', lesson.end - lesson.start < 35);
+              events.append(card);
+            }
+            if (!dayRows.length) events.append(element('p', 'lxp-day-empty', emptyText));
+            column.append(events);
           }
           board.append(column);
         }
@@ -230,6 +305,10 @@
           return;
         }
         const result = [board];
+        const other = !list && rows.filter((lesson) => lesson.date && !timed(lesson));
+        if (other?.length) result.push(element('section', 'lxp-undated', element('h2', '', 'Andre aktiviteter'),
+          ...other.map((lesson) => element('div', 'lxp-other-activity',
+            element('span', 'lxp-other-date', data.displayDay(lesson.date)), lessonCard(lesson, true, colors.get(lesson.subject))))));
         if (undated.length) result.push(element('section', 'lxp-undated', element('h2', '', 'Aktiviteter uden dato'),
           ...undated.sort(byTime).map((lesson) => lessonCard(lesson, true, colors.get(lesson.subject)))));
         stage.replaceChildren(...result);
@@ -241,6 +320,68 @@
 
       paint();
       return [heading, controls, stage];
+    }
+
+    function homeworkEntry(row) {
+      const entry = element('li', 'lxp-homework-card');
+      if (row.node.id) entry.dataset.lxpSourceId = row.node.id;
+      const header = element('div', 'lxp-homework-header',
+        element('div', 'lxp-homework-subject', element('span', `lxp-record-icon lxp-${accentFor(row.subject || row.title)}`, icon('book')),
+          element('h2', '', row.subject || 'Lektier')));
+      if (row.dueText) {
+        const date = element(row.due ? 'time' : 'span', 'lxp-homework-date', icon('calendar'), row.dueText);
+        if (row.due) date.dateTime = row.due;
+        date.setAttribute('aria-label', 'Til ' + row.dueText);
+        header.append(date);
+      }
+      entry.append(header);
+      if (row.activityTitle) entry.append(readSource(row.link, 'lxp-homework-activity', 'Åbn ' + row.activityTitle,
+        element('strong', '', row.activityTitle), ...(row.link ? [icon('chevron')] : [])));
+      const content = element('div', 'lxp-homework-content');
+      let needsOriginal = false;
+      const allowed = new Set(['P','DIV','BR','UL','OL','LI','STRONG','B','EM','I','U','S','SUB','SUP','BLOCKQUOTE','PRE','CODE']);
+      function copy(source, target) {
+        if (source.nodeType === Node.TEXT_NODE) { target.append(document.createTextNode(source.textContent)); return; }
+        if (source.nodeType !== Node.ELEMENT_NODE || source.matches(data.iconSelector + ', script, style, template, [hidden], [aria-hidden="true"]') || source.style.display === 'none') return;
+        if (source.tagName === 'A') {
+          const label = data.readableText(source) || source.getAttribute('title') || 'Åbn materiale';
+          const raw = source.getAttribute('href') || '';
+          if (source.hasAttribute('onclick') || /^javascript:(?:__doPostBack|WebForm_DoPostBackWithOptions)\(/i.test(raw)) {
+            target.append(button('lxp-homework-link', label, () => revealOriginal(source, true), label));
+          } else if (document.body.hasAttribute('data-lxp-preview') && raw.startsWith('#')) {
+            target.append(anchor('lxp-homework-link', raw, label));
+          } else {
+            let url;
+            try { url = new URL(raw, getSourceUrl()); } catch { /* Keep an invalid link's readable label. */ }
+            if (raw && url && ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password) {
+              const link = anchor('lxp-homework-link', url.href, label);
+              if (url.origin !== location.origin || source.target === '_blank') { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+              target.append(link);
+            } else { target.append(label); if (raw) needsOriginal = true; }
+          }
+          return;
+        }
+        if (/^(IMG|IFRAME|VIDEO|AUDIO|OBJECT|EMBED|INPUT|SELECT|TEXTAREA|BUTTON|CANVAS|SVG|MATH|TABLE)$/.test(source.tagName)) {
+          needsOriginal = true;
+          if (source.tagName === 'IMG' && source.getAttribute('alt')) target.append(element('p', 'lxp-homework-media', source.getAttribute('alt')));
+          return;
+        }
+        const tag = /^H[1-6]$/.test(source.tagName) ? 'h3' : allowed.has(source.tagName) ? source.tagName.toLowerCase() : null;
+        const child = tag ? element(tag) : target;
+        if (tag) target.append(child);
+        for (const node of source.childNodes) copy(node, child);
+      }
+      if (row.contentCell) for (const child of row.contentCell.childNodes) copy(child, content);
+      else content.textContent = row.description || row.title;
+      entry.append(content);
+      if (needsOriginal) entry.append(button('lxp-work-button lxp-homework-original', 'Åbn lektiens indlejrede indhold i Lectio',
+        () => revealOriginal(row.contentCell), icon('external'), 'Vis billeder og indlejret indhold i Lectio'));
+      if (row.extra.length) {
+        const fields = element('dl', 'lxp-record-fields');
+        for (const { label, value } of row.extra) fields.append(element('div', '', element('dt', '', label), element('dd', '', value)));
+        entry.append(element('details', 'lxp-homework-extra', element('summary', '', 'Flere oplysninger'), fields));
+      }
+      return entry;
     }
 
     function listPage(scope, kind, table, state) {
@@ -266,7 +407,8 @@
       const subjects = [...new Set(table.rows.map((row) => row.subject).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'da'));
       const subject = select('Fag eller hold', [['', 'Alle fag og hold'], ...subjects.map((value) => [value, value])], state.subject);
       state.subject = subject.value;
-      const sort = select('Sortér opgaver', [['', 'Lectios rækkefølge'], ['soon', 'Tidligste frist'], ['later', 'Seneste frist']], state.sort);
+      const sort = select(kind === 'homework' ? 'Sortér lektier' : 'Sortér opgaver', [['', 'Lectios rækkefølge'],
+        ['soon', kind === 'homework' ? 'Tidligste dato' : 'Tidligste frist'], ['later', kind === 'homework' ? 'Seneste dato' : 'Seneste frist']], state.sort);
       if (!table.hasStatus) state.status = '';
       const choices = [['', 'Alle'], ['open', 'Mangler'], ['submitted', 'Afleveret']];
       const tabs = element('div', 'lxp-segment');
@@ -292,7 +434,7 @@
       }, 'Ryd filtre');
       controls.append(searchBox);
       if (subjects.length > 1) controls.append(subject);
-      if (kind === 'tasks' && table.rows.some((row) => row.due)) controls.append(sort);
+      if (['tasks','homework'].includes(kind) && table.rows.some((row) => row.due)) controls.append(sort);
       controls.append(clear, status);
       subject.addEventListener('change', () => { state.subject = subject.value; paint(); });
       sort.addEventListener('change', () => { state.sort = sort.value; paint(); });
@@ -301,7 +443,7 @@
         clear.hidden = !state.query && !state.subject && !state.status && !state.sort;
         const terms = normal(state.query || '').split(' ').filter(Boolean);
         const rows = table.rows.filter((row) => (!state.subject || row.subject === state.subject) &&
-          (!state.status || row.state === state.status) && terms.every((term) => normal(row.node.textContent).includes(term)));
+          (!state.status || row.state === state.status) && terms.every((term) => normal([row.subject,row.dueText,row.node.textContent].join(' ')).includes(term)));
         if (state.sort) rows.sort((first, second) => {
           if (!first.due || !second.due) return Number(!first.due) - Number(!second.due);
           const compare = `${first.due}T${first.dueTime}`.localeCompare(`${second.due}T${second.dueTime}`);
@@ -315,6 +457,10 @@
           return;
         }
 
+        if (kind === 'homework') {
+          stage.replaceChildren(element('ul', 'lxp-homework-list', ...rows.map(homeworkEntry)));
+          return;
+        }
         const columns = ['lxp-record', table.hasDate && 'lxp-record-date', table.hasStatus && 'lxp-record-status'].filter(Boolean).join(' ');
         const list = element('ul', 'lxp-record-list');
         const headings = [element('span', '', itemLabel)];
@@ -399,20 +545,25 @@
     }
 
     function update(scope, kind, today) {
+      node.classList.toggle('lxp-schedule-workspace', kind === 'schedule');
+      node.classList.toggle('lxp-homework-workspace', kind === 'homework');
       if (kind === 'school' && schoolPage(scope)) return true;
-      const source = scope && (kind === 'schedule' ? data.scheduleView(scope) : data.tableView(scope, kind));
+      let source = scope && (kind === 'schedule' ? data.scheduleView(scope,getSourceUrl()) : data.tableView(scope, kind));
+      const state=pageStates.get(kind)||{};pageStates.set(kind,state);
+      if(kind==='schedule'&&source?.days.length&&state.previewWeek&&document.body.hasAttribute('data-lxp-preview')){
+        const monday=data.weekAt(source.days[0]).monday,delta=Math.round((dateAtNoon(state.previewWeek)-dateAtNoon(monday))/86400000),week=data.weekAt(state.previewWeek);
+        source={...source,days:source.days.map(date=>data.shiftDate(date,delta)),weekLabel:`Uge ${week.week} – ${week.year}`,lessons:source.lessons.map(lesson=>({...lesson,date:lesson.date?data.shiftDate(lesson.date,delta):''}))};
+      }
       const items = kind === 'schedule' ? source?.lessons : source?.rows;
       if (!source || (kind === 'schedule' && !source.days.length && !items.length)) {
         mounted = undefined;
         node.replaceChildren();
         return false;
       }
-      const signature = JSON.stringify([kind, today, source.days, source.weekLabel, source.hasStatus, source.hasDate,
-        items.map(({ node: sourceNode, link, ...values }) => [values, link?.getAttribute('href'), link?.getAttribute('onclick'),
-          kind === 'schedule' ? '' : sourceNode.textContent])]);
+      const signature = JSON.stringify([kind,kind==='schedule'?getSourceUrl():null, kind === 'schedule' ? [getPreferences().scheduleSize, getPreferences().scheduleView, getPreferences().showBreaks, getPreferences().colorLessons, getPreferences().showLessonRoom] : null, today, source.days, source.weekLabel, source.hasStatus, source.hasDate,
+        items.map(({ node: sourceNode, link, contentCell, ...values }) => [values, link?.getAttribute('href'), link?.getAttribute('onclick'),
+          kind === 'schedule' ? '' : sourceNode.textContent, kind === 'homework' ? contentCell?.innerHTML : ''])]);
       if (mounted?.kind === kind && mounted.signature === signature && mounted.items.every((item, index) => item.node === items[index].node && item.link === items[index].link)) return true;
-      const state = pageStates.get(kind) || {};
-      pageStates.set(kind, state);
       const focus = node.contains(document.activeElement) && document.activeElement.getAttribute('aria-label');
       node.replaceChildren(...(kind === 'schedule' ? schedulePage(scope, source, state, today) : listPage(scope, kind, source, state)));
       mounted = { kind, signature, items };
@@ -424,12 +575,12 @@
       if (kind === 'home') return true;
       if (kind === 'school') return Boolean(scope.querySelector('#m_Content_elevUL a[href]'));
       if (kind === 'schedule') {
-        const schedule = data.scheduleView(scope);
+        const schedule = data.scheduleView(scope,getSourceUrl());
         return Boolean(schedule && (schedule.days.length || schedule.lessons.length));
       }
       return Boolean(data.tableView(scope, kind));
     }
 
-    return { node, update, supports, pageHeading };
+    return { node, update, supports, pageHeading, invalidate(){mounted=undefined;} };
   };
 })();

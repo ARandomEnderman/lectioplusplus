@@ -1,0 +1,19 @@
+/* Person photos can occur in headers, cards, lists, popovers and embedded pages. */
+html[data-lxp-hide-profile-photo] :is(
+  img.StudPic, .StudPic img, .thumber img,
+  img[id$="picctrlthumbimage" i], img[id$="picctrlimage" i],
+  img[src*="getimage.aspx" i][src*="pictureid=" i],
+  img[srcset*="getimage.aspx" i][srcset*="pictureid=" i],
+  [data-lxp-person-photo="image"]
+) { display: none !important; }
+html[data-lxp-hide-profile-photo] [data-lxp-person-photo="background"] { background-image: none !important; }
+/* Keep original text in the DOM for Lectio's own data readers and form logic.
+   This is a reversible display preference, not a redaction/export facility. */
+html[data-lxp-anonymize-name] [data-lxp-name-mask] {
+  font-size: 0 !important; letter-spacing: 0 !important; word-spacing: 0 !important;
+}
+html[data-lxp-anonymize-name] [data-lxp-name-mask="first"]::after {
+  content: 'Anonym'; font-size: var(--lxp-private-font-size, 16px);
+  letter-spacing: normal; word-spacing: normal;
+}
+.lxp-privacy-help { font-size: 13px; line-height: 1.5; color: var(--lxp-text-muted); max-width: 62ch; }

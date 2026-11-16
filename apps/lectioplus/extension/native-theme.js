@@ -3,7 +3,7 @@
 
   const appearance = globalThis.lectioPlusAppearance;
   const root = document.documentElement;
-  const body = document.body;
+  let body = document.body;
   const embedded = window !== window.top;
   const blankDocument = /^about:(?:blank|srcdoc)(?:#.*)?$/;
   const storage = globalThis.chrome?.storage;
@@ -136,6 +136,11 @@
     if (frame === undefined) frame = requestAnimationFrame(scan);
   }
 
+  function flush() {
+    if (frame !== undefined) cancelAnimationFrame(frame);
+    scan();
+  }
+
   function queueMenu(event) {
     const branch = event.target instanceof Element && event.target.closest(menuBranch);
     if (branch && !(event.relatedTarget instanceof Node && branch.contains(event.relatedTarget))) queue(branch);
@@ -146,8 +151,10 @@
       const inherited = parentRoot?.dataset.lxpMode;
       appearance.apply(root, inherited ? { ...preferences, theme: inherited } : preferences, system.matches, preferences.enabled);
     }
-    root.toggleAttribute('data-lxp-native-theme', preferences.enabled);
+    if (root.hasAttribute('data-lxp-native-theme') !== preferences.enabled) root.toggleAttribute('data-lxp-native-theme', preferences.enabled);
     queue();
+    flush();
+    api.applied = preferences.enabled;
   }
 
   async function start() {
@@ -158,18 +165,25 @@
       preferences = appearance.defaults;
     }
     apply();
+    globalThis.lectioPlusBoot?.onPreferences?.(settings=>{preferences=appearance.normalize(settings);apply();});
     const observer = new MutationObserver((records) => {
+      if(document.body&&body!==document.body){body=document.body;apply();}
       for (const record of records) {
         if (record.type === 'attributes') queue(record.target);
         else for (const node of record.addedNodes) if (node.nodeType === Node.ELEMENT_NODE) queue(node);
       }
+      // Mutation observers run before paint: style new menus in this batch, not a later frame.
+      flush();
     });
-    observer.observe(body, { subtree: true, childList: true, attributes: true,
+    observer.observe(document, { subtree: true, childList: true, attributes: true,
       attributeFilter: ['class', 'style', 'hidden', 'open', 'aria-hidden', 'aria-selected', 'aria-current', 'aria-expanded', 'current-page'] });
-    new MutationObserver(() => queue()).observe(root, { attributes: true, attributeFilter: ['data-lxp-mode', 'data-lxp-design'] });
+    new MutationObserver(() => {
+      if (root.hasAttribute('data-lxp-native-theme') !== preferences.enabled) apply();
+      else queue();
+    }).observe(root, { attributes: true, attributeFilter: ['data-lxp-mode', 'data-lxp-design', 'data-lxp-native-theme'] });
     if (parentRoot) new MutationObserver(apply).observe(parentRoot, { attributes: true, attributeFilter: ['data-lxp-mode'] });
-    for (const type of ['pointerover', 'pointerout', 'focusin', 'focusout']) body.addEventListener(type, queueMenu);
-    body.addEventListener('toggle', queueMenu, true);
+    for (const type of ['pointerover', 'pointerout', 'focusin', 'focusout']) document.addEventListener(type, queueMenu);
+    document.addEventListener('toggle', queueMenu, true);
     system.addEventListener('change', apply);
     window.addEventListener('load', () => queue(), { once: true });
     window.addEventListener('resize', () => queue(), { passive: true });
@@ -184,5 +198,7 @@
     });
   }
 
-  void start();
+  const api = globalThis.lectioPlusNativeTheme = { applied: false, flush, ready: null };
+  api.ready = start().catch(() => { /* Keep original controls usable if theming fails. */ })
+    .finally(() => { if (embedded) globalThis.lectioPlusBoot?.finish(); });
 })();

@@ -48,3 +48,6 @@ body.lxp-school-enabled > #schoolsdiv { display: none !important; }
   .lxp-school-results { grid-template-columns: 1fr; }
   .lxp-school-footer span { flex-basis: 100%; }
 }
+
+.lxp-school-save-status { font-size:12px; color:var(--lxp-muted); margin:12px 0; }
+.lxp-school-save-status:empty { display:none; }

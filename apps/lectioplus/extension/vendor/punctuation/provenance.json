@@ -1,0 +1,23 @@
+{
+  "model": {
+    "repository": "https://huggingface.co/syvai/danish-pnc",
+    "revision": "ac67b2ffcab409b069e759de8389e93ca25bdb14",
+    "license": "CC-BY-4.0"
+  },
+  "runtime": {
+    "package": "onnxruntime-web",
+    "version": "1.22.0",
+    "license": "MIT"
+  },
+  "files": {
+    "ort/ort-wasm-simd-threaded.wasm": "71aef04959c5c1b6de461b6538e2058e306610034a85aad2742d0c7fd4533fe4",
+    "ort/ort-wasm-simd-threaded.mjs": "30dd851d9c00622940500f71ddd2ff8820c5cb65270816080175b958705385a8",
+    "ort/ort.wasm.bundle.min.mjs": "e53392ea5f0e654acf1866c16564b340661ed5d238f692c3c2bd40b940f924a2",
+    "ort/ThirdPartyNotices.txt": "e9e90971a8e75a9a8ac0c6412e29c1202d079998389915aa485f46c816c3b4cc",
+    "ort/LICENSE": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+    "model/tokenizer.json": "97e70d47ffa42cd364cdc922e9cda7d0455b02cddd5ffe431108c75399a72a0a",
+    "model/pnc.int8.onnx": "cb3d4571b9ff2bf6e81695a323655398ce594165501041d28b01dae7090e504a",
+    "model/config.json": "f9313536cfb8370bb8821f92e521bc596ef4407f4ae73fa8ed962ac30a5ad66e",
+    "model/LICENSE": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+  }
+}

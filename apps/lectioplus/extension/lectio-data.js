@@ -16,8 +16,16 @@
     return value.replace(/\s+/g, ' ').trim();
   }
 
+  // Icon fonts store glyph names as text (e.g. sms/bookmark). Read labels
+  // without those nodes; never remove these words from actual lesson text.
+  const iconSelector = '.ls-fonticon, .material-icons, .material-icons-outlined, .material-icons-round, .material-icons-sharp, .material-icons-two-tone, .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp';
+  const nonTextSelector = iconSelector + ', script, style, template, [hidden], [aria-hidden="true"]';
   function text(node) {
-    return clean(node?.textContent || '');
+    if (!node || node.matches?.(nonTextSelector)) return '';
+    if (!node.querySelector?.(nonTextSelector)) return clean(node.textContent || '');
+    const copy = node.cloneNode(true);
+    copy.querySelectorAll(nonTextSelector).forEach(child => child.remove());
+    return clean(copy.textContent || '');
   }
 
   function normalized(value) {
@@ -44,6 +52,29 @@
     const januaryFourth = new Date(Date.UTC(year, 0, 4));
     const weekday = januaryFourth.getUTCDay() || 7;
     return Array.from({ length: 7 }, (_, day) => new Date(Date.UTC(year, 0, 5 - weekday + 7 * (week - 1) + day)).toISOString().slice(0, 10));
+  }
+
+  function weekAt(date){
+    if(!/^20\d{2}-\d{2}-\d{2}$/.test(date))return null;
+    const day=new Date(date+'T12:00:00Z');if(!Number.isFinite(day.getTime())||day.toISOString().slice(0,10)!==date)return null;
+    const monday=new Date(day);monday.setUTCDate(monday.getUTCDate()-((monday.getUTCDay()+6)%7));
+    const thursday=new Date(monday);thursday.setUTCDate(thursday.getUTCDate()+3);const year=thursday.getUTCFullYear();
+    const jan4=new Date(Date.UTC(year,0,4,12));jan4.setUTCDate(jan4.getUTCDate()-((jan4.getUTCDay()+6)%7));
+    const week=1+Math.round((monday-jan4)/(7*86400000)),number=String(week).padStart(2,'0');
+    return {year,week,monday:monday.toISOString().slice(0,10),value:year+'-W'+number,code:number+year};
+  }
+  function weekDate(value){
+    const match=/^(20\d{2})-W(\d{2})$/.exec(String(value));if(!match)return '';
+    const days=displayedWeek('Uge '+Number(match[2])+' '+match[1]);
+    return days.length&&weekAt(days[0])?.value===value?days[0]:'';
+  }
+  function shiftDate(date,days){const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);}
+  function weekHref(base,date){
+    const week=weekAt(date);if(!week)return '';
+    let url;try{url=new URL(base,location.href);}catch{return '';}
+    if(!/^https?:$/.test(url.protocol)||!/^\/lectio\/\d+\/(?:skema|skemany)\.aspx$/i.test(url.pathname))return '';
+    for(const key of [...url.searchParams.keys()])if(/^week$/i.test(key))url.searchParams.delete(key);
+    url.searchParams.set('week',week.code);url.hash='';return url.href;
   }
 
   function today(now = new Date()) {
@@ -79,6 +110,7 @@
     const template = document.createElement('template');
     try {
       template.innerHTML = value.replace(/<\s*br\b[^>]*>|<\s*\/(?:div|p|li|tr)\s*>/gi, '\n');
+      template.content.querySelectorAll(nonTextSelector).forEach(child => child.remove());
       return template.content.textContent.trim();
     } catch {
       return value;
@@ -96,14 +128,19 @@
     return '';
   }
 
-  function scheduleView(scope) {
+  function scheduleView(scope, referenceUrl = location.href) {
     const nodes = [...scope.querySelectorAll(lessonSelector)]
       .filter((node) => !node.parentElement.closest(lessonSelector) && !node.closest('[hidden], [aria-hidden="true"], .s2skyggeSkemabrik'));
     const host = scope.querySelector('.s2skema, [data-lxp-schedule]') || nodes[0]?.closest('table');
     if (!host) return null;
 
-    const weekLabel = text(scope.querySelector('.s2weekHeader')).match(/\buge\s*\d{1,2}(?:\s*[-–,]?\s*20\d{2})?/i)?.[0] || '';
-    const week = displayedWeek(weekLabel);
+    let weekLabel = text(scope.querySelector('.s2weekHeader')).match(/\buge\s*\d{1,2}(?:\s*[-–,]?\s*20\d{2})?/i)?.[0] || '';
+    let week=displayedWeek(weekLabel);
+    if(!week.length){
+      let code;try{code=new URL(referenceUrl,location.href).searchParams.get('week');}catch{ /* A missing URL must not break parsing. */ }
+      const match=/^(\d{2})(20\d{2})$/.exec(code||'');
+      if(match&&weekDate(match[2]+'-W'+match[1])){weekLabel='Uge '+Number(match[1])+' – '+match[2];week=displayedWeek(weekLabel);}
+    }
     const scheduleDate = (value) => {
       const withoutTime = value.replace(lessonRangePattern, '');
       const exact = dateIn(withoutTime);
@@ -112,12 +149,12 @@
       const suffix = partial && `-${partial[2].padStart(2, '0')}-${partial[1].padStart(2, '0')}`;
       return suffix ? week.find((date) => date.endsWith(suffix)) || '' : '';
     };
-    const headers = [...host.querySelectorAll('.s2dayHeader, [data-lxp-day]')];
+    const headers = [...host.querySelectorAll('.s2dayHeader td, .s2dayHeader th, th.s2dayHeader, td.s2dayHeader, [data-lxp-day]')];
     const dateForHeader = (header) => scheduleDate(header.dataset.lxpDay || text(header));
     const days = new Set(headers.map(dateForHeader).filter(Boolean));
     const table = host.matches('table') ? host : host.querySelector('table');
     const columnHeaders = table && [...table.rows].find((row) => [...row.cells].every((cell) => cell.colSpan === 1) &&
-      [...row.cells].filter((cell) => cell.matches('th, .s2dayHeader, [data-lxp-day]') && dateForHeader(cell)).length >= 2);
+      [...row.cells].filter((cell) => cell.matches('th, .s2dayHeader, .s2dayHeader td, [data-lxp-day]') && dateForHeader(cell)).length >= 2);
     const columnDates = columnHeaders ? [...columnHeaders.cells].map(dateForHeader) : [];
     for (const date of columnDates.filter(Boolean)) days.add(date);
     const lessons = nodes.filter((node) => host.contains(node)).map((node) => {
@@ -143,8 +180,11 @@
       const subject = fields.find((line) => /^hold\s*:/i.test(line))?.split(':').slice(1).join(':').trim() || title;
       const status = statusOfLesson(node, tooltip);
       const rowTime = gridRow?.cells[0]?.matches('th') ? text(gridRow.cells[0]) : '';
-      const range = lessonRange(node.dataset.lxpTime || timeLine || rowTime);
-      return { node, link, title, detail, room, subject, date, status, ...range, searchable: clean(`${text(node)} ${tooltip}`) };
+      const range = lessonRange(node.dataset.lxpTime || timeLine || text(node.querySelector('.s2timeline')) || rowTime);
+      const minutes = timesIn(range.time).map((time) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3)));
+      const start = minutes[0] ?? null;
+      const end = minutes.length === 2 && minutes[1] > start ? minutes[1] : null;
+      return { node, link, title, detail, room, subject, date, status, start, end, ...range, searchable: clean(`${text(node)} ${tooltip}`) };
     });
     const gridDays = new Set([...week.slice(0, 5), ...days]);
     return { host, lessons, days: [...gridDays].sort(), confirmedDays: [...days].sort(), weekLabel };
@@ -188,28 +228,51 @@
       if (indexes.title === -1 || (kind === 'tasks' && indexes.due === -1) || (kind === 'messages' && indexes.message === -1)) continue;
       const subject = headers.findIndex((header) => /^(fag|hold|holdelement)$/.test(header));
       const width = headers.length;
+      const cellsByRow = new Map();
+      if (kind === 'homework') for (const body of table.tBodies) {
+        let spans = [];
+        for (const row of body.rows) {
+          if ([...row.cells].some(cell => cell.tagName === 'TH' || cell.colSpan !== 1)) { spans = []; continue; }
+          const cells = [], next = [];
+          spans.forEach((span, index) => { if (span) { cells[index] = span.cell; if (span.left > 1) next[index] = { cell: span.cell, left: span.left - 1 }; } });
+          let index = 0;
+          for (const cell of row.cells) {
+            while (cells[index]) index++;
+            cells[index] = cell;
+            const rows = cell.rowSpan === 0 ? body.rows.length : cell.rowSpan;
+            if (rows > 1) next[index] = { cell, left: rows - 1 };
+            index++;
+          }
+          spans = next;
+          if (cells.length === width && Array.from({length:width},(_,index)=>cells[index]).every(Boolean)) cellsByRow.set(row,cells);
+        }
+      }
+      const cellsOf = row => cellsByRow.get(row) || [...row.cells];
       const rows = [...table.tBodies].flatMap((body) => [...body.rows]).filter((row) =>
-        row.cells.length === width && !row.closest('[hidden], [aria-hidden="true"]') && row.style.display !== 'none' &&
-        ![...row.cells].some((cell) => cell.tagName === 'TH' || cell.colSpan !== 1) && text(row.cells[indexes.title]));
+        cellsOf(row).length === width && !row.closest('[hidden], [aria-hidden="true"]') && row.style.display !== 'none' &&
+        ![...row.cells].some((cell) => cell.tagName === 'TH' || cell.colSpan !== 1) && text(cellsOf(row)[indexes.title]));
       return { table, rows: rows.map((node) => {
-        const titleCell = node.cells[indexes.title];
-        const dueCell = node.cells[indexes.due];
+        const cells = cellsOf(node);
+        const titleCell = cells[indexes.title];
+        const dueCell = cells[indexes.due];
         const dueText = text(dueCell);
         const dueValue = dueCell?.querySelector('time')?.getAttribute('datetime') || dueText;
         const due = dateIn(dueValue);
-        const statusCell = node.cells[indexes.status];
+        const statusCell = cells[indexes.status];
         const status = text(statusCell);
-        const waiting = text(node.cells[indexes.waiting]);
+        const waiting = text(cells[indexes.waiting]);
         const alreadyShown = new Set([indexes.title, indexes.due, indexes.status, indexes.description, subject]);
         const extra = labels.flatMap((label, index) => {
-          const cell = node.cells[index];
+          const cell = cells[index];
           if (!label || alreadyShown.has(index) || cell.matches('[hidden], [aria-hidden="true"]') || cell.style.display === 'none') return [];
           const value = text(cell);
           return value ? [{ label, value }] : [];
         });
         return {
-          node, title: text(titleCell), link: titleCell.querySelector('a[href], a[onclick]'), subject: text(node.cells[subject]),
-          description: indexes.description === indexes.title ? '' : text(node.cells[indexes.description]),
+          node, title: text(titleCell), link: titleCell.querySelector('a[href], a[onclick]'), subject: text(cells[subject]),
+          ...(kind === 'homework' ? { contentCell: cells[indexes.description] || titleCell,
+            activityTitle: indexes.title !== indexes.description && indexes.description !== -1 ? text(titleCell) : '' } : {}),
+          description: indexes.description === indexes.title ? '' : text(cells[indexes.description]),
           due, dueTime: timeRange(dueValue).order || '23:59', dueText, status, state: statusOfTask(status, waiting), extra
         };
       }), hasStatus: kind === 'tasks' && (indexes.status !== -1 || indexes.waiting !== -1), hasDate: indexes.due >= 0 };
@@ -217,5 +280,5 @@
     return null;
   }
 
-  globalThis.lectioPlusData = { today, displayDay, scheduleView, tableView };
+  globalThis.lectioPlusData = { today, displayDay, scheduleView, tableView, weekAt, weekDate, shiftDate, weekHref, readableText: text, iconSelector };
 })();

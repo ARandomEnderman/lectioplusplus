@@ -1,29 +1,40 @@
 (() => {
   'use strict';
 
-  const preview = document.body.hasAttribute('data-lxp-preview');
+  const preview = document.body?.hasAttribute('data-lxp-preview');
   const schoolPath = location.pathname.match(/^\/lectio\/\d+\//i)?.[0];
   const file = location.pathname.split('/').pop().toLowerCase();
-  const native = document.getElementById('masterContent');
   const boot = globalThis.lectioPlusBoot;
-  if (!native || (!preview && (!schoolPath || /login|logout|logud|auth|eksam|proeve/.test(file)))) {
+  if (!preview && (!schoolPath || /login|logout|logud|auth|eksam|proeve/.test(file))) {
     boot?.finish();
     return;
   }
 
+  let mounted=false;
+  function mount(){
+    const native=document.getElementById('masterContent');
+    if(mounted||!native)return false;
+    mounted=true;initialize(native);return true;
+  }
+  if(!mount()){
+    const pending=new MutationObserver(()=>{if(mount())pending.disconnect();});
+    pending.observe(document,{childList:true,subtree:true});
+  }
+  function initialize(native){
   const pages = [
     { key: 'home', label: 'Overblik', lectio: 'Forside', icon: 'home', route: /^forside\.aspx$/i },
-    { key: 'schedule', label: 'Skema', lectio: 'Skema', icon: 'calendar', route: /^skema\.aspx$/i },
-    { key: 'tasks', label: 'Opgaver', lectio: 'Opgaver', icon: 'file', route: /^(opgaver|eleveropgaver|opgaveoversigt)\.aspx$/i },
-    { key: 'homework', label: 'Lektier', lectio: 'Lektier', icon: 'book', route: /^(lektier|lektieoversigt)\.aspx$/i },
+    { key: 'schedule', label: 'Skema', lectio: 'Skema', icon: 'calendar', route: /^(skema|skemany)\.aspx$/i },
+    { key: 'tasks', label: 'Opgaver', lectio: 'Opgaver', icon: 'file', route: /^(opgaver|eleveropgaver|opgaverelev|opgaveoversigt|elevaflevering)\.aspx$/i },
+    { key: 'homework', label: 'Lektier', lectio: 'Lektier', icon: 'book', route: /^(lektier|lektieoversigt|material_lektieoversigt)\.aspx$/i },
     { key: 'messages', label: 'Beskeder', lectio: 'Beskeder', icon: 'message', route: /^(beskeder2?|beskedoversigt)\.aspx$/i },
-    { key: 'attendance', label: 'Fravær', lectio: 'Fravær', icon: 'chart', route: /^(fravaer|subnavfravaerelev)\.aspx$/i },
+    { key: 'attendance', label: 'Fravær', lectio: 'Fravær', icon: 'chart', route: /^(fravaer|(?:subnav)?fravaerelev(?:_fravaersaarsager)?)\.aspx$/i },
     { key: 'grades', label: 'Karakterer', lectio: 'Karakterer', icon: 'chart', route: /^(karakterer|grades|grade_report)\.aspx$/i },
-    { key: 'study', label: 'Studieplan', lectio: 'Studieplan', icon: 'calendar', route: /^(studieplan|studieplan2)\.aspx$/i },
-    { key: 'documents', label: 'Dokumenter', lectio: 'Dokumenter', icon: 'file', route: /^(dokumenter|document)\.aspx$/i },
+    { key: 'study', label: 'Studieplan', lectio: 'Studieplan', icon: 'calendar', route: /^(studieplan2?|forloeb_vis)\.aspx$/i },
+    { key: 'documents', label: 'Dokumenter', lectio: 'Dokumenter', icon: 'file', route: /^(dokumenter|dokumentoversigt|dokumentfolderrediger|document)\.aspx$/i },
     { key: 'books', label: 'Bøger', lectio: 'Bøger', icon: 'book', route: /^(boeger|bogoversigt)\.aspx$/i },
-    { key: 'surveys', label: 'Spørgeskemaer', lectio: 'Spørgeskema', icon: 'file', route: /^(spoergeskemaer?|questionnaire)\.aspx$/i },
+    { key: 'surveys', label: 'Spørgeskemaer', lectio: 'Spørgeskema', icon: 'file', route: /^(spoergeskemaer?|spoergeskema_(?:rapport|besvar)|questionnaire)\.aspx$/i },
     { key: 'support', label: 'SPS', lectio: 'SPS', icon: 'help', route: /^sps[\w-]*\.aspx$/i },
+    { key: 'electives', label: 'Valgfag', lectio: 'Studieretning', aliases: ['Studieretning og valgfag', 'Valgfag'], icon: 'book', route: /^studieretningValgfag\.aspx$/i },
     { key: 'profile', label: 'Profil', lectio: 'Profil', icon: 'user', route: /^(profil|profile)\.aspx$/i },
     { key: 'school', label: 'Hovedmenu', lectio: 'Hovedmenu', icon: 'grid', route: /^default\.aspx$/i }
   ];
@@ -35,12 +46,14 @@
   const icon = globalThis.lectioPlusIcon;
   const lectio = globalThis.lectioPlusData;
   const initialUrl = location.href;
-  const initialTitle = document.title;
+  const initialTitle = globalThis.lectioPlusPrivacy?.getOriginalTitle() ?? document.title;
   let sourceTitle = initialTitle;
   const fastPages = new Set(['home', 'schedule', 'tasks', 'homework', 'messages', 'school']);
   const navigationSelector = '#m_mastermenu, #m_MobilMenuNav, #mobilMereSheetMenu, nav, [role="navigation"], [role="tablist"], .ls-master-header-container, .ls-subnav-container, .ls-subnav1, .ls-subnav2, [id*="menutab" i], [class*="menutab" i]';
   const activityPage = { key: 'activity', label: 'Aktivitet', icon: 'calendar' };
   // Extension-owned tab (not a Lectio page): an embed of Strafe Clicker, opened via the #lxp-clicker hash.
+  const toolsPage = { key: 'tools', label: 'HjælpeMiddler', icon: 'grid', href: '#lxp-tools' };
+  const toolsHash = () => /^#lxp-tools(?:\/|$)/.test(location.hash);
   const clickerHash = '#lxp-clicker';
   const clickerUrl = 'https://clicker.strafe-mc.com/#/clicker';
   const clickerPage = { key: 'clicker', label: 'Strafe Clicker', icon: 'game', href: clickerHash };
@@ -55,11 +68,34 @@
   let activePage;
   let showNative = false;
   let workspaceReady = false;
-  let refreshTimer;
+  let refreshFrame;
+  let missingContentTimer;
   let lastDialogTrigger;
   let settingsControls;
+  let settingsHomeScope;
+  let settingsHomeUrl;
+  let settingsPreviewStatus;
   let nativeHeading;
   let replacedHeading;
+  let nativePageScope;
+  let sectionNavSignature;
+  let sectionNavSources = [];
+  let secondaryNavigationOpen = false;
+  let navigationPreferences;
+  const bodyState = new Map();
+  const nativeLayout = globalThis.lectioPlusNativeLayout?.();
+
+  function setBodyState(name, enabled) {
+    bodyState.set(name, Boolean(enabled));
+    if (document.body.classList.contains(name) !== Boolean(enabled)) document.body.classList.toggle(name, Boolean(enabled));
+  }
+
+  function restorePresentation() {
+    if (failed || !activePage) return;
+    appearance.apply(document.documentElement, preferences, darkMode.matches, preferences.enabled);
+    for (const [name, enabled] of bodyState) setBodyState(name, enabled);
+    if (root.hidden === preferences.enabled) root.hidden = !preferences.enabled;
+  }
 
   function element(tag, className = '', ...children) {
     const result = document.createElement(tag);
@@ -123,7 +159,7 @@
 
   function getNavigation() {
     const navigation = preview ? native.querySelector('[data-lxp-nav]') : source;
-    const names = new Set(pages.map((page) => normalize(page.lectio)));
+    const names = new Set(pages.flatMap((page) => [page.lectio, ...(page.aliases || [])].map(normalize)));
     const candidates = Array.from(navigation.querySelectorAll('a[href]'))
       .filter((link) => !link.closest('[data-lxp-owned]'))
       .map((link) => ({ link, title: normalize(navigationText(link)), inMenu: Boolean(link.closest(navigationSelector)) }))
@@ -134,7 +170,7 @@
     const entries = pages.flatMap((page) => {
       const candidate = candidates.find(({ link, href, title, inMenu }) => preview
         ? link.dataset.page === page.key
-        : title === normalize(page.lectio) && (inMenu || page.route.test(new URL(href).pathname.split('/').pop())));
+        : [page.lectio, ...(page.aliases || [])].map(normalize).includes(title) && (inMenu || page.route.test(new URL(href).pathname.split('/').pop())));
       return candidate ? [[page.key, { ...page, href: candidate.href }]] : [];
     });
     const result = new Map(entries);
@@ -145,25 +181,32 @@
   }
 
   function searchablePages() {
-    const entries = [...links.values()];
-    if (preview) return entries;
-    const known = new Set(entries.flatMap((entry) => [normalize(entry.lectio), entry.href]));
+    const entries = [...links.values(), toolsPage, ...schoolTools.entries];
+    const known = new Set(entries.map((entry) => entry.href));
     const extraLinks = source.querySelectorAll(`:is(${navigationSelector}, #m_Content_elevUL) a[href]`);
     for (const link of extraLinks) {
       const label = navigationText(link);
       const href = safeHref(link);
       if (!href || !/\p{L}/u.test(label) || /^(log ind|log ud|login|keyboard_arrow)/i.test(label) ||
-          known.has(normalize(label)) || known.has(href) || /#/.test(href)) continue;
-      known.add(normalize(label));
+          known.has(href) || (!preview && /#/.test(href))) continue;
       known.add(href);
-      entries.push({ href, label, lectio: label, icon: 'grid' });
+      const previewGroup = preview && link.closest('[data-lxp-view]')?.dataset.lxpView.split('/')[0];
+      const context = previewGroup ? pages.find((page) => page.key === previewGroup)?.label :
+        link.closest('.ls-subnav1, .ls-subnav2, .lectioTabToolbar, [role="tablist"]') ? activePage?.parent || activePage?.label : 'Flere sider';
+      entries.push({ href, label, lectio: label, icon: 'grid', context });
     }
     return entries;
   }
 
   function pageInfo() {
-    if (location.hash === clickerHash) return clickerPage;
-    if (preview) return pages.find(({ key }) => `#${key}` === location.hash.split('/')[0]) || pages[0];
+    if (toolsHash()) return toolsPage;
+    if (preferences.showClicker && location.hash === clickerHash) return clickerPage;
+    if (preview) {
+      const view = location.hash.slice(1);
+      const detail = [...native.querySelectorAll('[data-lxp-parent]')].find((node) => node.dataset.lxpView === view);
+      const page = pages.find(({ key }) => key === (detail?.dataset.lxpParent || view.split('/')[0])) || pages[0];
+      return detail ? { ...page, label: detail.dataset.lxpLabel || page.label, parent: page.label, view, detail: true } : page;
+    }
     const url = new URL(sourceUrl);
     const name = url.pathname.split('/').pop();
     const documentTitle = sourceTitle.split(/\s+[-–|]\s+/);
@@ -176,7 +219,10 @@
     const matching = [...links.values()].filter(({ href }) => new URL(href, url).pathname.toLowerCase() === url.pathname.toLowerCase());
     const match = pages.find(({ route }) => route.test(name)) || matching.find(({ href }) => new URL(href, url).search === url.search) ||
       (matching.length === 1 ? matching[0] : null);
-    if (match) return match;
+    if (match) {
+      const detail = nativeWorkflow(match, sourceUrl, source) || /^(forloeb_vis|dokumentfolderrediger|spoergeskema_besvar|fravaerelev_fravaersaarsager)\.aspx$/i.test(name);
+      return detail ? { ...match, label: nativeTitle(source)?.text || match.label, parent: match.label, detail: true } : match;
+    }
     const heading = nativeTitle(source)?.text;
     const lectioIndex = documentTitle.findIndex((part) => normalize(part) === 'lectio');
     const title = lectioIndex > 0 ? documentTitle[lectioIndex - 1].trim() : '';
@@ -184,10 +230,13 @@
   }
 
   function nativeWorkflow(page, href, scope) {
-    if (preview || !['tasks', 'homework', 'messages'].includes(page.key)) return false;
+    if (preview) return Boolean(page.detail);
+    if (!['tasks', 'homework', 'messages'].includes(page.key)) return false;
+    if (/\/elevaflevering\.aspx$/i.test(new URL(href).pathname)) return true;
     const params = new URL(href).searchParams;
     const detailKeys = page.key === 'messages' ? /^(beskedid|messageid|threadid|conversationid)$/i : /^(opgaveid|elevopgaveid|afleveringid|absid)$/i;
     return [...params].some(([key, value]) => value && (detailKeys.test(key) ||
+      (page.key === 'messages' && /^type$/i.test(key) && /^(visbesked|nybesked|besvar|svar|reply|compose)$/i.test(value)) ||
       (/^(mode|action)$/i.test(key) && /^(edit|new|reply|compose|upload|aflever)$/i.test(value)))) ||
       /(?:^|[-–]\s+)(?:ny besked|besvar besked|aflever opgave|rediger opgave)\b/i.test(nativeTitle(scope)?.text || '');
   }
@@ -201,8 +250,12 @@
   navigationStatus.setAttribute('role', 'status');
   const overview = element('main', 'lxp-overview');
   overview.id = 'lxp-overview';
+  const sectionNav = element('nav', 'lxp-section-nav');
+  sectionNav.hidden = true;
+  sectionNav.setAttribute('aria-label', 'Undermenuer');
   const nativeOverview = element('section', 'lxp-native-overview');
   nativeOverview.id = 'lxp-native-overview';
+  const schoolTools = globalThis.lectioPlusSchoolTools({ ui: { element, button, icon }, getPreferences: () => preferences, onChange: savePreferences });
   const clickerView = element('main', 'lxp-clicker-view');
   clickerView.id = 'lxp-clicker';
   clickerView.hidden = true;
@@ -214,7 +267,7 @@
   clickerView.append(element('div', 'lxp-clicker-toolbar',
     element('span', '', 'Forsvinder dit login? Åbn spillet i en ny fane, og log ind der.'), clickerExternal));
   const workspace = globalThis.lectioPlusWorkspace({
-    ui: { element, button, anchor, icon }, data: lectio, narrow, safeHref, revealOriginal
+    ui: { element, button, anchor, icon }, data: lectio, narrow, safeHref, revealOriginal, getPreferences: () => preferences, onPreferences: savePreferences, getSourceUrl: () => sourceUrl
   });
   const skip = anchor('lxp-skip', '#lxp-overview', 'Spring til indhold');
   skip.addEventListener('click', (event) => {
@@ -227,20 +280,28 @@
   });
   const search = element('dialog', 'lxp lxp-dialog');
   const settings = element('dialog', 'lxp lxp-dialog lxp-settings');
-  const restore = button('lxp-restore', 'Aktivér LectioPlus+', () => savePreferences({ enabled: true }), 'Aktivér LectioPlus+');
+  let failed=false;
+  const restore = button('lxp-restore', 'Aktivér LectioPlus+', () => failed ? location.reload() : savePreferences({ enabled: true }), 'Aktivér LectioPlus+');
   root.hidden = true;
   restore.hidden = true;
-  root.append(skip, sidebar, topbar, navigationStatus, overview, workspace.node, clickerView, nativeOverview);
+  root.append(skip, sidebar, topbar, navigationStatus, sectionNav, overview, workspace.node, clickerView, schoolTools.node, nativeOverview);
+  if(schoolTools.dockNode)root.append(schoolTools.dockNode);
   native.before(root);
   document.body.append(search, settings, restore);
   const hideHints = globalThis.lectioPlusHints();
 
   function updateNativeOverview(visible) {
     const page = activePage;
-    const scope = preview ? native.querySelector('[data-lxp-view]:not([hidden])') : native.querySelector('#m_outerContentFrameDiv, .ls-content-container');
+    const scope = preview ? native.querySelector('[data-lxp-view]:not([hidden])') : native.querySelector('#m_outerContentFrameDiv, .ls-content-container') || native;
     const supported = visible && page && scope;
     nativeOverview.hidden = !supported;
-    document.body.classList.toggle('lxp-native-heading', Boolean(supported));
+    if (nativePageScope !== (supported ? scope : null)) {
+      nativePageScope?.classList.remove('lxp-native-page');
+      nativePageScope = supported ? scope : null;
+      nativePageScope?.classList.add('lxp-native-page');
+    }
+    nativeLayout?.update(supported ? scope : null);
+    setBodyState('lxp-native-heading', Boolean(supported));
     if (!supported) {
       replacedHeading?.removeAttribute('data-lxp-replaced-title');
       replacedHeading = undefined;
@@ -261,37 +322,94 @@
     const context = page.key === 'activity' || normalize(title) === normalize(label) ? '' : title.endsWith(suffix) ? title.slice(0, -suffix.length) : title;
     const found = new Set([normalize(label)]);
     const sections = [...(scope?.querySelectorAll('h2, h3, .islandHeaderContainer, .ls-island-header') || [])].flatMap((target) => {
-      const label = navigationText(target.querySelector('h2, h3') || target);
+      const label = navigationText(target.querySelector('.islandHeader, h2, h3') || target);
       const key = normalize(label);
       if (!label || label.length > 75 || found.has(key) || target.closest('[hidden], [aria-hidden="true"]')) return [];
       found.add(key);
-      return [{ target: target.querySelector('h2, h3') || target, label }];
-    }).slice(0, 8);
-    const signature = JSON.stringify([page.key, label, context, sections.map(({ label }) => label)]);
+      return [{ target: target.querySelector('.islandHeader, h2, h3') || target, label }];
+    });
+    const signature = JSON.stringify([page.key, label, context, preferences.sectionShortcuts, sections.map(({ label }) => label)]);
     if (nativeHeading?.signature === signature && sections.every(({ target }, index) => nativeHeading.sections[index]?.target === target)) return;
     nativeHeading = { signature, sections };
     nativeOverview.replaceChildren(workspace.pageHeading(label, page.icon || 'grid', context));
     if (page.key === 'profile') {
       nativeOverview.append(button('lxp-secondary-button lxp-profile-settings', 'Designindstillinger', openSettings, icon('settings'), 'Designindstillinger'));
     }
-    if (sections.length < 2) return;
+    if (!preferences.sectionShortcuts || sections.length < 2) return;
     const shortcuts = element('nav', 'lxp-native-links', element('span', '', 'På siden'));
     shortcuts.setAttribute('aria-label', 'På siden');
+    const jumpTo = (target) => {
+      if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: 'start' });
+    };
+    if (sections.length > 4) {
+      const picker = element('select', 'lxp-section-picker');
+      picker.setAttribute('aria-label', 'Hop til afsnit');
+      picker.append(new Option(`Hop til afsnit (${sections.length})…`, ''));
+      sections.forEach(({ label }, index) => picker.append(new Option(label, String(index))));
+      picker.addEventListener('change', () => {
+        if (picker.value !== '') jumpTo(sections[Number(picker.value)].target);
+        picker.value = '';
+      });
+      shortcuts.append(picker);
+      nativeOverview.append(shortcuts);
+      return;
+    }
     for (const { target, label } of sections) {
       shortcuts.append(button('lxp-native-jump', `Gå til ${label}`, () => {
-        if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
-        target.focus({ preventScroll: true });
-        target.scrollIntoView({ block: 'start' });
+        jumpTo(target);
       }, label));
     }
     nativeOverview.append(shortcuts);
   }
 
+  function updateSectionNavigation(visible) {
+    const scope = preview ? native.querySelector('[data-lxp-view]:not([hidden])') : source;
+    const groups = visible && scope ? [...scope.querySelectorAll('.ls-subnav1, .ls-subnav2, .lectioTabToolbar, [role="tablist"]')]
+      .filter((group) => !group.parentElement.closest('.ls-subnav1, .ls-subnav2, .lectioTabToolbar, [role="tablist"]')) : [];
+    const known = [...links.values()];
+    const seen = new Set();
+    const rows = groups.map((group) => [...group.querySelectorAll('a[href], button, input[type="button"], input[type="submit"]')].flatMap((control) => {
+      if (control.closest('[hidden], [aria-hidden="true"]')) return [];
+      const label = navigationText(control) || control.value || control.getAttribute('aria-label');
+      const href = safeHref(control);
+      if (!label || known.some((page) => normalize(page.lectio) === normalize(label) && page.href === href)) return [];
+      const key = href || `${label}:${control.getAttribute('onclick') || ''}`;
+      if (seen.has(key)) return [];
+      seen.add(key);
+      const selected = Boolean(control.closest('[aria-selected="true"], [aria-current="page"], [current-page], .ls-subnav-active, .selected, .sel'));
+      const disabled = control.disabled || control.hasAttribute('disabled') || control.getAttribute('aria-disabled') === 'true';
+      return [{ control, href, label, selected, disabled }];
+    })).filter((row) => row.length);
+    sectionNav.hidden = !rows.length;
+    const sources = rows.flat().map((entry) => entry.control);
+    const signature = JSON.stringify(rows.map((row) => row.map(({ href, label, selected, disabled }) => [href, label, selected, disabled])));
+    if (sectionNavSignature === signature && sources.every((control, index) => control === sectionNavSources[index])) return;
+    sectionNavSignature = signature;
+    sectionNavSources = sources;
+    sectionNav.replaceChildren(...rows.map((row) => element('div', 'lxp-section-nav-row', ...row.map(({ control, href, label, selected, disabled }) => {
+      const postback = control.hasAttribute('onclick') || !href || control.getAttribute('href') === '#';
+      const link = postback || disabled ? button('lxp-section-link', label, () => revealOriginal(control, true), label) : anchor('lxp-section-link', href, label);
+      if (disabled) link.disabled = true;
+      if (selected) link.setAttribute('aria-current', 'page');
+      return link;
+    }))));
+  }
+
   function updateViewVisibility() {
     const enabled = preferences.enabled;
     const home = activePage?.key === 'home';
-    const clickerOpen = enabled && activePage?.key === 'clicker';
-    const enhanced = enabled && !showNative && !clickerOpen && (home || workspaceReady);
+    const toolsOpen = enabled && activePage?.key === 'tools';
+    schoolTools.update(toolsOpen);
+    const clickerOpen = enabled && preferences.showClicker && activePage?.key === 'clicker';
+    if (!enabled || !preferences.showClicker) clickerView.querySelector('iframe')?.remove();
+    // A delegated menu action may open a real Lectio dialog inside the source.
+    // Reveal that form for its lifetime, then automatically resume the modern view.
+    const nativeDialog = source === native && [...native.querySelectorAll('dialog[open], [role="dialog"][aria-hidden="false"]')].some(dialog => !dialog.closest('[hidden]') && getComputedStyle(dialog).display !== 'none');
+    const enhanced = enabled && !showNative && !nativeDialog && !clickerOpen && !toolsOpen && (home || workspaceReady);
+    updateSectionNavigation(enhanced || toolsOpen);
+    if (toolsOpen) sectionNav.hidden = true;
     overview.hidden = !enhanced || !home;
     workspace.node.hidden = !enhanced || home;
     clickerView.hidden = !clickerOpen;
@@ -304,20 +422,21 @@
       frame.referrerPolicy = 'no-referrer';
       clickerView.append(frame);
     }
-    document.body.classList.toggle('lxp-native-hidden', enhanced || clickerOpen || (enabled && source !== native));
-    document.body.classList.toggle('lxp-inline-native', enabled && !showNative && !enhanced && !clickerOpen && links.has('home') && links.has('schedule'));
-    document.body.classList.toggle('lxp-activity-page', enabled && source === native && activePage?.key === 'activity');
-    updateNativeOverview(enabled && !enhanced && !clickerOpen && source === native);
+    setBodyState('lxp-native-hidden', enhanced || clickerOpen || toolsOpen || (enabled && source !== native));
+    setBodyState('lxp-inline-native', enabled && !showNative && !enhanced && !clickerOpen && !toolsOpen);
+    setBodyState('lxp-activity-page', enabled && source === native && activePage?.key === 'activity');
+    updateNativeOverview(enabled && !enhanced && !clickerOpen && !toolsOpen && source === native);
     const originalButton = topbar.querySelector('[data-lxp-original]');
     if (originalButton) {
-      originalButton.hidden = clickerOpen;
+      originalButton.hidden = clickerOpen || toolsOpen;
       const label = showNative ? 'Tilbage til LectioPlus+' : 'Lectios værktøjer';
       originalButton.setAttribute('aria-expanded', String(showNative));
       originalButton.setAttribute('aria-label', label);
       originalButton.dataset.lxpHint = showNative ? 'Vis siden i LectioPlus+ igen' : 'Åbn de oprindelige formularer og værktøjer';
       originalButton.lastElementChild.textContent = label;
     }
-    skip.href = clickerOpen ? clickerHash : enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
+    globalThis.lectioPlusNativeTheme?.flush();
+    skip.href = toolsOpen ? '#lxp-tools' : clickerOpen ? clickerHash : enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
       (document.getElementById('m_outerContentFrameDiv') ? '#m_outerContentFrameDiv' : '#masterContent');
   }
 
@@ -326,17 +445,18 @@
     pendingNavigation = undefined;
     navigationProgress();
     if (source !== native) {
-      history.replaceState({ ...history.state, lectioPlusOriginal: true }, '');
+      history.replaceState({ ...history.state, lectioPlusOriginal: !keepWorkspace }, '');
       location.reload();
       return;
     }
     if (keepWorkspace && control?.isConnected) {
-      const script = control.getAttribute('onclick') || control.getAttribute('href') || '';
-      if (/^(?:javascript:\s*)?(?:return\s+)?(?:__doPostBack|WebForm_DoPostBackWithOptions)\s*\(/i.test(script.trim())) {
-        control.click();
-        return;
-      }
+      // Delegate to the real control, including Lectio's own JS wrappers.
+      // Selecting an item is not a request to stay in the original UI.
+      control.click();
+      requestAnimationFrame(()=>refresh(true));
+      return;
     }
+
     showNative = true;
     updateViewVisibility();
     if (control?.isConnected) {
@@ -355,7 +475,7 @@
       const markup = document.createElement('template');
       markup.innerHTML = await response.text();
       const scope = markup.content.querySelector('#masterContent');
-      if (!scope?.querySelector('#aspnetForm')) throw new Error('Lectio content was not found.');
+      if (!scope || !markup.content.querySelector('#aspnetForm')) throw new Error('Lectio content was not found.');
       return { scope, title: readableText(markup.content.querySelector('title')) };
     })().catch((error) => {
       if (pageCache.get(href) === entry) pageCache.delete(href);
@@ -389,7 +509,7 @@
     navigationProgress();
     if (href === sourceUrl) {
       if (!fromHistory && location.href !== href) history.pushState({ lectioPlusNavigation: true }, '', href);
-      if (activePage?.key === 'clicker') refresh();
+      if (activePage?.key === 'clicker' || activePage?.key === 'tools') refresh();
       if (showNative) {
         showNative = false;
         updateViewVisibility();
@@ -448,21 +568,39 @@
     const institution = source.querySelector('.ls-master-header-institution-name')?.textContent.trim();
     const navigation = element('nav', 'lxp-nav');
     navigation.setAttribute('aria-label', 'Navigation i LectioPlus+');
-    for (const [label, keys] of [
-      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages', 'clicker']],
-      ['Elev', ['attendance', 'grades', 'study', 'documents', 'books', 'surveys', 'support', 'profile', 'school']]
-    ]) {
-      const group = keys.map((key) => (key === 'clicker' ? clickerPage : links.get(key))).filter(Boolean);
+    const ordered = preferences.navigation.filter((item) => item.visible);
+    const pinned = ordered.filter((item) => item.pinned).map((item) => item.id);
+    const customOrder = preferences.navigation.some((item, index) => item.id !== appearance.navigationItems[index][0]);
+    const groups = customOrder ? [['Menuer', ordered.map((item) => item.id)]] : [
+      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages', 'tools', 'clicker']],
+      ['Elev', ['attendance', 'grades', 'study', 'documents', 'books']],
+      ['Flere menuer', ['surveys', 'support', 'electives', 'profile', 'school']]
+    ];
+    if (pinned.length) groups.unshift(['Favoritter', pinned]);
+    for (const [label, keys] of groups) {
+      const group = keys.filter((key) => ordered.some((item) => item.id === key) && (label === 'Favoritter' || !pinned.includes(key))).map((key) => (key === 'tools' ? toolsPage : key === 'clicker' ? (preferences.showClicker ? clickerPage : null) : links.get(key))).filter(Boolean);
       if (!group.length) continue;
-      navigation.append(element('div', 'lxp-nav-heading', label));
+      let container = navigation;
+      if (label === 'Flere menuer' && preferences.navigationGroups !== 'flat') {
+        const disclosure = element('details', 'lxp-nav-group');
+        disclosure.open = preferences.navigationGroups === 'expanded' || secondaryNavigationOpen || group.some((entry) => entry.key === activePage.key);
+        disclosure.addEventListener('toggle', () => { secondaryNavigationOpen = disclosure.open; });
+        disclosure.append(element('summary', '', label, icon('chevron')));
+        container = element('div', 'lxp-nav-group-links');
+        disclosure.append(container);
+        navigation.append(disclosure);
+      } else navigation.append(element('div', 'lxp-nav-heading', label));
       for (const entry of group) {
         const link = anchor('lxp-nav-link', entry.href, icon(entry.icon), element('span', '', entry.label));
         if (entry.key === activePage.key) link.setAttribute('aria-current', 'page');
         link.addEventListener('click', () => setSidebar(false));
-        navigation.append(link);
+        container.append(link);
       }
     }
 
+    if (!preview && searchablePages().some((entry) => entry.context)) {
+      navigation.append(button('lxp-nav-more', 'Find flere sider og undermenuer', openSearch, icon('search'), 'Flere sider…'));
+    }
     const sidebarEnd = element('div', 'lxp-sidebar-end');
     if (institution) sidebarEnd.append(element('div', 'lxp-school-name', icon('grid'), element('span', '', institution)));
     if (preview) sidebarEnd.append(element('p', 'lxp-preview-label', 'Forhåndsvisning · Eksempeldata'));
@@ -493,10 +631,12 @@
     }, icon('external'), element('span', '', 'Lectios værktøjer'));
     originalButton.dataset.lxpOriginal = '';
     originalButton.setAttribute('aria-controls', native.id);
+    const dockButton=button('lxp-icon-button','Åbn værktøjspanel',()=>schoolTools.toggleDock?.(),icon('grid'));dockButton.dataset.lxpDockButton='';
+    const repairButton=button('lxp-icon-button','Reparér visningen',()=>{showNative=false;failed=false;workspace.invalidate?.();appearance.apply(document.documentElement,preferences,darkMode.matches,preferences.enabled);refresh();navigationStatus.textContent=failed?'Kunne ikke genopbygge visningen. Genindlæs siden.':'Visningen er genopbygget. Dine indstillinger og input er bevaret.';},element('span','','↻'));
     topbar.replaceChildren(
-      element('div', 'lxp-topbar-label', menu, element('span', 'lxp-breadcrumb', 'Lectio', icon('chevron')),
+      element('div', 'lxp-topbar-label', menu, element('span', 'lxp-breadcrumb', ...(activePage.parent && links.get(activePage.key) ? [anchor('', links.get(activePage.key).href, activePage.parent)] : ['Lectio']), icon('chevron')),
         element('span', 'lxp-current-page', activePage.label)),
-      element('div', 'lxp-topbar-actions', searchButton, originalButton, themeButton, settingsButton)
+      element('div', 'lxp-topbar-actions', searchButton, originalButton, dockButton, repairButton, themeButton, settingsButton)
     );
     setSidebar(false);
     updateThemeButton();
@@ -506,8 +646,8 @@
     return (node?.textContent || '').replace(/\s+/g, ' ').trim();
   }
 
-  function findPanel(pattern) {
-    const titles = source.querySelectorAll('h2, h3, h4, legend, .islandHeaderContainer, .islandHeader, .islandTitle, .ls-island-header, .ls-island-title');
+  function findPanel(pattern, scope = source) {
+    const titles = scope.querySelectorAll('h2, h3, h4, legend, .islandHeaderContainer, .islandHeader, .islandTitle, .ls-island-header, .ls-island-title');
     for (const title of titles) {
       if (title.closest('[data-lxp-owned]') || !pattern.test(normalize(title.textContent))) continue;
       const panel = title.closest('.lf-island, .island, .ls-island, section, fieldset, [data-front-panel]') || title.parentElement;
@@ -516,12 +656,12 @@
     return null;
   }
 
-  function panelItems(panel, key) {
+  function panelItems(panel, key, base = sourceUrl) {
     if (!panel) return [];
     const items = [];
     const visited = new Set();
     for (const link of panel.querySelectorAll('a[href], a[onclick]')) {
-      const direct = safeHref(link);
+      const direct = safeHref(link, base);
       const hasNativeAction = link.hasAttribute('onclick') || link.getAttribute('href')?.startsWith('javascript:');
       const href = direct || (hasNativeAction && links.get(key)?.href);
       const title = readableText(link);
@@ -584,7 +724,10 @@
         // The original page stays available when Lectio redirects or the response is unavailable.
       } finally {
         source.pending = false;
-        if (preferences.enabled && activePage.key === 'home' && homeSources.get(key) === source) renderOverview();
+        if (preferences.enabled && homeSources.get(key) === source) {
+          if (activePage.key === 'home') renderOverview();
+          if (settings.open) settingsControls?.refreshPreview();
+        }
       }
     }
   }
@@ -627,30 +770,23 @@
     return element('section', 'lxp-detail-card', heading, items.length ? list : element('p', 'lxp-empty', emptyLabel));
   }
 
-  function renderOverview() {
-    if (activePage.key !== 'home') {
-      overviewData = undefined;
-      overview.replaceChildren();
-      return;
-    }
+  function buildOverviewWidgets(config, scope, base = sourceUrl) {
     const now = preview ? new Date(document.body.dataset.lxpPreviewDate) : new Date();
     const today = lectio.today(now);
-    const frontSchedule = panelItems(findPanel(/^(?:(dagens (skema|lektioner)|skema i dag)\b|i dag$)/), 'schedule');
-    const frontTasks = panelItems(findPanel(/^(kommende (opgaver|afleveringer)|næste afleveringer)\b/), 'tasks');
+    const frontSchedule = panelItems(findPanel(/^(?:(dagens (skema|lektioner)|skema i dag)\b|i dag$)/, scope), 'schedule', base);
+    const frontTasks = panelItems(findPanel(/^(kommende (opgaver|afleveringer)|næste afleveringer)\b/, scope), 'tasks', base);
     const scheduleSource = frontSchedule.length ? undefined : homeSource('schedule', today);
     const taskSource = frontTasks.length ? undefined : homeSource('tasks', today);
     const schedule = scheduleSource?.items || frontSchedule;
     const tasks = taskSource?.items || frontTasks;
-    const messages = panelItems(findPanel(/^ulæste beskeder\b/), 'messages');
-    const generalTasks = tasks.length || taskSource?.items || taskSource?.pending ? [] : panelItems(findPanel(/^(afleveringer|opgaver)\b/), 'tasks');
+    const messages = panelItems(findPanel(/^ulæste beskeder\b/, scope), 'messages', base);
+    const generalTasks = tasks.length || taskSource?.items || taskSource?.pending ? [] : panelItems(findPanel(/^(afleveringer|opgaver)\b/, scope), 'tasks', base);
     const date = lectio.displayDay(today.date);
     const data = JSON.stringify([date, schedule, tasks, messages, generalTasks, scheduleSource?.pending, Boolean(scheduleSource?.items),
-      taskSource?.pending, Boolean(taskSource?.items), [...links]]);
-    if (data === overviewData) return;
-    overviewData = data;
+      taskSource?.pending, Boolean(taskSource?.items), [...links], config.dashboard, config.showClicker]);
     const hero = element('div', 'lxp-hero', element('div', 'lxp-hero-art'),
       element('div', 'lxp-hero-copy', element('div', 'lxp-hero-date', icon('calendar'), date),
-        element('h1', '', 'Dit overblik')));
+        element('h1', '', config.dashboard.title)));
     const heroLink = actionLink('schedule', 'Se dit skema', 'lxp-hero-link');
     if (heroLink) hero.append(heroLink);
     const summaries = element('div', 'lxp-summary-grid',
@@ -673,7 +809,46 @@
       element('span', 'lxp-clicker-name', 'Strafe', element('span', '', 'Clicker')),
       clickerArtwork, icon('arrow'));
     clicker.setAttribute('aria-label', 'Åbn Strafe Clicker');
-    overview.replaceChildren(hero, summaries, details, clicker);
+    const registry = new Map([['hero', hero], ['summary', summaries], ['schedule', details.children[0]], ['tasks', details.children[1]],
+      ['messages', detailCard('Ulæste beskeder', 'messages', 'Alle beskeder', messages, 'messages', 'Ingen ulæste beskeder på forsiden.')], ['clicker', clicker]]);
+    const shortcuts = element('section', 'lxp-detail-card lxp-custom-card', element('h2', '', 'Genveje'));
+    const shortcutsList = element('div', 'lxp-dashboard-shortcuts');
+    for (const key of ['schedule', 'tasks', 'homework', 'messages', 'documents']) {
+      const entry = links.get(key);
+      if (entry) shortcutsList.append(anchor('lxp-secondary-button', entry.href, icon(entry.icon), entry.label));
+    }
+    shortcuts.append(shortcutsList);
+    registry.set('shortcuts', shortcuts);
+    for (const item of config.dashboard.custom) {
+      const card = element('section', 'lxp-detail-card lxp-custom-card', element('h2', '', item.title));
+      if (item.text) card.append(element('p', 'lxp-custom-text', item.text));
+      const url = appearance.safeUrl(item.url);
+      if (item.type === 'link' && url) {
+        const link = anchor('lxp-secondary-button', url, 'Åbn link', icon('external'));
+        link.target = '_blank'; link.rel = 'noopener noreferrer'; card.append(link);
+      }
+      registry.set(item.id, card);
+    }
+    return { registry, data };
+  }
+
+  function renderOverview() {
+    if (activePage.key !== "home") { overviewData = undefined; overview.replaceChildren(); return; }
+    const { registry, data } = buildOverviewWidgets(preferences, preview ? native.querySelector('[data-lxp-view="home"]') : source);
+    if (data === overviewData) return;
+    overviewData = data;
+    const grid = element('div', 'lxp-dashboard-grid');
+    grid.dataset.columns = preferences.dashboard.columns;
+    for (const slot of preferences.dashboard.slots) {
+      if (!slot.visible || (slot.id === 'clicker' && !preferences.showClicker) || !registry.has(slot.id)) continue;
+      const wrapper = element('div', 'lxp-dashboard-widget', registry.get(slot.id));
+      wrapper.dataset.widget = slot.id; wrapper.dataset.width = slot.width;
+      grid.append(wrapper);
+    }
+    if (!grid.children.length) grid.append(element('p', 'lxp-empty', 'Tilføj felter under Tilpas overblik for at komme i gang.'));
+    const toolbar = element('div', 'lxp-dashboard-toolbar', button('lxp-secondary-button', 'Tilpas overblik', () => openSettings('dashboard'), icon('settings'), 'Tilpas overblik'));
+    overview.replaceChildren(toolbar, grid);
+    if (settings.open) settingsControls?.refreshPreview();
   }
 
   function showDialog(dialog, focusTarget) {
@@ -685,8 +860,9 @@
 
   for (const dialog of [search, settings]) {
     dialog.addEventListener('close', () => lastDialogTrigger?.focus());
+    dialog.addEventListener('cancel', (event) => { if (dialog === settings && !settingsControls?.canClose()) event.preventDefault(); });
     dialog.addEventListener('click', (event) => {
-      if (event.target === dialog) dialog.close();
+      if (event.target === dialog && (dialog !== settings || settingsControls?.canClose())) dialog.close();
     });
   }
 
@@ -703,10 +879,10 @@
     status.setAttribute('aria-live', 'polite');
     const renderResults = () => {
       const query = normalize(input.value);
-      const matching = entries.filter((entry) => normalize(`${entry.label} ${entry.lectio}`).includes(query));
+      const matching = entries.filter((entry) => normalize(`${entry.label} ${entry.lectio} ${entry.context || ''}`).includes(query));
       status.textContent = matching.length ? '' : 'Ingen sider matcher din søgning.';
       results.replaceChildren(...matching.map((entry) => {
-        const result = anchor('lxp-search-result', entry.href, icon(entry.icon), element('span', '', entry.label), icon('arrow'));
+        const result = anchor('lxp-search-result', entry.href, icon(entry.icon), element('span', 'lxp-search-copy', element('span', '', entry.label), ...(entry.context ? [element('small', '', entry.context)] : [])), icon('arrow'));
         result.addEventListener('click', () => search.close());
         return element('li', '', result);
       }));
@@ -732,19 +908,44 @@
     showDialog(search, input);
   }
 
-  function openSettings() {
+  function openSettings(initialTab = 'appearance') {
     if (settings.open || search.open) return;
     settings.setAttribute('aria-label', 'Indstillinger');
-    const close = button('lxp-icon-button', 'Luk indstillinger', () => settings.close(), icon('close'));
-    settingsControls = appearance.controls(savePreferences);
+    const close = button('lxp-icon-button', 'Luk indstillinger', () => { if (settingsControls.canClose()) settings.close(); }, icon('close'));
+    settingsHomeScope = preview ? native.querySelector('[data-lxp-view=home]') : activePage.key === 'home' ? source : null;
+    settingsHomeUrl = sourceUrl;
+    settingsPreviewStatus = settingsHomeScope ? (preview ? 'Testdata fra demoens overblik' : 'Dine data fra Lectio') : 'Henter dit overblik…';
+    settingsControls = globalThis.lectioPlusSettings({ ui: { element, button, icon }, getPreferences: () => preferences, onChange: savePreferences, getWidgets: (config) => {
+      const widgets = buildOverviewWidgets(config, settingsHomeScope || document.createElement('div'), settingsHomeUrl);
+      if (!settingsHomeScope) widgets.registry.set('messages', element('p', 'lxp-empty', settingsPreviewStatus));
+      return { ...widgets, label: settingsPreviewStatus };
+    }, initialTab: typeof initialTab === 'string' ? initialTab : 'appearance' });
     settingsControls.sync(preferences);
+    if (!settingsHomeScope) {
+      const controls = settingsControls;
+      const home = links.get('home');
+      void (async () => {
+        try {
+          if (!home) throw new Error('missing');
+          const page = await loadPage(home.href);
+          if (controls !== settingsControls) return;
+          settingsHomeScope = page.scope; settingsHomeUrl = home.href; settingsPreviewStatus = 'Dine data fra Lectio';
+        } catch {
+          if (controls !== settingsControls) return;
+          settingsPreviewStatus = 'Overblikket kunne ikke hentes. Åbn Overblik og prøv igen.';
+        }
+        controls.refreshPreview();
+      })();
+    }
     const classic = button('lxp-secondary-button', 'Brug klassisk Lectio', () => {
+      if (!settingsControls.canClose()) return;
       settings.close();
       savePreferences({ enabled: false });
     }, icon('external'), 'Brug klassisk Lectio');
     settings.replaceChildren(element('div', 'lxp-dialog-body lxp-settings-body',
       element('div', 'lxp-card-heading', element('h2', '', 'Indstillinger'), close),
       settingsControls.node, classic));
+    settings.classList.toggle('lxp-settings-visual', settingsControls.node.dataset.category === 'dashboard');
     showDialog(settings, close);
   }
 
@@ -762,7 +963,7 @@
   function applyPreferences() {
     if (!preferences.enabled) globalThis.lectioPlusTab?.apply('', false, sourceTitle);
     hideHints();
-    document.body.classList.toggle('lxp-enabled', preferences.enabled);
+    setBodyState('lxp-enabled', preferences.enabled);
     appearance.apply(document.documentElement, preferences, darkMode.matches, preferences.enabled);
     settingsControls?.sync(preferences);
     root.hidden = !preferences.enabled;
@@ -785,21 +986,29 @@
     }
   }
 
-  async function savePreferences(changes) {
-    preferences = appearance.normalize({ ...preferences, ...changes });
-    const reload = source !== native && !preferences.enabled;
-    if (!reload) applyPreferences();
-    try {
-      if (storage) await storage.local.set(changes);
-      else if (preview) localStorage.setItem('lectioPlusPreview', JSON.stringify(preferences));
-    } catch {
-      // The active tab still works if the browser prevents persistent storage.
-    }
-    if (reload) applyPreferences();
+  let preferenceQueue = Promise.resolve();
+  function savePreferences(changes) {
+    const snapshot = structuredClone(changes);
+    const save = async () => {
+      const next = appearance.normalize({ ...preferences, ...snapshot });
+      const values = Object.fromEntries(Object.keys(snapshot).filter((key) => key in defaults).map((key) => [key, next[key]]));
+      try {
+        if (storage) await storage.local.set(values);
+        else if (preview) localStorage.setItem('lectioPlusPreview', JSON.stringify(next));
+      } catch { return false; }
+      preferences = next;
+      applyPreferences();
+      return true;
+    };
+    if (!storage) return save();
+    const result = preferenceQueue.then(save);
+    preferenceQueue = result.catch(() => {});
+    return result;
   }
 
   function selectPreviewPage() {
-    const selected = pageInfo().key;
+    const page = pageInfo();
+    const selected = page.view || page.key;
     for (const panel of native.querySelectorAll('[data-lxp-view]')) {
       const hidden = panel.dataset.lxpView !== selected;
       if (panel.hidden !== hidden) panel.hidden = hidden;
@@ -818,26 +1027,49 @@
     } else window.scrollTo(0, 0);
   }
 
-  function refresh() {
+  function failOpen(){
+    failed=true;root.hidden=true;restore.hidden=false;
+    restore.textContent='Genindlæs LectioPlus+';restore.setAttribute('aria-label','Genindlæs LectioPlus+');
+    document.body.classList.remove('lxp-enabled','lxp-native-hidden','lxp-native-heading','lxp-inline-native','lxp-activity-page');
+    globalThis.lectioPlusNativeTheme?.flush();boot?.finish();
+  }
+  function refresh(transient=false){
+    try{refreshContent(transient);if(failed&&preferences.enabled){failed=false;setBodyState('lxp-enabled',true);restore.hidden=true;}restorePresentation();}
+    catch{failOpen();}
+  }
+  function refreshContent(transient = false) {
     if (!preferences.enabled) return;
+    if (!preferences.showClicker && location.hash === clickerHash) history.replaceState(history.state, '', preview ? '#home' : location.pathname + location.search);
     if (preview) selectPreviewPage();
     const previousLinks = JSON.stringify([...links]);
     const previousPage = activePage;
     links = getNavigation();
     activePage = pageInfo();
-    globalThis.lectioPlusTab?.apply(activePage.label, true, sourceTitle);
+    globalThis.lectioPlusTab?.apply(activePage.label, preferences.tabBranding, sourceTitle);
     if (previousPage && previousPage.key !== activePage.key) {
       hideHints();
       showNative = false;
       if (previousPage?.key === 'home') cancelHomeSources();
     }
-    if (previousPage?.key !== activePage.key || previousPage?.label !== activePage.label || previousLinks !== JSON.stringify([...links])) {
+    const navPrefs = JSON.stringify([preferences.showClicker, preferences.navigationGroups, preferences.navigation]);
+    if (navigationPreferences !== navPrefs || previousPage?.key !== activePage.key || previousPage?.label !== activePage.label || previousPage?.parent !== activePage.parent || previousLinks !== JSON.stringify([...links])) {
+      navigationPreferences = navPrefs;
       renderNavigation();
     }
     renderOverview();
     const scope = preview ? native.querySelector('[data-lxp-view]:not([hidden])') : source;
     const now = preview ? new Date(document.body.dataset.lxpPreviewDate) : new Date();
-    workspaceReady = workspace.update(nativeWorkflow(activePage, sourceUrl, scope || native) ? null : scope, activePage.key, lectio.today(now).date);
+    const workflow = nativeWorkflow(activePage, sourceUrl, scope || native);
+    if (transient && workspaceReady && previousPage?.key === activePage.key && !workflow && scope && !workspace.supports(scope, activePage.key)) {
+      // Lectio can remove and recreate a table in separate tasks. Keep the last complete view briefly.
+      workspace.node.setAttribute('aria-busy', 'true');
+      if (!missingContentTimer) missingContentTimer = setTimeout(() => { missingContentTimer = undefined; refresh(); }, 750);
+      return;
+    }
+    clearTimeout(missingContentTimer);
+    missingContentTimer = undefined;
+    workspace.node.removeAttribute('aria-busy');
+    workspaceReady = workspace.update(workflow ? null : scope, activePage.key, lectio.today(now).date);
     updateViewVisibility();
   }
 
@@ -856,7 +1088,9 @@
     }
     if (preview) selectPreviewPage();
     applyPreferences();
+    boot?.onPreferences?.(settings=>{const next=appearance.normalize(settings);if(JSON.stringify(next)!==JSON.stringify(preferences)){preferences=next;applyPreferences();}});
     if (preview && location.hash.includes('/')) navigatePreview();
+    await globalThis.lectioPlusNativeTheme?.ready;
 
     storage?.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
@@ -865,7 +1099,7 @@
         if (changes[key]) next[key] = changes[key].newValue ?? defaults[key];
       }
       const normalized = appearance.normalize(next);
-      if (Object.keys(defaults).every((key) => normalized[key] === preferences[key])) return;
+      if (JSON.stringify(normalized) === JSON.stringify(preferences)) return;
       preferences = normalized;
       applyPreferences();
     });
@@ -899,7 +1133,7 @@
       navigatePreview();
     });
     if (!preview) window.addEventListener('hashchange', () => {
-      if (preferences.enabled && (activePage?.key === 'clicker' || location.hash === clickerHash)) refresh();
+      if (preferences.enabled && (activePage?.key === 'clicker' || activePage?.key === 'tools' || location.hash === clickerHash || toolsHash())) refresh();
     });
     if (!preview) window.addEventListener('popstate', () => {
       if (!preferences.enabled) return;
@@ -911,7 +1145,11 @@
       if (href === initialUrl) void navigate(href, page || { label: 'Lectio' }, true);
       else if (history.state?.lectioPlusNavigation && page && fastPages.has(page.key)) void navigate(href, page, true);
     });
+    window.addEventListener('beforeunload', (event) => {
+      if (settings.open && settingsControls?.hasUnsaved()) { event.preventDefault(); event.returnValue = ''; }
+    });
     window.addEventListener('pageshow', (event) => {
+      restorePresentation();
       if (event.persisted && preferences.enabled && activePage.key === 'home') {
         pageCache.clear();
         cancelHomeSources();
@@ -919,19 +1157,25 @@
       }
     });
     const observer = new MutationObserver((records) => {
-      if (records.every(({ target }) => (target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement)
-        ?.closest('[data-lxp-owned]'))) return;
-      clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(refresh, 80);
+      const current=document.getElementById('masterContent');
+      if(current&&(!root.isConnected||current!==native)){
+        if(current!==native){native=current;source=current;sourceUrl=location.href;pendingNavigation=undefined;pageCache.clear();}
+        if(!root.isConnected)native.before(root);
+        for(const node of [search,settings,restore])if(!node.isConnected)document.body.append(node);
+        applyPreferences();
+        return;
+      }
+      if(records.some(({target})=>target===document.documentElement||target===document.body||target===root))restorePresentation();
+      if(!records.some(({target})=>native.contains(target)&&!(target.nodeType===Node.ELEMENT_NODE?target:target.parentElement)?.closest('[data-lxp-owned]')))return;
+      if(refreshFrame!==undefined)return;
+      refreshFrame=requestAnimationFrame(()=>{refreshFrame=undefined;refresh(true);});
     });
-    observer.observe(native, { childList: true, characterData: true, subtree: true, attributes: true,
-      attributeFilter: ['class', 'hidden', 'open', 'style', 'aria-hidden', 'aria-selected', 'aria-current', 'current-page', 'data-tooltip', 'href', 'title'] });
+    // The source itself (and occasionally its parent) can be replaced by Lectio.
+    observer.observe(document,{childList:true,characterData:true,subtree:true,attributes:true,
+      attributeFilter:['class','hidden','open','style','aria-hidden','aria-selected','aria-current','current-page','data-tooltip','href','title',...appearance.attributeNames]});
+
   }
 
-  void start().catch(() => {
-    globalThis.lectioPlusTab?.apply('', false, sourceTitle);
-    root.hidden = true;
-    document.body.classList.remove('lxp-enabled', 'lxp-native-hidden', 'lxp-native-heading', 'lxp-inline-native', 'lxp-activity-page');
-    appearance.apply(document.documentElement, defaults, darkMode.matches, false);
-  }).finally(() => boot?.finish());
+  void start().catch(failOpen).finally(()=>boot?.finish());
+  }
 })();

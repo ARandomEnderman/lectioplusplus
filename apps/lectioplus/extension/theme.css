@@ -35,8 +35,9 @@
 }
 
 @media screen {
-  html.lxp-starting { background: var(--lxp-bg); }
-  html.lxp-starting body { visibility: hidden !important; }
+  html.lxp-starting { background: var(--lxp-bg) !important; min-height: 100vh; }
+  html.lxp-starting body { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+  html.lxp-starting::after { content: 'LectioPlus+ · Indlæser…'; position: fixed; inset: 0; display: grid; place-items: center; color: var(--lxp-muted); font: 500 14px/1.4 var(--lxp-font); pointer-events: none; }
 }
 
 :root[data-lxp-design='strafe'], .lxp-design-swatch[data-swatch='strafe'] {
@@ -186,3 +187,35 @@
 .lxp-design-swatch { width: 21px; height: 21px; border-radius: 7px; background: var(--lxp-design-mark); }
 .lxp-design-swatch[data-swatch='indigo'] { --lxp-design-mark: #5a58d0; }
 @media (max-width: 280px) { .lxp-design-options { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Set the scheme on the controls themselves: Lectio may set a light scheme
+   on a descendant of html. Native option popups otherwise keep a white surface. */
+html[data-lxp-mode='dark'] :is(select, option, optgroup) { color-scheme: dark !important; }
+html[data-lxp-mode='light'] :is(select, option, optgroup) { color-scheme: light !important; }
+html[data-lxp-mode] select :is(option, optgroup) {
+  background-color: var(--lxp-surface) !important;
+  color: var(--lxp-text) !important;
+}
+html[data-lxp-mode] select option:checked {
+  background-color: var(--lxp-active) !important;
+  color: var(--lxp-accent) !important;
+}
+html[data-lxp-mode] select :is(option, optgroup):disabled { color: var(--lxp-muted) !important; }
+
+/* Explicit, theme-independent on/off feedback on extension preferences. */
+html[data-lxp-mode] .lxp-toggle { position:relative; display:inline-flex; align-items:center; gap:9px; min-width:86px; min-height:34px; flex-shrink:0; cursor:pointer; vertical-align:middle; }
+html[data-lxp-mode] .lxp-toggle > input[type='checkbox'] { position:absolute; inset:0; z-index:1; width:100% !important; height:100% !important; max-width:none; margin:0; padding:0; opacity:0; cursor:pointer; }
+html[data-lxp-mode] .lxp-toggle-track { position:relative; box-sizing:border-box; width:42px; height:24px; border:2px solid var(--lxp-muted); border-radius:20px; background:var(--lxp-subtle); flex:none; }
+html[data-lxp-mode] .lxp-toggle-track::before { content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:var(--lxp-muted); }
+html[data-lxp-mode] .lxp-toggle > input:checked + .lxp-toggle-track { background:var(--lxp-accent); border-color:var(--lxp-accent); }
+html[data-lxp-mode] .lxp-toggle > input:checked + .lxp-toggle-track::before { left:21px; background:var(--lxp-surface); }
+html[data-lxp-mode] .lxp-toggle-state { color:var(--lxp-muted); font:650 12px/1 var(--lxp-font); }
+html[data-lxp-mode] .lxp-toggle > input:checked ~ .lxp-toggle-state { color:var(--lxp-accent); }
+html[data-lxp-mode] .lxp-toggle > input:focus-visible + .lxp-toggle-track { outline:2px solid var(--lxp-accent); outline-offset:4px; }
+html[data-lxp-mode] .lxp-toggle:has(input:disabled) { opacity:.5; cursor:default; }
+@media (forced-colors: active) {
+  html[data-lxp-mode] .lxp-toggle-track { border-color:ButtonText; }
+  html[data-lxp-mode] .lxp-toggle > input:checked + .lxp-toggle-track { background:Highlight; border-color:Highlight; }
+  html[data-lxp-mode] .lxp-toggle-track::before { background:ButtonText; }
+  html[data-lxp-mode] .lxp-toggle > input:checked + .lxp-toggle-track::before { background:HighlightText; }
+}

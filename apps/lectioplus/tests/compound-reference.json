@@ -1,0 +1,405 @@
+{
+  "source": "NIH PubChem PUG REST, retrieved 2026-11-16",
+  "records": [
+    {
+      "positive": "1",
+      "negative": "23",
+      "query": "sodium chloride",
+      "CID": 5234,
+      "MolecularFormula": "ClNa",
+      "MolecularWeight": "58.44"
+    },
+    {
+      "positive": "2",
+      "negative": "23",
+      "query": "potassium chloride",
+      "CID": 4873,
+      "MolecularFormula": "ClK",
+      "MolecularWeight": "74.55"
+    },
+    {
+      "positive": "6",
+      "negative": "23",
+      "query": "calcium chloride",
+      "CID": 5284359,
+      "MolecularFormula": "CaCl2",
+      "MolecularWeight": "110.98"
+    },
+    {
+      "positive": "5",
+      "negative": "23",
+      "query": "magnesium chloride",
+      "CID": 5360315,
+      "MolecularFormula": "Cl2Mg",
+      "MolecularWeight": "95.21"
+    },
+    {
+      "positive": "12",
+      "negative": "23",
+      "query": "iron(II) chloride",
+      "CID": 24458,
+      "MolecularFormula": "Cl2Fe",
+      "MolecularWeight": "126.75"
+    },
+    {
+      "positive": "13",
+      "negative": "23",
+      "query": "iron(III) chloride",
+      "CID": 24380,
+      "MolecularFormula": "Cl3Fe",
+      "MolecularWeight": "162.20"
+    },
+    {
+      "positive": "11",
+      "negative": "23",
+      "query": "copper(II) chloride",
+      "CID": 24014,
+      "MolecularFormula": "Cl2Cu",
+      "MolecularWeight": "134.45"
+    },
+    {
+      "positive": "3",
+      "negative": "23",
+      "query": "ammonium chloride",
+      "CID": 25517,
+      "MolecularFormula": "ClH4N",
+      "MolecularWeight": "53.49"
+    },
+    {
+      "positive": "4",
+      "negative": "29",
+      "query": "silver nitrate",
+      "CID": 24470,
+      "MolecularFormula": "AgNO3",
+      "MolecularWeight": "169.873"
+    },
+    {
+      "positive": "1",
+      "negative": "29",
+      "query": "sodium nitrate",
+      "CID": 24268,
+      "MolecularFormula": "NNaO3",
+      "MolecularWeight": "84.995"
+    },
+    {
+      "positive": "2",
+      "negative": "29",
+      "query": "potassium nitrate",
+      "CID": 24434,
+      "MolecularFormula": "KNO3",
+      "MolecularWeight": "101.103"
+    },
+    {
+      "positive": "6",
+      "negative": "29",
+      "query": "calcium nitrate",
+      "CID": 24963,
+      "MolecularFormula": "CaN2O6",
+      "MolecularWeight": "164.09"
+    },
+    {
+      "positive": "5",
+      "negative": "29",
+      "query": "magnesium nitrate",
+      "CID": 25212,
+      "MolecularFormula": "MgN2O6",
+      "MolecularWeight": "148.32"
+    },
+    {
+      "positive": "3",
+      "negative": "29",
+      "query": "ammonium nitrate",
+      "CID": 22985,
+      "MolecularFormula": "H4N2O3",
+      "MolecularWeight": "80.044"
+    },
+    {
+      "positive": "1",
+      "negative": "31",
+      "query": "sodium sulfate",
+      "CID": 24436,
+      "MolecularFormula": "Na2O4S",
+      "MolecularWeight": "142.04"
+    },
+    {
+      "positive": "2",
+      "negative": "31",
+      "query": "potassium sulfate",
+      "CID": 24507,
+      "MolecularFormula": "K2O4S",
+      "MolecularWeight": "174.26"
+    },
+    {
+      "positive": "6",
+      "negative": "31",
+      "query": "calcium sulfate",
+      "CID": 24497,
+      "MolecularFormula": "CaO4S",
+      "MolecularWeight": "136.14"
+    },
+    {
+      "positive": "5",
+      "negative": "31",
+      "query": "magnesium sulfate",
+      "CID": 24083,
+      "MolecularFormula": "MgO4S",
+      "MolecularWeight": "120.37"
+    },
+    {
+      "positive": "11",
+      "negative": "31",
+      "query": "copper(II) sulfate",
+      "CID": 24462,
+      "MolecularFormula": "CuO4S",
+      "MolecularWeight": "159.61"
+    },
+    {
+      "positive": "3",
+      "negative": "31",
+      "query": "ammonium sulfate",
+      "CID": 6097028,
+      "MolecularFormula": "H8N2O4S",
+      "MolecularWeight": "132.14"
+    },
+    {
+      "positive": "14",
+      "negative": "31",
+      "query": "aluminium sulfate",
+      "CID": 24850,
+      "MolecularFormula": "Al2O12S3",
+      "MolecularWeight": "342.2"
+    },
+    {
+      "positive": "12",
+      "negative": "31",
+      "query": "iron(II) sulfate",
+      "CID": 24393,
+      "MolecularFormula": "FeO4S",
+      "MolecularWeight": "151.91"
+    },
+    {
+      "positive": "13",
+      "negative": "31",
+      "query": "iron(III) sulfate",
+      "CID": 24826,
+      "MolecularFormula": "Fe2O12S3",
+      "MolecularWeight": "399.9"
+    },
+    {
+      "positive": "8",
+      "negative": "31",
+      "query": "barium sulfate",
+      "CID": 24414,
+      "MolecularFormula": "BaO4S",
+      "MolecularWeight": "233.39"
+    },
+    {
+      "positive": "1",
+      "negative": "26",
+      "query": "sodium hydroxide",
+      "CID": 14798,
+      "MolecularFormula": "HNaO",
+      "MolecularWeight": "39.997"
+    },
+    {
+      "positive": "2",
+      "negative": "26",
+      "query": "potassium hydroxide",
+      "CID": 14797,
+      "MolecularFormula": "HKO",
+      "MolecularWeight": "56.106"
+    },
+    {
+      "positive": "6",
+      "negative": "26",
+      "query": "calcium hydroxide",
+      "CID": 6093208,
+      "MolecularFormula": "CaH2O2",
+      "MolecularWeight": "74.09"
+    },
+    {
+      "positive": "5",
+      "negative": "26",
+      "query": "magnesium hydroxide",
+      "CID": 73981,
+      "MolecularFormula": "H2MgO2",
+      "MolecularWeight": "58.320"
+    },
+    {
+      "positive": "14",
+      "negative": "26",
+      "query": "aluminium hydroxide",
+      "CID": 10176082,
+      "MolecularFormula": "AlH3O3",
+      "MolecularWeight": "78.004"
+    },
+    {
+      "positive": "11",
+      "negative": "26",
+      "query": "copper(II) hydroxide",
+      "CID": 164826,
+      "MolecularFormula": "CuH2O2",
+      "MolecularWeight": "97.56"
+    },
+    {
+      "positive": "9",
+      "negative": "26",
+      "query": "zinc hydroxide",
+      "CID": 9812759,
+      "MolecularFormula": "H2O2Zn",
+      "MolecularWeight": "99.4"
+    },
+    {
+      "positive": "1",
+      "negative": "33",
+      "query": "sodium carbonate",
+      "CID": 10340,
+      "MolecularFormula": "CNa2O3",
+      "MolecularWeight": "105.988"
+    },
+    {
+      "positive": "2",
+      "negative": "33",
+      "query": "potassium carbonate",
+      "CID": 11430,
+      "MolecularFormula": "CK2O3",
+      "MolecularWeight": "138.205"
+    },
+    {
+      "positive": "6",
+      "negative": "33",
+      "query": "calcium carbonate",
+      "CID": 10112,
+      "MolecularFormula": "CCaO3",
+      "MolecularWeight": "100.09"
+    },
+    {
+      "positive": "5",
+      "negative": "33",
+      "query": "magnesium carbonate",
+      "CID": 11029,
+      "MolecularFormula": "CMgO3",
+      "MolecularWeight": "84.31"
+    },
+    {
+      "positive": "1",
+      "negative": "34",
+      "query": "sodium bicarbonate",
+      "CID": 516892,
+      "MolecularFormula": "CHNaO3",
+      "MolecularWeight": "84.007"
+    },
+    {
+      "positive": "2",
+      "negative": "34",
+      "query": "potassium bicarbonate",
+      "CID": 516893,
+      "MolecularFormula": "CHKO3",
+      "MolecularWeight": "100.115"
+    },
+    {
+      "positive": "1",
+      "negative": "35",
+      "query": "trisodium phosphate",
+      "CID": 24243,
+      "MolecularFormula": "Na3O4P",
+      "MolecularWeight": "163.941"
+    },
+    {
+      "positive": "2",
+      "negative": "35",
+      "query": "tripotassium phosphate",
+      "CID": 62657,
+      "MolecularFormula": "K3O4P",
+      "MolecularWeight": "212.266"
+    },
+    {
+      "positive": "6",
+      "negative": "35",
+      "query": "tricalcium phosphate",
+      "CID": 24456,
+      "MolecularFormula": "Ca3O8P2",
+      "MolecularWeight": "310.18"
+    },
+    {
+      "positive": "3",
+      "negative": "37",
+      "query": "monoammonium phosphate",
+      "CID": 24402,
+      "MolecularFormula": "H6NO4P",
+      "MolecularWeight": "115.03"
+    },
+    {
+      "positive": "3",
+      "negative": "36",
+      "query": "diammonium phosphate",
+      "CID": 24540,
+      "MolecularFormula": "H9N2O4P",
+      "MolecularWeight": "132.06"
+    },
+    {
+      "positive": "1",
+      "negative": "36",
+      "query": "disodium phosphate",
+      "CID": 24203,
+      "MolecularFormula": "HNa2O4P",
+      "MolecularWeight": "141.959"
+    },
+    {
+      "positive": "1",
+      "negative": "37",
+      "query": "monosodium phosphate",
+      "CID": 23672064,
+      "MolecularFormula": "H2NaO4P",
+      "MolecularWeight": "119.977"
+    },
+    {
+      "positive": "9",
+      "negative": "27",
+      "query": "zinc oxide",
+      "CID": 3007857,
+      "MolecularFormula": "OZn",
+      "MolecularWeight": "81.4"
+    },
+    {
+      "positive": "13",
+      "negative": "27",
+      "query": "ferric oxide",
+      "CID": 518696,
+      "MolecularFormula": "Fe2O3",
+      "MolecularWeight": "159.69"
+    },
+    {
+      "positive": "11",
+      "negative": "27",
+      "query": "copper(II) oxide",
+      "CID": 164827,
+      "MolecularFormula": "CuO",
+      "MolecularWeight": "79.55"
+    },
+    {
+      "positive": "10",
+      "negative": "27",
+      "query": "copper(I) oxide",
+      "CID": 18346908,
+      "MolecularFormula": "Cu2O",
+      "MolecularWeight": "143.09"
+    },
+    {
+      "positive": "5",
+      "negative": "27",
+      "query": "magnesium oxide",
+      "CID": 14792,
+      "MolecularFormula": "MgO",
+      "MolecularWeight": "40.305"
+    },
+    {
+      "positive": "6",
+      "negative": "27",
+      "query": "calcium oxide",
+      "CID": 14778,
+      "MolecularFormula": "CaO",
+      "MolecularWeight": "56.08"
+    }
+  ]
+}
