@@ -38,6 +38,26 @@
     const node = element('main', 'lxp-workspace');
     node.id = 'lxp-workspace';
     node.tabIndex = -1;
+
+    // The "now" line in the week view: placed with the same top-% maths as the lessons, moved every 30 s.
+    function markNow(root = node) {
+      const preview = document.body.hasAttribute('data-lxp-preview');
+      const { date, time } = data.today(preview ? new Date(document.body.dataset.lxpPreviewDate) : new Date());
+      const minute = Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
+      for (const board of root.querySelectorAll('.lxp-week-board')) {
+        const first = Number(board.dataset.lxpFirst), duration = Number(board.dataset.lxpDuration);
+        const timelines = [...board.querySelectorAll('.lxp-day-timeline')];
+        const visible = minute >= first && minute <= first + duration && timelines.some((timeline) => timeline.dataset.lxpDate === date);
+        const top = `${(minute - first) / duration * 100}%`;
+        for (const marker of board.querySelectorAll('.lxp-now-line, .lxp-now-time')) {
+          marker.hidden = !visible;
+          marker.style.top = top;
+        }
+        const label = board.querySelector('.lxp-now-time');
+        if (label) label.textContent = time;
+      }
+    }
+    setInterval(() => markNow(), 30000);
     node.hidden = true;
     const pageStates = new Map();
     let mounted;
@@ -248,6 +268,12 @@
             tick.style.top = `${(minute - firstMinute) / duration * 100}%`;
             times.append(tick);
           }
+          board.dataset.lxpFirst = String(firstMinute);
+          board.dataset.lxpDuration = String(duration);
+          const nowTime = element('span', 'lxp-now-time');
+          nowTime.hidden = true;
+          nowTime.setAttribute('aria-hidden', 'true');
+          times.append(nowTime);
           axis.append(times);
           board.append(axis);
         }
@@ -269,6 +295,11 @@
             column.append(events);
           } else {
             const events = element('div', 'lxp-day-timeline');
+            events.dataset.lxpDate = date;
+            const nowLine = element('div', 'lxp-now-line');
+            nowLine.hidden = true;
+            nowLine.setAttribute('aria-hidden', 'true');
+            events.append(nowLine);
             // Short gaps are shown in their actual place; filtering must never create fake breaks.
             const occupied = dated.filter((lesson) => lesson.date === date).sort((a, b) => a.start - b.start);
             let previousEnd = null;
@@ -312,6 +343,7 @@
         if (undated.length) result.push(element('section', 'lxp-undated', element('h2', '', 'Aktiviteter uden dato'),
           ...undated.sort(byTime).map((lesson) => lessonCard(lesson, true, colors.get(lesson.subject)))));
         stage.replaceChildren(...result);
+        markNow(stage); // stage may not be attached to the page yet on first render
       }
 
       function byTime(first, second) {
