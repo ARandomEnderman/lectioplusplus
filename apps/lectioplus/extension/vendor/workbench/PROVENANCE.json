@@ -30,7 +30,7 @@
     "pyodide/pyodide.asm.wasm": "e14d49ceca9b4a0e274ea918f3a898de2d3880b6e5573a6cfe1a2267ecc70329",
     "pyodide/pyodide.mjs": "1bb8cc14f9405aaa7cd4e00c12edd0a8539de9cc026618d6ee5a9663f367dc70",
     "pyodide/python_stdlib.zip": "2bd3394a145bfbbe5bbc9d9d6ab9136abbb986c6fef6c142b3a2962227aa5c28",
-    "sql.js/LICENSE": "60a3f6e4d7b29b4321359e683b36cf198d24f58e24582070f56e6fa89d5ee2be",
+    "sql.js/LICENSE": "f1c6fb37bb37afa4b52c52c37b17c98b2b1d0f900a74a4a8f86cce047cd88f76",
     "sql.js/dist/sql-wasm.js": "9b96118841c6edfdf53c6f388c1419d1f473cf469df6a6fc2864b386d60bdb5e",
     "sql.js/dist/sql-wasm.wasm": "43bbcdd44287e5a2db3b6b5af34b1a3485a7a441285d247976c1ebe3c61f8dbf",
     "tessdata/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
@@ -67,5 +67,8 @@
       "version": "7.0.0",
       "integrity": "sha512-WnNH518NzmbSq9zgTPeoF8c+xmilS8rFIl1YKbk/ptuuc7p6cLNELNuPAzcmsYw450ca6bLa8j3t0VAtq435Vw=="
     }
+  },
+  "modifications": {
+    "sql.js/LICENSE": "Added a final newline; license wording is unchanged."
   }
 }
