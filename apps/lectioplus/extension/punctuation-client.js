@@ -13,6 +13,7 @@
     // isolated content script and an extension frame has different source/origin
     // behavior across browsers; it is only needed for the localhost preview.
     const token=extension?Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join(''):'';
+    const backgroundHost = extension && runtime.getURL('').startsWith('moz-extension://');
     const url=extension?runtime.getURL('punctuation-frame.html')+'#'+token:new URL('punctuation-frame.html',scriptURL||new URL('./extension/punctuation-client.js',location.href)).href;
     const frame=document.createElement('iframe');frame.hidden=true;frame.title='Lokal behandling af tegnsætning';frame.setAttribute('aria-hidden','true');frame.src=url;
     const state={frame,port:null,task:null,ready:null,closed:false};
@@ -35,7 +36,7 @@
       };
       const failed=()=>state.close(Error('Forbindelsen til sprogmodellen blev afbrudt. Genindlæs udvidelsen og Lectio-fanen, og prøv igen.'));
       frame.addEventListener('error',failed,{once:true});
-      frame.addEventListener('load',()=>{
+      const connect = () => {
         if(state.closed)return;
         try{
           if(extension){
@@ -48,10 +49,12 @@
             frame.contentWindow.postMessage({type:'lxp-punctuation-connect'},new URL(url).origin,[channel.port2]);
           }
         }catch{failed();}
-      },{once:true});
+      };
+      if (backgroundHost) connect();
+      else frame.addEventListener('load',connect,{once:true});
     });
     connection=state;
-    try{document.documentElement.append(frame);}catch{state.close(Error('Browseren kunne ikke åbne sprogmodellens lokale vindue. Genindlæs Lectio-fanen.'));}
+    try{if (!backgroundHost) document.documentElement.append(frame);}catch{state.close(Error('Browseren kunne ikke åbne sprogmodellens lokale vindue. Genindlæs Lectio-fanen.'));}
     return state;
   }
   function close(){connection?.close();}

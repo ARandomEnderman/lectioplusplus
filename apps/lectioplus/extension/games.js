@@ -7,7 +7,7 @@
     const link=(title,href,cls)=>{const a=E('a',cls,title);a.href=href;return a;};
     const node=E('main','lxp-games');node.id='lxp-games';node.hidden=true;
     const lobby=E('section','lxp-games-lobby'),play=E('section','lxp-game-play');node.append(lobby,play);
-    const heading=E('header','lxp-games-heading'),eyebrow=E('p','lxp-game-eyebrow','TAG EN PAUSE'),title=E('h1','','Spil'),intro=E('p','','10 klassikere og et bonusspil. Vælg et spil, og gå i gang.');
+    const heading=E('header','lxp-games-heading'),eyebrow=E('p','lxp-game-eyebrow','TAG EN PAUSE'),title=E('h1','','Spil'),intro=E('p','','Vælg et spil, og gå i gang.');
     heading.append(eyebrow,title,intro);lobby.append(heading);
     const filters=E('nav','lxp-games-filters');filters.setAttribute('aria-label','Spilkategorier');lobby.append(filters);
     const cards=E('div','lxp-games-cards');lobby.append(cards);
@@ -30,7 +30,21 @@
     const settings=E('label','lxp-game-difficulty','Tempo '),difficulty=E('select');difficulty.setAttribute('aria-label','Spillets tempo');
     for(const [value,text]of [['easy','Roligt'],['normal','Normalt'],['hard','Hurtigt']]){const o=E('option','',text);o.value=value;difficulty.append(o);}settings.append(difficulty);
     difficulty.addEventListener('change',()=>{void save({difficulty:difficulty.value});openGame(current.id,true);});
-    toolbar.append(start,restart,settings);
+    const R=globalThis.lectioPlusRhythm;
+    const songLabel=E('label','lxp-game-difficulty','Bane '),song=E('select');
+    for(const track of R.tracks){
+      const rate=track.targets.length/track.end;
+      const level=rate<1.65?'Let':rate<2.13?'Øvet':'Svær';
+      const option=E('option','',track.title+' · '+level+' · '+Math.ceil(track.end)+' s');
+      option.value=track.id;song.append(option);
+    }
+    songLabel.append(song);song.addEventListener('change',()=>openGame('osu',true));
+    const practice=B('Øv uden lyd',()=>{
+      silent=!silent;audioError='';practice.setAttribute('aria-pressed',String(silent));
+      if(current?.id==='osu')render();
+    });
+    let silent=false;
+    practice.setAttribute('aria-pressed','false');toolbar.append(start,restart,settings,songLabel,practice);
     const layout=E('div','lxp-game-layout'),panel=E('div','lxp-game-panel'),stats=E('div','lxp-game-stats'),score=E('span'),best=E('span'),clock=E('span');
     stats.append(score,best,clock);
     const arena=E('div','lxp-game-arena');arena.tabIndex=0;arena.setAttribute('aria-label','Spilleområde');
@@ -42,22 +56,48 @@
     let current=null,state=null,visible=false,running=false,started=false,frame=0,previous=0,lastGrid='',recorded=false,flagMode=false,canvas=null,ctx=null;
     const keys=new Set(),symbols=['🍒','🍋','🍇','🥝','🍓','🍊','🍉','🫐'];
     const direction={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
-    const recordKey=()=>current.id+':'+state.difficulty;
+    let rhythm=null, player=null, aim=null, audioError='', lastAudioTick=0;
+    const recordKey=()=>current.id==='osu'?'osu:'+rhythm.track.id:current.id+':'+state.difficulty;
     const prefs=()=>getPreferences().games||{difficulty:'normal',bests:{}};
     async function save(changes){try{if(await onChange({games:{...prefs(),...changes}})===false)throw Error('storage');}catch{feedback.textContent='Indstillingen eller rekorden kunne ikke gemmes. Du kan stadig spille.';}}
     const setText=(el,text)=>{if(el.textContent!==text)el.textContent=text;};
-    function stop(){running=false;keys.clear();if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
+    function stop(){
+      if(player){if(rhythm)rhythm.time=player.now();player.close();player=null;}
+      running=false;keys.clear();if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
     function pause(){if(!state||state.status!=='playing')return;stop();render();}
     function toggle(){
       if(!visible||!state||document.hidden)return;
       if(state.status!=='playing'){openGame(current.id,true);}
       if(running){pause();return;}
+      if(current.id==='osu'){
+        audioError='';
+        const failed=()=>{audioError='Lyden kunne ikke starte. Prøv igen, eller vælg Øv uden lyd.';stop();render();};
+        try {
+          if(silent){
+            const origin=performance.now()/1000-rhythm.time;
+            player={now:()=>performance.now()/1000-origin,schedule(){},close(){},ready:Promise.resolve()};
+          }else player=R.playback(rhythm.track,rhythm.time);
+          lastAudioTick=performance.now();
+          const active=player;player.ready.catch(()=>{if(player===active)failed();});
+        } catch {failed();return;}
+      }
       running=true;started=true;previous=0;render();arena.focus({preventScroll:true});frame=requestAnimationFrame(loop);
     }
     function loop(now){
       frame=0;if(!running||!visible||document.hidden)return;
       const dt=previous?Math.min((now-previous)/1000,0.05):0;previous=now;
-      C.step(state,dt,keys);render();
+      if(player){
+        const position=player.now();
+        if(position>rhythm.time)lastAudioTick=performance.now();
+        if(performance.now()-lastAudioTick>2600){
+          audioError='Lyden starter ikke. Tjek lydudgangen, eller vælg Øv uden lyd.';
+          stop();render();return;
+        }
+        player.schedule();R.advance(rhythm,position);
+        state.time=rhythm.time;state.score=rhythm.score;
+        if(state.time>=rhythm.track.end)state.status='won';
+      }else C.step(state,dt,keys);
+      render();
       if(state.status!=='playing'){stop();render();return;}
       frame=requestAnimationFrame(loop);
     }
@@ -80,7 +120,9 @@
       const game=C.catalog.find(g=>g.id===id);if(!game)return;
       if(current?.id===id&&!reset)return;
       stop();current=game;state=C.create(id,{difficulty:game.live?(reset?difficulty.value:prefs().difficulty):'normal'});recorded=false;started=false;lastGrid='';flagMode=false;
-      setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live;
+      aim=null;audioError='';songLabel.hidden=practice.hidden=id!=='osu';
+      rhythm=id==='osu'?R.session(R.tracks.find(t=>t.id===song.value)||R.tracks[0]):null;
+      setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live||id==='osu';
       tip.textContent=game.category==='For to'?'Giv turen videre til den anden spiller.':game.category==='Bonus'?'Dine valg bliver kun i denne runde.':'Pause virker med P eller Escape. Spillet pauser automatisk, når du forlader det.';
       surface.replaceChildren();controls.replaceChildren();extra.replaceChildren();canvas=ctx=null;
       if(game.live){
@@ -99,6 +141,8 @@
       render();
     }
     function finishText(){
+      if(current.id==='osu')return rhythm.track.title+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt · '+Math.round(rhythm.points/(300*rhythm.track.targets.length)*100)+' % præcision · Bedste serie '+rhythm.longest;
+      if(current.id==='lights')return 'Alle lys er slukket på '+state.moves+' træk!';
       if(state.status==='lost')return current.id==='pong'?'Computeren vandt denne runde':'Spillet er slut';
       if(state.status==='draw')return 'Uafgjort — prøv igen!';
       if(current.id==='tic')return (state.winner===1?'X':'O')+' vandt!';
@@ -110,20 +154,23 @@
       if(!state)return;
       const finished=state.status!=='playing';
       const localTwo=current.category==='For to';
-      setText(score,current.id==='pong'?`Dig ${state.score} : ${state.opponent} Computer`:localTwo?`Træk ${state.moves}`:current.id==='memory'?`Forsøg ${state.attempts} · Par ${state.matched.length/2}/8`:current.id==='choices'?`Valg ${state.index}/24`:`Point ${state.score}`);
+      setText(score,current.id==='lights'?'Træk '+state.moves:current.id==='pong'?`Dig ${state.score} : ${state.opponent} Computer`:localTwo?`Træk ${state.moves}`:current.id==='memory'?`Forsøg ${state.attempts} · Par ${state.matched.length/2}/8`:current.id==='choices'?`Valg ${state.index}/24`:`Point ${state.score}`);
       setText(clock,`${Math.floor(state.time/60)}:${String(Math.floor(state.time)%60).padStart(2,'0')}`);
-      best.hidden=localTwo||['choices','memory','mines'].includes(current.id);
+      best.hidden=localTwo||['choices','memory','mines','lights'].includes(current.id);
       setText(best,'Rekord '+Math.max(prefs().bests[recordKey()]||0,state.score));
       start.textContent=finished?'Spil igen':running?'Pause':started?'Fortsæt':'Start spil';
-      start.disabled=Boolean(current.live&&!ctx);difficulty.disabled=running;
+      start.disabled=Boolean(current.live&&!ctx);difficulty.disabled=running;song.disabled=practice.disabled=running;
       veil.hidden=!(current.live&&!started||started&&!running&&!finished);
       veilTitle.textContent=started?'På pause':'Klar til '+current.title+'?';veilCopy.textContent=started?'Fortsæt, når du er klar.':current.controls;veilButton.textContent=started?'Fortsæt':'Start spil';veilButton.disabled=start.disabled;
+      if(audioError){veilTitle.textContent='Lyden kunne ikke starte';veilCopy.textContent=audioError;veilButton.textContent='Prøv igen';}
       surface.inert=started&&!running&&!finished;
       for(const button of controls.querySelectorAll('button'))button.disabled=finished||(started&&!running);
       if(finished){
         setText(feedback,finishText());
         if(!recorded){recorded=true;if(!best.hidden&&state.score>(prefs().bests[recordKey()]||0))void save({bests:{...prefs().bests,[recordKey()]:state.score}});}
-      }else if(current.id==='breakout')setText(feedback,`♥ ${state.lives} liv · ${state.bricks.length} mursten tilbage${state.launch?' · Send bolden for at fortsætte':''}`);
+      }else if(current.id==='osu')setText(feedback,audioError||rhythm.track.bpm+' BPM · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
+      else if(current.id==='lights')setText(feedback,state.board.flat().filter(Boolean).length+' lys tilbage');
+      else if(current.id==='breakout')setText(feedback,`♥ ${state.lives} liv · ${state.bricks.length} mursten tilbage${state.launch?' · Send bolden for at fortsætte':''}`);
       else if(current.id==='blocks')setText(feedback,`${state.lines} rækker ryddet · Niveau ${1+Math.floor(state.lines/10)}`);
       else if(current.id==='mines')setText(feedback,`${state.flags.flat().filter(Boolean).length} flag / 10 miner · ${state.score}/71 sikre felter`);
       else if(localTwo)setText(feedback,'Tur: '+(current.id==='tic'?(state.player===1?'X':'O'):(state.player===1?'Rød':'Gul')));
@@ -139,7 +186,12 @@
       surface.replaceChildren();
       const grid=E('div','lxp-game-grid lxp-game-grid-'+current.id);surface.append(grid);
       const cell=(text,key,label,fn,cls='')=>{const b=B(text,fn,'lxp-game-cell '+cls);b.dataset.cell=key;b.setAttribute('aria-label',label);grid.append(b);return b;};
-      if(current.id==='2048'){
+      if(current.id==='lights'){
+        state.board.forEach((row,y)=>row.forEach((v,x)=>{
+          const b=cell(v?'☀':'·',x+','+y,'Række '+(y+1)+', kolonne '+(x+1)+(v?', tændt':', slukket'),()=>action('cell',[x,y]));
+          b.setAttribute('aria-pressed',String(Boolean(v))); b.disabled=state.status!=='playing';
+        }));
+      }else if(current.id==='2048'){
         for(const [y,row]of state.board.entries())for(const [x,v]of row.entries()){const tile=E('div','lxp-game-tile',v||'');tile.dataset.power=v?Math.min(11,Math.log2(v)):0;tile.setAttribute('aria-label',`Række ${y+1}, kolonne ${x+1}: ${v||'tom'}`);grid.append(tile);}
       }else if(current.id==='mines'){
         state.board.forEach((row,y)=>row.forEach((v,x)=>{
@@ -171,7 +223,25 @@
       const rect=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
       const circle=(x,y,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();};
       const text=(v,x,y,size=16,color=p.ink)=>{ctx.fillStyle=color;ctx.font=`600 ${size}px system-ui`;ctx.fillText(String(v),x,y);};
-      if(current.id==='dino'){
+      if(current.id==='osu'){
+        const lead=.95;
+        let last=rhythm.index;
+        while(last+1<rhythm.track.targets.length && rhythm.track.targets[last+1].time-rhythm.time<=lead)last++;
+        for(let i=Math.min(last,rhythm.track.targets.length-1);i>=rhythm.index;i--){
+          const target=rhythm.track.targets[i],left=target.time-rhythm.time;
+          if(left>lead)continue;
+          const active=i===rhythm.index, r=28;
+          ctx.globalAlpha=active?1:.46;
+          circle(target.x,target.y,r,active?p.accent:p.muted);
+          circle(target.x,target.y,r-3,p.surface);
+          ctx.textAlign='center';text(i+1,target.x,target.y+6,17,p.ink);ctx.textAlign='start';
+          ctx.beginPath();ctx.arc(target.x,target.y,r+Math.max(0,left)*37,0,Math.PI*2);
+          ctx.strokeStyle=active?p.accent:p.muted;ctx.lineWidth=2;ctx.stroke();
+        }
+        ctx.globalAlpha=1;
+        rect(0,h-4,w*Math.min(1,rhythm.time/rhythm.track.end),4,p.accent);
+        text(rhythm.verdict||'Følg ringen',16,27,15,p.muted);
+      }else if(current.id==='dino'){
         rect(0,318,640,2,p.border);for(let i=0;i<12;i++)rect((i*70-state.distance*8)%780,336,28,2,p.border);
         for(const o of state.obstacles){rect(o.x,o.y,o.w,o.h,'#45b68c');rect(o.x-6,o.y+10,8,6,'#45b68c');rect(o.x+o.w-2,o.y+4,8,6,'#45b68c');}
         rect(72,state.y+12,26,23,p.accent);rect(87,state.y,27,20,p.accent);rect(66,state.y+15,10,8,p.accent);rect(76,state.y+33,6,9,p.accent);rect(91,state.y+31,6,11,p.accent);rect(105,state.y+5,4,4,p.bg);text('DINO RUN',24,35,14,p.muted);text(state.score,540,35,22);
@@ -191,13 +261,19 @@
       }else if(current.id==='breakout'){
         const palette=['#a78bdd','#7c9fe5','#51b5ba','#68bd91','#e8b05e'];for(const b of state.bricks)rect(b.x,b.y,b.w,b.h,palette[b.color]);rect(state.paddle,330,100,10,p.accent);circle(state.ball.x,state.ball.y,7,p.ink);if(state.launch)text('Send bolden ↗',255,220,18,p.muted);
       }
-      if(state.status!=='playing'){ctx.globalAlpha=0.85;rect(0,h/2-40,w,80,p.bg);ctx.globalAlpha=1;text(state.status==='won'?'Du vandt!':'Spillet er slut',w/2-80,h/2+8,23);}
+      if(state.status!=='playing'){ctx.globalAlpha=0.85;rect(0,h/2-40,w,80,p.bg);ctx.globalAlpha=1;text(current.id==='osu'?'Bane færdig!':state.status==='won'?'Du vandt!':'Spillet er slut',w/2-80,h/2+8,23);}
     }
     node.addEventListener('keydown',event=>{
       if(!visible||play.hidden||!state)return;
       if(event.ctrlKey||event.metaKey||event.altKey||event.target.closest('select,input,textarea'))return;
       if(event.key==='Escape'||event.key.toLowerCase()==='p'){event.preventDefault();if(running)pause();return;}
       if(event.target.closest('button')&&(event.key===' '||event.key==='Enter'))return;
+      if(current.id==='osu'){
+        if(running && ['z','x'].includes(event.key.toLowerCase())){
+          event.preventDefault();if(!event.repeat && aim)rhythmHit(aim);
+        }
+        return;
+      }
       const dir=direction[event.key];let type=dir;
       if(event.key===' ')type={dino:'jump',blocks:'drop',breakout:'launch'}[current?.id];
       if(!type||!current)return;
@@ -207,13 +283,23 @@
     node.addEventListener('keyup',event=>{if(direction[event.key])keys.delete(direction[event.key]);});
     window.addEventListener('keyup',event=>{if(direction[event.key])keys.delete(direction[event.key]);});
     node.addEventListener('focusout',event=>{if(running&&event.relatedTarget&&!node.contains(event.relatedTarget))pause();});
+    function position(event){
+      const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/640,r.height/360);
+      return {x:(event.clientX-r.left-(r.width-640*scale)/2)/scale,y:(event.clientY-r.top-(r.height-360*scale)/2)/scale};
+    }
+    function rhythmHit(point){
+      if(!player||!running)return;
+      R.hit(rhythm,point.x,point.y,player.now());state.score=rhythm.score;render();
+    }
+    arena.addEventListener('pointerleave',()=>{aim=null;});
     arena.addEventListener('pointermove',event=>{
+      if(current?.id==='osu'&&event.target===canvas&&canvas){aim=position(event);return;}
       if(!canvas||!running||!['pong','breakout'].includes(current.id))return;
       const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
       const scale=Math.min(r.width/640,r.height/360),left=r.left+(r.width-640*scale)/2,top=r.top+(r.height-360*scale)/2;
       C.act(state,'pointer',current.id==='pong'?(event.clientY-top)/scale:(event.clientX-left)/scale);
     });
-    arena.addEventListener('pointerdown',event=>{if(event.target!==canvas)return;arena.focus({preventScroll:true});if(current.id==='dino')action('jump');else if(current.id==='breakout')action('launch');});
+    arena.addEventListener('pointerdown',event=>{if(event.target!==canvas)return;arena.focus({preventScroll:true});if(current.id==='osu'&&event.button===0){aim=position(event);rhythmHit(aim);}else if(current.id==='dino')action('jump');else if(current.id==='breakout')action('launch');});
     document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
     window.addEventListener('blur',()=>{if(running)pause();});window.addEventListener('pagehide',()=>stop());
     function update(open){

@@ -28,7 +28,13 @@
     });
     port.postMessage({type:'ready'});
   }
-  if(runtime?.onConnect){
+  if (location.protocol === 'moz-extension:' && runtime?.id) {
+    // Only the same-origin background document can invoke this method.
+    globalThis.lectioPlusAttachPort = incoming => {
+      incoming.onDisconnect.addListener(clear);
+      attach(data => incoming.postMessage(data), listen => incoming.onMessage.addListener(listen));
+    };
+  } else if(runtime?.onConnect){
     const token=location.hash.slice(1);
     runtime.onConnect.addListener(incoming=>{
       const sender=incoming.sender;

@@ -6,7 +6,7 @@
   const boot = globalThis.lectioPlusBoot;
   if (!appearance || document.getElementById('lxp-school-picker')) return;
   const media = matchMedia('(prefers-color-scheme: dark)');
-  const storage = globalThis.chrome?.storage;
+  const storage = (globalThis.browser?.storage ?? globalThis.chrome?.storage);
   let mounted=false;
   function mount(){const original=document.querySelector('.site-container')||document.getElementById('schoolsdiv');if(mounted||!original)return false;mounted=true;initialize(original);return true;}
   if(!mount()){const observer=new MutationObserver(()=>{if(mount())observer.disconnect();});observer.observe(document,{childList:true,subtree:true});}

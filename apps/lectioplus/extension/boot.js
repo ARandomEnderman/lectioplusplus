@@ -46,7 +46,7 @@
     }
 
     const listeners=new Set();let latest=appearance.defaults,readFinished=false,readTimer;
-    const read=Promise.resolve().then(()=>globalThis.chrome?.storage?.local?.get(appearance.defaults))
+    const read=Promise.resolve().then(()=>(globalThis.browser?.storage ?? globalThis.chrome?.storage)?.local?.get(appearance.defaults))
       .then(appearance.normalize,()=>appearance.defaults).then(settings=>{
         readFinished=true;clearTimeout(readTimer);latest=settings;
         if(!released)appearance.apply(root,settings,systemDark,settings.enabled);

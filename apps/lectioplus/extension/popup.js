@@ -1,4 +1,5 @@
 const appearance = globalThis.lectioPlusAppearance;
+const extensionAPI = globalThis.browser ?? globalThis.chrome;
 const enabled = document.getElementById('enabled');
 const showClicker = document.getElementById('show-clicker');
 const status = document.getElementById('status');
@@ -21,7 +22,7 @@ async function save(changes) {
   preferences = next;
   render();
   try {
-    await chrome.storage.local.set(changes);
+    await extensionAPI.storage.local.set(changes);
     status.textContent = '';
   } catch {
     if (preferences === next) {
@@ -34,14 +35,14 @@ async function save(changes) {
 
 async function start() {
   try {
-    preferences = appearance.normalize(await chrome.storage.local.get(appearance.defaults));
+    preferences = appearance.normalize(await extensionAPI.storage.local.get(appearance.defaults));
     document.getElementById('preferences').append(controls.node);
     enabled.disabled = false;
     showClicker.disabled = false;
     showClicker.addEventListener('change', () => save({ showClicker: showClicker.checked }));
     enabled.addEventListener('change', () => save({ enabled: enabled.checked }));
     system.addEventListener('change', render);
-    chrome.storage.onChanged.addListener((changes, area) => {
+    extensionAPI.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
       const next = { ...preferences };
       for (const key of Object.keys(appearance.defaults)) {

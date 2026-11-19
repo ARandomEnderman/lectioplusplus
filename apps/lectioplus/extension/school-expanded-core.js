@@ -32,6 +32,59 @@
     {id:'ohm',name:'Ohms lov: U = R·I',units:{U:'V',R:'Ω',I:'A'},solve:{U:q=>q.R*q.I,R:q=>q.U/positive(q.I),I:q=>q.U/positive(q.R)},rewrites:{U:'U = R·I',R:'R = U/I',I:'I = U/R'}},
     {id:'energy',name:'Energi: E = P·t',units:{E:'J',P:'W',t:'s'},solve:{E:q=>q.P*q.t,P:q=>q.E/positive(q.t),t:q=>q.E/positive(q.P)},rewrites:{E:'E = P·t',P:'P = E/t',t:'t = E/P'}}
   ];
+  // The school model f(x) = b · x^a uses positive x and b.
+  function powerFigure(evaluate, firstX, lastX, markers) {
+    const curve = points(evaluate, firstX, lastX, 96);
+    return {
+      axes: ['x', 'f(x)'],
+      plot: [{name:'Potensfunktion', points:curve}, {name:'Valgte punkter', points:markers, dots:true}],
+      table: {head:['x', 'f(x)'], body:curve.filter((point, index) => index % 24 === 0)}
+    };
+  }
+
+  function powerValue(y) {
+    if (!(y > 0 && y <= 1e300)) throw Error('Resultatet ligger uden for grafens talområde. Prøv mindre ekstreme værdier.');
+    return y;
+  }
+
+  add('power-function', 'math', 'Funktioner', 'Undersøg en potensfunktion',
+    'Tegn f(x) = b · x^a, og beregn værdien i et bestemt punkt.',
+    [num('b','Startværdi b = f(1)',3), num('a','Eksponent a',2), num('x','Beregn ved x',4)],
+    ({b, a, x}) => {
+      positive(b, 'Startværdien b');
+      positive(x, 'x');
+      const evaluate = t => powerValue(b * t ** a);
+      const y = evaluate(x);
+      const direction = a > 0 ? 'Voksende' : a < 0 ? 'Aftagende' : 'Konstant';
+      return rows([
+        ['Forskrift', `f(x) = ${fmt(b)} · x^(${fmt(a)})`],
+        [`f(${fmt(x)})`, y], ['Forløb', direction]
+      ], [
+        `Når x = 1, er f(1) = ${fmt(b)}.`,
+        `Indsæt x = ${fmt(x)} i forskriften og beregn ${fmt(b)} · ${fmt(x)}^(${fmt(a)}).`,
+        'Ganges x med en positiv faktor k, ganges funktionsværdien med k^a.'
+      ], powerFigure(evaluate, x === 1 ? 0.5 : Math.min(1,x), x === 1 ? 2 : Math.max(1,x), [[x,y]]));
+    }, 'Brug positive værdier for b og x. Eksponenten må også være nul eller negativ.');
+
+  add('power-two-points', 'math', 'Funktioner', 'Potensfunktion fra to punkter',
+    'Find eksponenten a og startværdien b i f(x) = b · x^a.',
+    [num('x1','Første punkt · x₁',2), num('y1','Første punkt · y₁',12),
+     num('x2','Andet punkt · x₂',4), num('y2','Andet punkt · y₂',48)],
+    ({x1, y1, x2, y2}) => {
+      for (const [name, value] of Object.entries({x1, y1, x2, y2})) positive(value, name);
+      if (x1 === x2) throw Error('De to punkter skal have forskellige x-værdier.');
+      // log1p retains precision for neighbouring coordinates.
+      const logRatio = (u, v) => Math.abs(u-v) < v/2 ? Math.log1p((u-v)/v) : Math.log(u)-Math.log(v);
+      const a = M.finite(logRatio(y2,y1) / logRatio(x2,x1));
+      const b = powerValue(Math.exp(Math.log(y1) - a*Math.log(x1)));
+      const evaluate = x => powerValue(Math.exp(Math.log(y1) + a*logRatio(x,x1)));
+      return rows([['Eksponent a', a], ['Startværdi b = f(1)', b],
+        ['Forskrift', `f(x) ≈ ${fmt(b)} · x^(${fmt(a)})`]], [
+        `a = ln(y₂/y₁) / ln(x₂/x₁) = ln(${fmt(y2)}/${fmt(y1)}) / ln(${fmt(x2)}/${fmt(x1)}).`,
+        `b = y₁ / x₁^a ≈ ${fmt(y1)} / ${fmt(x1)}^(${fmt(a)}) ≈ ${fmt(b)}.`
+      ], powerFigure(evaluate, Math.min(x1,x2), Math.max(x1,x2), [[x1,y1],[x2,y2]]));
+    }, 'Begge punkter skal have positive koordinater og forskellige x-værdier.');
+
   add('differentiate','math','Funktioner','Differentialregning','Afled et polynomium, og flyt tangentpunktet.',[txt('coeff','Koefficienter fra højeste potens','1; 0; -3; 2','Fx x³ − 3x + 2: 1; 0; −3; 2.'),num('x','Tangentpunkt x',1),num('min','Graf fra x',-3),num('max','Graf til x',3)],v=>{if(v.max<=v.min)throw Error('Grafens øvre grænse skal være størst.');const a=coeff(v.coeff),d=derivative(a),y=poly(a,v.x),s=poly(d,v.x);return rows([['f(x)',polynomial(a)],['f′(x)',polynomial(d)],['f(x₀)',y],['Hældning',s],['Tangent',`y = ${fmt(s)}(x − (${fmt(v.x)})) + (${fmt(y)})`]],['Potensreglen: (a·xⁿ)′ = n·a·xⁿ⁻¹.','Konstantled har afledt 0.'],{plot:[{name:'f(x)',points:points(x=>poly(a,x),v.min,v.max)},{name:'Tangent',points:[[v.min,y+s*(v.min-v.x)],[v.max,y+s*(v.max-v.x)]]}],axes:['x','y']});});
   add('integral','math','Funktioner','Integral og areal','Integrér et polynomium og sammenlign med arealet.',[txt('coeff','Koefficienter fra højeste potens','1; 0; -1'),num('a','Nedre grænse a',-2),num('b','Øvre grænse b',2)],v=>{if(v.b<=v.a)throw Error('b skal være større end a.');const a=coeff(v.coeff),primitive=[...a.map((c,i)=>c/(a.length-i)),0],value=poly(primitive,v.b)-poly(primitive,v.a);let area=0,n=4000,dx=(v.b-v.a)/n;for(let i=0;i<n;i++)area+=Math.abs(poly(a,v.a+(i+.5)*dx))*dx;return rows([['Stamfunktion F(x)',polynomial(primitive)+' + C'],['Fortegnet integral',value],['Geometrisk areal (numerisk)',area]],['Integrationsreglen: ∫a·xⁿ dx = a·xⁿ⁺¹/(n+1) + C.','Det bestemte integral er F(b) − F(a).','Arealet beregnes numerisk af |f(x)| med 4.000 delintervaller. Dette tal er en tilnærmelse.'],{plot:[{name:'f(x)',points:points(x=>poly(a,x),v.a,v.b),area:true}],axes:['x','f(x)']});});
   add('inequality','math','Algebra','Uligheder','Løs ax + b sammenlignet med c og se tallinjen.',[num('a','a',2),num('b','b',3),select('op','Ulighed',[['<','<'],['<=','≤'],['>','>'],['>=','≥']]),num('c','c',9)],v=>{const check=(x,op,y)=>({'<':x<y,'<=':x<=y,'>':x>y,'>=':x>=y}[op]);if(v.a===0)return rows([['Løsningsmængde',check(v.b,v.op,v.c)?'Alle reelle tal':'Ingen reelle tal']],['Når a = 0, sammenlignes kun konstanterne.']);const x=(v.c-v.b)/v.a,op=v.a<0?({'<':'>','<=':'>=','>':'<','>=':'<='}[v.op]):v.op;return rows([['Løsningsmængde',`x ${op.replace('<=','≤').replace('>=','≥')} ${fmt(x)}`]],[`Træk ${fmt(v.b)} fra begge sider.`,`Divider med ${fmt(v.a)}.${v.a<0?' Vend ulighedstegnet, fordi divisoren er negativ.':''}`],{numberLine:{x,op}});});
