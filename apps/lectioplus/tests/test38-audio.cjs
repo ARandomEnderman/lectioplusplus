@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict');
+require('../extension/rhythm.js');
+const R=globalThis.lectioPlusRhythm;
+(async()=>{
+  const rate=8000;
+  const buffer={sampleRate:rate,numberOfChannels:2,getChannelData:i=>new Float32Array(rate*5).fill(i ? -.35 : .5)};
+  const track={end:4};
+  const wave=await R.recordingClip(track,{buffer,start:.5}).arrayBuffer();
+  const view=new DataView(wave);
+  assert.equal(Buffer.from(wave,0,4).toString(),'RIFF');
+  assert.equal(view.getUint16(22,true),2);
+  assert.equal(view.getUint32(24,true),rate);
+  assert.equal(view.getUint32(40,true),rate*4*2*2);
+  assert.equal(view.getInt16(44+(rate-1)*4,true),0);
+  assert.equal(view.getInt16(44+rate*4,true),16384);
+  assert.equal(view.getInt16(46+rate*4,true),-11469);
+  assert(Math.abs(view.getInt16(wave.byteLength-4,true))<150);
+  const second=await R.recordingClip(track,{buffer,start:2}).arrayBuffer();
+  assert.equal(new DataView(second).getInt16(44,true),16384);
+  const media={ended:false,muted:true,currentTime:0,play(){this.paused=false;return Promise.resolve();},pause(){this.paused=true;}};
+  const p=R.mediaPlayback(media,track,2.125);await p.ready;
+  assert.equal(p.now(),2.125);assert.equal(media.paused,false);assert.equal(media.muted,false);
+  media.currentTime=2.5;assert.equal(p.now(),2.5);p.close();assert.equal(media.paused,true);
+  media.ended=true;assert.equal(p.now(),track.end);
+  console.log('Native playback, resume, stereo waveform and lead-in verified');
+})().catch(e=>{console.error(e);process.exit(1);});

@@ -29,7 +29,7 @@
     dashboard: defaultDashboard(), navigation: defaultNavigation(), customSidebar: [], toolbox: toolbox(), games: games() };
   function games(value={}){
     const input=value&&typeof value==='object'?value:{},allowed=['dino','snake','blocks','pong','breakout','2048','mines','memory','tic','four','choices'];
-    return {difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=id==='osu' ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(0,53))};
+    return {difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=id==='osu' ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(0,63))};
   }
   function choice(value, options, fallback) { return options.includes(value) ? value : fallback; }
   function cleanText(value, length) { return typeof value === 'string' ? value.slice(0, length) : ''; }

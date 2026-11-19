@@ -28,7 +28,7 @@ function environment(html='<head><title>Original</title><link rel="icon" href="/
  ok(live.d.body.classList.contains('lxp-native-hidden')&&!live.errors.length,'week fetch keeps modern layout without reload errors');live.dom.window.close();
  const cssParser=require('rrweb-cssom');for(const name of fs.readdirSync(root).filter(n=>n.endsWith('.css'))){const sheet=cssParser.parse(fs.readFileSync(root+'/'+name,'utf8'));ok(sheet.cssRules.length>0,'stylesheet parses: '+name);}
  const printRules=cssParser.parse(fs.readFileSync(root+'/styles.css','utf8')).cssRules.find(rule=>rule.media?.mediaText==='print').cssRules;ok([...printRules].some(rule=>rule.selectorText==='body.lxp-enabled.lxp-native-hidden #masterContent'&&rule.style.display==='none')&&[...printRules].some(rule=>rule.selectorText==='body.lxp-enabled.lxp-native-hidden #lxp-root'&&rule.style.display==='block'),'print rules use the currently displayed modern view instead of a stale original week');
- const manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8'));ok(manifest.permissions.join(',')==='storage'&&manifest.version==='0.1.6','release keeps minimal permissions and declares version 0.1.6');
+ const manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8'));ok(manifest.permissions.join(',')==='storage'&&manifest.version==='0.1.7','release keeps minimal permissions and declares version 0.1.7');
  for(const group of manifest.content_scripts)for(const file of [...group.js,...(group.css||[])])assert.ok(fs.existsSync(path.join(root,file)));checks++;
  ok(!fs.existsSync(root+'/school-ai.js')&&!fs.existsSync(path.resolve(root,'../ai-server')),'AI client/server are absent from current source');
  console.log('TOTAL',checks,'extension-wide regression checks');

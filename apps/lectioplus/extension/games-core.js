@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const catalog = [
-    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Ram cirklerne i takt til 20 kendte melodier.',controls:'Klik eller tryk på den næste cirkel, når ringen møder kanten. Du kan også sigte med musen og bruge Z eller X.',live:true},
+    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Spil 10 popbaner med øvebeat eller egen sangfil, og 20 instrumentalbaner.',controls:'Klik eller tryk på den næste cirkel, når ringen møder kanten. Du kan også sigte med musen og bruge Z eller X.',live:true},
     {id:'lights',title:'Lys ud',symbol:'💡',category:'Hjernevridere',description:'Sluk hele brættet. Hvert tryk skifter flere lys.',controls:'Vælg et felt for at skifte det og dets naboer oppe, nede og til siderne. Sluk alle 25 lys.'},
     {id:'dino',title:'Dinohop',symbol:'🦖',category:'Arkade',description:'Hop over kaktusser, og hold løbet i gang.',controls:'Mellemrum, ↑ eller Hop. Ét hop ad gangen.',live:true},
     {id:'snake',title:'Snake',symbol:'🐍',category:'Arkade',description:'Saml frugter, og giv slangen plads til at vokse.',controls:'Piletaster, WASD eller retningsknapper. Undgå vægge og din egen hale.',live:true},

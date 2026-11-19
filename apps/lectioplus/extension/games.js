@@ -32,19 +32,26 @@
     difficulty.addEventListener('change',()=>{void save({difficulty:difficulty.value});openGame(current.id,true);});
     const R=globalThis.lectioPlusRhythm;
     const songLabel=E('label','lxp-game-difficulty','Bane '),song=E('select');
-    for(const track of R.tracks){
-      const rate=track.targets.length/track.end;
-      const level=rate<1.65?'Let':rate<2.13?'Øvet':'Svær';
-      const option=E('option','',track.title+' · '+level+' · '+Math.ceil(track.end)+' s');
-      option.value=track.id;song.append(option);
+    const allTracks=[...R.popTracks,...R.tracks];
+    for(const [label,tracks] of [['Pophits',R.popTracks],['Instrumental',R.tracks]]){
+      const group=E('optgroup');group.label=label;
+      for(const track of tracks){
+        const rate=track.targets.length/track.end;
+        const level=rate<1.65?'Let':rate<2.13?'Øvet':'Svær';
+        const title=track.artist ? track.title+' · '+track.artist : track.title;
+        const option=E('option','',title+' · '+level+' · '+Math.ceil(track.end)+' s');
+        option.value=track.id;group.append(option);
+      }
+      song.append(group);
     }
     songLabel.append(song);song.addEventListener('change',()=>openGame('osu',true));
     const practice=B('Øv uden lyd',()=>{
       silent=!silent;audioError='';practice.setAttribute('aria-pressed',String(silent));
       if(current?.id==='osu')render();
     });
-    let silent=false;
-    practice.setAttribute('aria-pressed','false');toolbar.append(start,restart,settings,songLabel,practice);
+    let silent=false,beatChosen=false;
+    const playBeat=B('Spil med øvebeat',()=>{beatChosen=true;toggle();});
+    practice.setAttribute('aria-pressed','false');toolbar.append(start,playBeat,restart,settings,songLabel,practice);
     const layout=E('div','lxp-game-layout'),panel=E('div','lxp-game-panel'),stats=E('div','lxp-game-stats'),score=E('span'),best=E('span'),clock=E('span');
     stats.append(score,best,clock);
     const arena=E('div','lxp-game-arena');arena.tabIndex=0;arena.setAttribute('aria-label','Spilleområde');
@@ -57,26 +64,97 @@
     const keys=new Set(),symbols=['🍒','🍋','🍇','🥝','🍓','🍊','🍉','🫐'];
     const direction={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
     let rhythm=null, player=null, aim=null, audioError='', lastAudioTick=0;
+    let recording=null,importNumber=0,loadingFile=false;
+    const soundPanel=E('section','lxp-song-audio');
+    const soundStatus=E('p');soundStatus.setAttribute('role','status');
+    const chooseFile=E('input');chooseFile.type='file';chooseFile.accept='audio/*,.mp3,.wav,.m4a,.ogg,.flac';
+    const fileLabel=E('label','','Vælg sangfil');fileLabel.append(chooseFile);
+    const offsetInput=E('input');offsetInput.type='number';offsetInput.min='0';offsetInput.step='0.01';
+    const offsetLabel=E('label','','Første slag i lydfilen (sekunder)');offsetLabel.append(offsetInput);
+    const media=E('audio');media.controls=true;media.preload='auto';
+    media.setAttribute('aria-label','Lyt til sangfilen');
+    let clipUrl='',clipStart=null,clipSource=null,backupAudio=false;
+    function stopPreview(){if(clipUrl&&!media.paused)media.pause();}
+    function releaseClip(){
+      if(!clipUrl)return;
+      media.pause();media.removeAttribute('src');media.load();
+      URL.revokeObjectURL(clipUrl);clipUrl='';clipStart=null;
+    }
+    function prepareClip(){
+      const source=hasRecording()?recording:rhythm.track;
+      if(clipSource===source && clipStart===source.start)return;
+      releaseClip();backupAudio=false;clipSource=source;clipStart=source.start;
+      function load(blob){
+        if(clipSource!==source)return;
+        clipUrl=URL.createObjectURL(blob);media.src=clipUrl;
+        media.hidden=!hasRecording() && Boolean(rhythm?.track.artist);
+      }
+      if(hasRecording())load(R.recordingClip(rhythm.track,recording));
+      else R.renderScore(source).then(load).catch(()=>{ /* The live synthesizer also plays this score. */ });
+    }
+    const removeFile=B('Fjern sangfil',()=>{releaseClip();recording=null;openGame('osu',true);});
+    soundPanel.append(E('h3','','Musik'),soundStatus,fileLabel,media,offsetLabel,removeFile);
+    function hasRecording(){return recording!==null && recording.id===rhythm?.track.id;}
+    function updateSoundPanel(){
+      if(!rhythm)return;
+      fileLabel.hidden=!rhythm.track.artist;
+      const attached=hasRecording();
+      offsetLabel.hidden=removeFile.hidden=!attached;
+      media.hidden=!clipUrl||(!attached && Boolean(rhythm.track.artist));
+      if(attached){
+        offsetInput.max=(Math.floor(recording.maxStart*100)/100).toFixed(2);
+        offsetInput.value=recording.start.toFixed(2);
+      }
+      soundStatus.textContent=attached?'Lydfil: '+recording.filename
+        :!rhythm.track.artist?rhythm.track.title+' · Instrumental'
+        :'Vælg en lokal MP3- eller WAV-fil med '+rhythm.track.title+' for at høre sangen. Du kan også spille med øvebeat.';
+    }
+    chooseFile.addEventListener('change',async()=>{
+      const file=chooseFile.files[0];chooseFile.value='';
+      if(!file||running||!rhythm?.track.artist)return;
+      stopPreview();const request=++importNumber;
+      loadingFile=true;render();soundStatus.textContent='Læser lydfilen …';
+      try{
+        const loaded=await R.importRecording(file,rhythm.track);
+        if(request!==importNumber)return;
+        releaseClip();recording=loaded;silent=false;practice.setAttribute('aria-pressed','false');
+        openGame('osu',true);
+      }catch(error){
+        if(request===importNumber){loadingFile=false;render();soundStatus.textContent=error.message;}
+      }
+    });
+    offsetInput.addEventListener('change',()=>{
+      if(!hasRecording()||running)return;
+      const value=offsetInput.valueAsNumber;
+      if(Number.isFinite(value))recording.start=Math.max(0,Math.min(recording.maxStart,value));
+      openGame('osu',true);
+    });
     const recordKey=()=>current.id==='osu'?'osu:'+rhythm.track.id:current.id+':'+state.difficulty;
     const prefs=()=>getPreferences().games||{difficulty:'normal',bests:{}};
     async function save(changes){try{if(await onChange({games:{...prefs(),...changes}})===false)throw Error('storage');}catch{feedback.textContent='Indstillingen eller rekorden kunne ikke gemmes. Du kan stadig spille.';}}
     const setText=(el,text)=>{if(el.textContent!==text)el.textContent=text;};
     function stop(){
+      stopPreview();
       if(player){if(rhythm)rhythm.time=player.now();player.close();player=null;}
       running=false;keys.clear();if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
     function pause(){if(!state||state.status!=='playing')return;stop();render();}
     function toggle(){
-      if(!visible||!state||document.hidden)return;
+      if(!visible||!state||document.hidden||loadingFile)return;
       if(state.status!=='playing'){openGame(current.id,true);}
       if(running){pause();return;}
       if(current.id==='osu'){
-        audioError='';
-        const failed=()=>{audioError='Lyden kunne ikke starte. Prøv igen, eller vælg Øv uden lyd.';stop();render();};
+        if(rhythm.track.artist && !hasRecording() && !silent && !beatChosen){chooseFile.click();return;}
+        stopPreview();audioError='';
+        const nativePlayer=Boolean(clipUrl) && !silent && !backupAudio;
+        const failed=()=>{if(nativePlayer)backupAudio=true;
+          audioError=nativePlayer?'Afspilleren kunne ikke starte. Prøv igen med den alternative lydafspiller.':'Lyden kunne ikke starte. Tjek fanens lyd, og prøv igen.';stop();render();};
         try {
           if(silent){
             const origin=performance.now()/1000-rhythm.time;
             player={now:()=>performance.now()/1000-origin,schedule(){},close(){},ready:Promise.resolve()};
-          }else player=R.playback(rhythm.track,rhythm.time);
+          }else if(nativePlayer)player=R.mediaPlayback(media,rhythm.track,rhythm.time);
+          else if(hasRecording())player=R.playRecording(rhythm.track,recording,rhythm.time);
+          else player=R.playback(rhythm.track,rhythm.time);
           lastAudioTick=performance.now();
           const active=player;player.ready.catch(()=>{if(player===active)failed();});
         } catch {failed();return;}
@@ -90,7 +168,8 @@
         const position=player.now();
         if(position>rhythm.time)lastAudioTick=performance.now();
         if(performance.now()-lastAudioTick>2600){
-          audioError='Lyden starter ikke. Tjek lydudgangen, eller vælg Øv uden lyd.';
+          if(clipUrl&&!backupAudio){backupAudio=true;audioError='Afspilningen gik i stå. Prøv igen med den alternative lydafspiller.';}
+          else audioError='Lyden starter ikke. Tjek fanens lyd og lydudgangen.';
           stop();render();return;
         }
         player.schedule();R.advance(rhythm,position);
@@ -119,12 +198,14 @@
     function openGame(id,reset=false){
       const game=C.catalog.find(g=>g.id===id);if(!game)return;
       if(current?.id===id&&!reset)return;
+      const keepBeat=beatChosen && id==='osu' && current?.id===id && rhythm?.track.id===song.value;
       stop();current=game;state=C.create(id,{difficulty:game.live?(reset?difficulty.value:prefs().difficulty):'normal'});recorded=false;started=false;lastGrid='';flagMode=false;
-      aim=null;audioError='';songLabel.hidden=practice.hidden=id!=='osu';
-      rhythm=id==='osu'?R.session(R.tracks.find(t=>t.id===song.value)||R.tracks[0]):null;
+      importNumber++;loadingFile=false;beatChosen=keepBeat;aim=null;audioError='';songLabel.hidden=practice.hidden=id!=='osu';
+      rhythm=id==='osu'?R.session(allTracks.find(t=>t.id===song.value)||allTracks[0]):null;
       setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live||id==='osu';
       tip.textContent=game.category==='For to'?'Giv turen videre til den anden spiller.':game.category==='Bonus'?'Dine valg bliver kun i denne runde.':'Pause virker med P eller Escape. Spillet pauser automatisk, når du forlader det.';
       surface.replaceChildren();controls.replaceChildren();extra.replaceChildren();canvas=ctx=null;
+      if(rhythm){extra.append(soundPanel);prepareClip();updateSoundPanel();}
       if(game.live){
         canvas=E('canvas','lxp-game-canvas');canvas.width=id==='snake'?720:id==='blocks'?480:1280;canvas.height=id==='snake'?720:id==='blocks'?800:720;
         canvas.setAttribute('role','img');canvas.setAttribute('aria-label',game.title+' spillebane');canvas.append(document.createTextNode('Spillet kræver en browser med canvas.'));surface.append(canvas);ctx=canvas.getContext('2d');
@@ -159,16 +240,26 @@
       best.hidden=localTwo||['choices','memory','mines','lights'].includes(current.id);
       setText(best,'Rekord '+Math.max(prefs().bests[recordKey()]||0,state.score));
       start.textContent=finished?'Spil igen':running?'Pause':started?'Fortsæt':'Start spil';
-      start.disabled=Boolean(current.live&&!ctx);difficulty.disabled=running;song.disabled=practice.disabled=running;
+      const needsFile=rhythm?.track.artist&&!hasRecording()&&!silent&&!beatChosen;
+      playBeat.hidden=!(needsFile&&!running);playBeat.disabled=loadingFile;
+      if(needsFile)start.textContent='Vælg sangfil';
+      if(rhythm)media.controls=!running;
+      start.disabled=Boolean(current.live&&!ctx)||loadingFile;
+      chooseFile.disabled=running||loadingFile;removeFile.disabled=offsetInput.disabled=running||loadingFile;difficulty.disabled=running;song.disabled=practice.disabled=running;
       veil.hidden=!(current.live&&!started||started&&!running&&!finished);
       veilTitle.textContent=started?'På pause':'Klar til '+current.title+'?';veilCopy.textContent=started?'Fortsæt, når du er klar.':current.controls;veilButton.textContent=started?'Fortsæt':'Start spil';veilButton.disabled=start.disabled;
+      if(rhythm?.track.artist && !started){
+        veilTitle.textContent=rhythm.track.title;
+        veilCopy.textContent=rhythm.track.artist+' · '+(silent?'Uden lyd':hasRecording()?'Din lydfil':beatChosen?'Øvebeat':'Vælg sangfil for at høre sangen');
+      }
+      if(needsFile)veilButton.textContent='Vælg sangfil';
       if(audioError){veilTitle.textContent='Lyden kunne ikke starte';veilCopy.textContent=audioError;veilButton.textContent='Prøv igen';}
       surface.inert=started&&!running&&!finished;
       for(const button of controls.querySelectorAll('button'))button.disabled=finished||(started&&!running);
       if(finished){
         setText(feedback,finishText());
         if(!recorded){recorded=true;if(!best.hidden&&state.score>(prefs().bests[recordKey()]||0))void save({bests:{...prefs().bests,[recordKey()]:state.score}});}
-      }else if(current.id==='osu')setText(feedback,audioError||rhythm.track.bpm+' BPM · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
+      }else if(current.id==='osu')setText(feedback,audioError||(silent?'Uden lyd':hasRecording()?'Sangfil: '+recording.filename:rhythm.track.artist?(beatChosen?'Øvebeat':'Ingen sangfil valgt'):'Instrumental')+' · '+rhythm.track.bpm+' BPM · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
       else if(current.id==='lights')setText(feedback,state.board.flat().filter(Boolean).length+' lys tilbage');
       else if(current.id==='breakout')setText(feedback,`♥ ${state.lives} liv · ${state.bricks.length} mursten tilbage${state.launch?' · Send bolden for at fortsætte':''}`);
       else if(current.id==='blocks')setText(feedback,`${state.lines} rækker ryddet · Niveau ${1+Math.floor(state.lines/10)}`);
@@ -300,14 +391,14 @@
       C.act(state,'pointer',current.id==='pong'?(event.clientY-top)/scale:(event.clientX-left)/scale);
     });
     arena.addEventListener('pointerdown',event=>{if(event.target!==canvas)return;arena.focus({preventScroll:true});if(current.id==='osu'&&event.button===0){aim=position(event);rhythmHit(aim);}else if(current.id==='dino')action('jump');else if(current.id==='breakout')action('launch');});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){stopPreview();pause();}});
     window.addEventListener('blur',()=>{if(running)pause();});window.addEventListener('pagehide',()=>stop());
     function update(open){
       visible=open;node.hidden=!open;
-      if(!open){if(running)pause();return;}
+      if(!open){stopPreview();if(running)pause();return;}
       const id=location.hash.split('/')[1],game=C.catalog.find(g=>g.id===id);
       lobby.hidden=Boolean(game);play.hidden=!game;
-      if(game){openGame(game.id);render();}else{if(running)pause();showCards();}
+      if(game){openGame(game.id);render();}else{stopPreview();if(running)pause();showCards();}
     }
     return {node,update,entries:C.catalog.map(g=>({href:'#lxp-games/'+g.id,key:'games',label:g.title,icon:'game',context:'Spil'}))};
   };

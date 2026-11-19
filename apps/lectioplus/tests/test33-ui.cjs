@@ -25,7 +25,8 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
   for(const game of w.lectioPlusGamesCore.catalog){
     await route('#lxp-games/'+game.id);ok(!games.querySelector('.lxp-game-play').hidden,'route '+game.id);ok(games.querySelector('.lxp-game-top h1').textContent===game.title,'title '+game.id);
     ok(games.querySelector('.lxp-game-guide').textContent.includes(game.controls),'guide '+game.id);
-    click(toolbar(),'Start spil');await wait();ok(games.dataset.gameState==='playing','start '+game.id);
+    if(game.id==='osu')ok([...toolbar().querySelectorAll('button')].some(b=>b.textContent==='Vælg sangfil'),'pop start requests the actual song');
+    click(toolbar(),game.id==='osu'?'Spil med øvebeat':'Start spil');await wait();ok(games.dataset.gameState==='playing','start '+game.id);
     click(toolbar(),'Pause');const stopped=draws;await wait();ok(games.dataset.gameState==='paused'&&draws===stopped,'pause stops rendering '+game.id);
     click(toolbar(),'Fortsæt');click(toolbar(),'Start forfra');ok(games.dataset.gameState==='ready','restart '+game.id);
     ok(!games.querySelector('img[src],iframe'),'no remote profiles or embeds '+game.id);
