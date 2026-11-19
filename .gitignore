@@ -13,3 +13,7 @@ results
 *.tsbuildinfo
 
 bun.lockb
+
+# Bundled extension runtimes are release inputs, not generated app builds.
+!apps/lectioplus/extension/vendor/workbench/sql.js/dist/
+!apps/lectioplus/extension/vendor/workbench/tesseract.js/dist/
