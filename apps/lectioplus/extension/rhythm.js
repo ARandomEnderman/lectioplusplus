@@ -93,16 +93,27 @@
   function advance(s,time) {
     s.time = time;
     while (s.index < s.track.targets.length && time - s.track.targets[s.index].time > .17) {
+      const target=s.track.targets[s.index];
+      if(target.spinEnd){
+        if(time<target.spinEnd)break;
+        const fraction=(s.rotation||0)/target.required;
+        const points=fraction>=1?300:fraction>=.65?100:fraction>=.35?50:0;
+        if(points){s.hits++;s.combo++;s.points+=points;s.score+=points;s.longest=Math.max(s.longest,s.combo);}
+        else s.combo=0;
+        s.verdict=points?'Spinner '+points:'Forpasset';s.rotation=0;s.angle=null;s.index++;continue;
+      }
       s.index++; s.combo = 0; s.verdict = 'Forpasset';
     }
   }
   function hit(s,x,y,time) {
     advance(s,time);
     const target = s.track.targets[s.index];
-    if (!target || Math.abs(time-target.time) > .17 || Math.hypot(x-target.x,y-target.y) > 28) return;
+    if (!target || target.spinEnd || Math.abs(time-target.time) > .17 || Math.hypot(x-target.x,y-target.y) > 28) return;
     const delta = Math.abs(time-target.time);
     const points = delta <= .065 ? 300 : delta <= .115 ? 100 : 50;
     s.combo++; s.hits++; s.points += points; s.score += points + Math.min(20,s.combo-1)*5;
+    const slider=s.sliders?.get(s.index);
+    if(slider){s.following=slider;s.followTime=Math.max(time,slider.time);s.followed=0;}
     s.longest = Math.max(s.longest,s.combo); s.index++; s.verdict = String(points);
   }
 
@@ -208,24 +219,161 @@
     return Math.max(0,phaseTime+Math.ceil((first-.05-phaseTime)/beat)*beat);
   }
 
-  async function importRecording(file,track){
+  const customTrack={id:'own-song',title:'Egen sang',artist:'Lokal lydfil',custom:true,targets:[],notes:[],end:0};
+  // Read the envelope once. Keep both channels so a hard-panned beat is still visible.
+  function analyseAudio(buffer){
+    const channels=Array.from({length:Math.min(2,buffer.numberOfChannels||1)},(_,i)=>buffer.getChannelData(i));
+    const hop=Math.max(1,Math.round(buffer.sampleRate*.02)), step=hop/buffer.sampleRate;
+    const energy=new Float32Array(Math.ceil(channels[0].length/hop)), flux=new Float32Array(energy.length);
+    let peak=0, average=0;
+    for(let k=0;k<energy.length;k++){
+      let power=0;
+      const start=k*hop,end=Math.min(start+hop,channels[0].length);
+      for(const samples of channels)for(let i=start;i<end;i+=2)power+=samples[i]*samples[i];
+      energy[k]=Math.sqrt(power/(Math.ceil((end-start)/2)*channels.length));
+      flux[k]=Math.max(0,energy[k]-average);
+      average=.45*average+.55*energy[k];
+      peak=Math.max(peak,energy[k]);
+    }
+    if(peak<.00001)throw Error('Filen indeholder ingen hørbar lyd.');
+    // Autocorrelation of onset peaks, sampled across the whole song.
+    const low=Math.ceil(60/185/step), high=Math.floor(60/72/step);
+    const correlations=new Float64Array(high+2);
+    let bestLag=0,bestScore=0;
+    for(let lag=low;lag<=high;lag++){
+      let score=0;
+      for(let k=lag;k<flux.length;k++)score+=flux[k]*flux[k-lag];
+      correlations[lag]=score;
+      if(score>bestScore){bestLag=lag;bestScore=score;}
+    }
+    const curvature=2*bestScore-correlations[bestLag-1]-correlations[bestLag+1];
+    const refined=bestLag+(curvature>0?(correlations[bestLag+1]-correlations[bestLag-1])/(2*curvature):0);
+    return {energy,flux,step,peak,bpm:bestLag?Math.round(60/(refined*step)):120};
+  }
+  function fullChart(profile,recording){
+    const {energy,flux,step,peak}=recording.analysis;
+    const bpm=profile.custom?recording.analysis.bpm:profile.bpm, beat=60/bpm;
+    const end=recording.buffer.duration, targets=[];
+    // Follow local accents, leave rests empty, and keep enough room to approach each object.
+    const radius=Math.floor(beat*.47/step);
+    for(let grid=recording.detectedStart;grid<end;grid+=beat){
+      const center=Math.round(grid/step);
+      let accent=center,loud=0;
+      for(let k=Math.max(0,center-radius);k<=Math.min(energy.length-1,center+radius);k++){
+        loud=Math.max(loud,energy[k]);
+        if(flux[k]>(flux[accent]||0))accent=k;
+      }
+      if(loud<peak*.009)continue;
+      const time=(flux[accent]>peak*.025?accent*step:grid)+recording.start-recording.detectedStart;
+      if(time<Math.min(.55,end*.25)||time>end-.18||time-(targets.at(-1)?.time??-1)<.23)continue;
+      targets.push({time});
+      // Include a distinct offbeat when the recording actually has a second attack.
+      const half=Math.round((grid+beat/2)/step);
+      let off=half;
+      for(let k=Math.max(1,half-2);k<=Math.min(flux.length-2,half+2);k++)
+        if(flux[k]>(flux[off]||0))off=k;
+      const offTime=off*step+recording.start-recording.detectedStart;
+      if(flux[off]>Math.max(peak*.07,(flux[accent]||0)*.32) &&
+         offTime-time>=.23 && offTime<=end-.18)targets.push({time:offTime});
+    }
+    // Preserve a readable cursor path even when a chorus gains extra subdivisions.
+    const seed=Array.from(recording.recordId).reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,0)%628/100;
+    let phase=seed;
+    for(const [i,target] of targets.entries()){
+      const gap=i?target.time-targets[i-1].time:beat;
+      phase+=Math.min(1.25,.76*gap/beat);
+      target.x=320+190*Math.sin(phase)+32*Math.sin(phase*.48);
+      target.y=180+91*Math.cos(phase*.67+seed)+24*Math.sin(phase*1.42);
+    }
+    if(!targets.length)throw Error('Der var for lidt lyd til at lave en spilbar bane.');
+    return {...profile,title:profile.custom?recording.filename.replace(/\.[^.]+$/,''):profile.title,
+      bpm,end,targets,notes:[],recordId:recording.recordId};
+  }
+  async function importRecording(file,track=customTrack){
     if(file.size>64*1024*1024)throw Error('Vælg en lydfil på højst 64 MB.');
     let buffer;
     try{
       const decoder=new OfflineAudioContext(1,1,22050);
       buffer=await decoder.decodeAudioData(await file.arrayBuffer());
-    }catch{throw Error('Filen kunne ikke læses som lyd. Prøv en MP3- eller WAV-fil.');}
-    const maxStart=buffer.duration-(track.end-lead);
-    if(maxStart<0)throw Error('Filen er for kort til banen. Vælg en længere indspilning.');
-    const start=Math.min(maxStart,firstBeat(buffer,track.bpm));
-    return {id:track.id,buffer,start,maxStart,filename:file.name};
+    }catch{throw Error('Browseren kunne ikke læse lydfilen. Prøv MP3 eller WAV.');}
+    const analysis=analyseAudio(buffer), bpm=track.custom?analysis.bpm:track.bpm;
+    const start=firstBeat(buffer,bpm);
+    let hash=2166136261;
+    for(const ch of [track.id,file.name,file.size,buffer.duration,file.lastModified||0].join('|'))
+      hash=Math.imul(hash^ch.charCodeAt(0),16777619);
+    const recordId='file-'+Array.from(String(hash>>>0),digit=>String.fromCharCode(97+Number(digit))).join('');
+    const recording={id:track.id,profile:track,buffer,file,analysis,start,detectedStart:start,maxStart:Math.min(buffer.duration,start+60/bpm),
+      filename:file.name,recordId};
+    recording.chart=fullChart(track,recording);
+    return recording;
+  }
+
+  function playingSession(track){
+    const targets=[];
+    let nextSpin=19;
+    for(let i=0;i<track.targets.length;i++){
+      const a=track.targets[i];
+      if(a.time>=nextSpin && a.time+4<track.end){
+        // Replace a continuous musical phrase. Never spin across a rest.
+        let j=i;
+        while(j+1<track.targets.length && track.targets[j+1].time-track.targets[j].time<.95 &&
+            track.targets[j+1].time-a.time<=2.7)j++;
+        const span=track.targets[j].time-a.time;
+        if(span>=1.65){
+          targets.push({x:320,y:180,time:a.time,spinEnd:a.time+span,required:span*2*Math.PI*1.15});
+          nextSpin=a.time+32;i=j;continue;
+        }
+      }
+      targets.push(a);
+    }
+    const s=session({...track,targets});
+    s.sliders=new Map();
+    for(let i=3;i<targets.length-1;i+=5){
+      const a=targets[i],b=targets[i+1],gap=b.time-a.time;
+      if(a.spinEnd||b.spinEnd||gap<.32)continue;
+      const dx=(b.x-a.x)*.58,dy=(b.y-a.y)*.58;
+      s.sliders.set(i,{x:a.x,y:a.y,cx:a.x+dx*.5-dy*.22,cy:a.y+dy*.5+dx*.22,
+        ex:a.x+dx,ey:a.y+dy,time:a.time,end:a.time+Math.min(.95,gap*.74)});
+    }
+    return s;
+  }
+  function sliderPoint(path,time){
+    const t=Math.max(0,Math.min(1,(time-path.time)/(path.end-path.time))), u=1-t;
+    return {x:u*u*path.x+2*u*t*path.cx+t*t*path.ex,y:u*u*path.y+2*u*t*path.cy+t*t*path.ey};
+  }
+  function follow(s,time,aim,held){
+    const spinner=s.track.targets[s.index];
+    if(spinner?.spinEnd && time>=spinner.time && time<=spinner.spinEnd){
+      const dx=(aim?.x??320)-320,dy=(aim?.y??180)-180;
+      if(held && Math.hypot(dx,dy)>28){
+        const angle=Math.atan2(dy,dx);
+        if(s.angle!=null){
+          const delta=angle-s.angle, arc=Math.abs(Math.atan2(Math.sin(delta),Math.cos(delta)));
+          s.rotation=(s.rotation||0)+Math.min(arc,Math.max(0,time-s.spinTime)*Math.PI*12);
+        }
+        s.angle=angle;s.spinTime=time;
+      }else s.angle=null;
+    }
+    const path=s.following;
+    if(!path)return;
+    const until=Math.min(path.end,time),previous=Math.max(path.time,s.followTime);
+    if(until<=previous)return;
+    const point=sliderPoint(path,until);
+    if(held && aim && Math.hypot(aim.x-point.x,aim.y-point.y)<=42)
+      s.followed+=Math.min(.09,until-previous);
+    s.followTime=until;
+    if(time>=path.end){
+      const success=s.followed>=(path.end-path.time)*.65;
+      if(success)s.score+=100;else s.combo=0;
+      s.verdict=success?'Slider +100':'Slider sluppet';s.following=null;
+    }
   }
 
   function playRecording(track,recording,offset){
     const audio=new AudioContext(), origin=audio.currentTime-offset;
     const source=audio.createBufferSource(), gain=audio.createGain();
     source.buffer=recording.buffer;source.connect(gain);gain.connect(audio.destination);
-    const delay=lead-recording.start;
+    const delay=recording.file?0:lead-recording.start;
     const when=Math.max(audio.currentTime,origin+delay), end=origin+track.end;
     if(end>when){
       gain.gain.setValueAtTime(.82,when);
@@ -264,9 +412,21 @@
 
   function mediaPlayback(media,track,offset){
     media.pause();media.currentTime=offset;media.muted=false;
-    return {ready:media.play(),now:()=>media.ended?track.end:media.currentTime,
+    // Some browsers quantize currentTime. Interpolate between observed ticks,
+    // bounded to one tick, so animation stays smooth without running through a stall.
+    let anchor=null,stamp=0,last=offset;
+    function now(){
+      if(media.ended)return track.end;
+      const raw=media.currentTime, tick=performance.now();
+      if(raw!==anchor){anchor=raw;stamp=tick;}
+      const ahead=!media.paused && !media.seeking && media.readyState>=3
+        ?Math.min(.09,(tick-stamp)/1000):0;
+      last=Math.max(last,Math.min(Math.max(raw,track.end-.001),raw+ahead));
+      return last;
+    }
+    return {ready:media.play(),now,
       schedule(){},close(){media.pause();}};
   }
 
-  globalThis.lectioPlusRhythm = {tracks,popTracks,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
+  globalThis.lectioPlusRhythm = {tracks,popTracks,customTrack,fullChart,playingSession,sliderPoint,follow,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
 })();
