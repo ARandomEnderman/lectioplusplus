@@ -1,5 +1,11 @@
 # LectioPlus+
 
+## Version 0.1.7
+
+Rytmecirkler har nu 30 baner. I de 10 nye popbaner kan du spille til en lokal sangfil. Vælg fx **California Gurls**, tryk **Vælg sangfil**, og start banen. Filen bliver i fanen. Du kan også vælge **Spil med øvebeat**. De 20 instrumentalbaner har indbygget musik.
+
+Browserens medieafspiller afspiller sangudsnittet og holder cirklerne i takt med musikken, også når du pauser og fortsætter. Under **Musik** kan du lytte inden spilstart og justere tidspunktet for første slag i din sangfil.
+
 ## Version 0.1.6
 
 - Under **Spil** kan du vælge mellem 20 offlinebaner i **osu! · Rytmecirkler**. Hver bane har sin egen melodi, sværhedsgrad og rekord. **Lys ud** er et nyt puslespil på et 5 × 5-bræt.
