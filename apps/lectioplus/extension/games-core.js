@@ -1,7 +1,8 @@
 (() => {
   'use strict';
   const catalog = [
-    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Spil 10 popbaner med øvebeat eller egen sangfil, og 20 instrumentalbaner.',controls:'Klik eller tryk på den næste cirkel, når ringen møder kanten. Du kan også sigte med musen og bruge Z eller X.',live:true},
+    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Lav en bane fra din egen sang, eller vælg blandt 10 popbaner og 20 instrumentalbaner.',controls:'Ram de nummererede cirkler, når ringen møder kanten. Klik, tryk på skærmen eller sigt med musen og brug dine to slagtaster. På en slider skal du holde knappen nede og følge kuglen. På en spinner skal du holde nede og dreje rundt om midten.',live:true},
+    {id:'dash',title:'Geometry Dash · Neonbaner',symbol:'◆',category:'Arkade',description:'15 originale rytmebaner med hop, ringe og flyveportaler.',controls:'Klik eller brug mellemrum eller ↑. Hold for at hoppe igen ved landing. Gule puder giver afsæt, og et ekstra tryk ved en ring giver et lufthop. I skibet stiger du ved at holde nede og falder, når du slipper.',live:true},
     {id:'lights',title:'Lys ud',symbol:'💡',category:'Hjernevridere',description:'Sluk hele brættet. Hvert tryk skifter flere lys.',controls:'Vælg et felt for at skifte det og dets naboer oppe, nede og til siderne. Sluk alle 25 lys.'},
     {id:'dino',title:'Dinohop',symbol:'🦖',category:'Arkade',description:'Hop over kaktusser, og hold løbet i gang.',controls:'Mellemrum, ↑ eller Hop. Ét hop ad gangen.',live:true},
     {id:'snake',title:'Snake',symbol:'🐍',category:'Arkade',description:'Saml frugter, og giv slangen plads til at vokse.',controls:'Piletaster, WASD eller retningsknapper. Undgå vægge og din egen hale.',live:true},
@@ -20,10 +21,11 @@
   const shuffle=(a,r)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const empty=(w,h)=>Array.from({length:h},()=>Array(w).fill(0));
   const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
-  function create(id,{difficulty='normal',rng=Math.random}={}){
+  function create(id,{difficulty='normal',rng=Math.random,level=1}={}){
     if(!catalog.some(g=>g.id===id))throw Error('Ukendt spil');
     const s={id,status:'playing',score:0,time:0,difficulty:['easy','normal','hard'].includes(difficulty)?difficulty:'normal',rng};
     s.factor={easy:0.8,normal:1,hard:1.25}[s.difficulty];
+    if(id==='dash')Object.assign(s,globalThis.lectioPlusDash.start(level));
     if(id==='dino')Object.assign(s,{y:276,vy:0,obstacles:[],spawn:1.4,distance:0});
     if(id==='snake'){Object.assign(s,{snake:[[7,8],[6,8],[5,8]],dir:[1,0],next:null,clock:0,size:18});food(s);}
     if(id==='blocks'){Object.assign(s,{board:empty(10,20),bag:[],lines:0,clock:0});s.nextPiece=takePiece(s);spawnPiece(s);}
@@ -111,6 +113,7 @@
       switchLights(s,x,y);s.moves++;
       if(!s.board.flat().some(Boolean))s.status='won';
     }
+    if(s.id==='dash'&&action==='jump')globalThis.lectioPlusDash.press(s);
     if(s.id==='dino'&&(action==='jump'||action==='up')&&s.y>=276){s.vy=-540;}
     if(s.id==='snake'){
       const dir={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[action];
@@ -150,6 +153,7 @@
   function step(s,dt,keys=new Set()){
     if(s.status!=='playing'||!Number.isFinite(dt)||dt<=0)return;
     dt=Math.min(dt,0.05);s.time+=dt;
+    if(s.id==='dash')globalThis.lectioPlusDash.step(s,dt,keys.has('jump'));
     if(s.id==='snake'){s.clock+=dt;const pace=Math.max(0.065,0.17/s.factor-s.score*0.0004);if(s.clock>=pace){s.clock-=pace;snakeStep(s);}}
     if(s.id==='blocks'){s.clock+=dt;if(s.clock>=Math.max(0.1,0.75/s.factor-Math.floor(s.lines/10)*0.07)){s.clock=0;drop(s);}}
     if(s.id==='memory'&&s.wait){s.wait=Math.max(0,s.wait-dt);if(!s.wait)s.flipped=[];}

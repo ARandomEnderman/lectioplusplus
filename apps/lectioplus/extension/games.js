@@ -32,7 +32,7 @@
     difficulty.addEventListener('change',()=>{void save({difficulty:difficulty.value});openGame(current.id,true);});
     const R=globalThis.lectioPlusRhythm;
     const songLabel=E('label','lxp-game-difficulty','Bane '),song=E('select');
-    const allTracks=[...R.popTracks,...R.tracks];
+    const allTracks=[...R.popTracks,...R.tracks,R.customTrack];
     for(const [label,tracks] of [['Pophits',R.popTracks],['Instrumental',R.tracks]]){
       const group=E('optgroup');group.label=label;
       for(const track of tracks){
@@ -44,6 +44,10 @@
       }
       song.append(group);
     }
+    const ownOption=E('option','','Egen sang …');ownOption.value=R.customTrack.id;song.append(ownOption);
+    const ownButton=B('Åbn egen sang…',()=>{
+      song.value=R.customTrack.id;openGame('osu',true);chooseFile.click();
+    });
     songLabel.append(song);song.addEventListener('change',()=>openGame('osu',true));
     const practice=B('Øv uden lyd',()=>{
       silent=!silent;audioError='';practice.setAttribute('aria-pressed',String(silent));
@@ -51,7 +55,7 @@
     });
     let silent=false,beatChosen=false;
     const playBeat=B('Spil med øvebeat',()=>{beatChosen=true;toggle();});
-    practice.setAttribute('aria-pressed','false');toolbar.append(start,playBeat,restart,settings,songLabel,practice);
+    practice.setAttribute('aria-pressed','false');toolbar.append(start,playBeat,restart,settings,songLabel,ownButton,practice);
     const layout=E('div','lxp-game-layout'),panel=E('div','lxp-game-panel'),stats=E('div','lxp-game-stats'),score=E('span'),best=E('span'),clock=E('span');
     stats.append(score,best,clock);
     const arena=E('div','lxp-game-arena');arena.tabIndex=0;arena.setAttribute('aria-label','Spilleområde');
@@ -64,7 +68,7 @@
     const keys=new Set(),symbols=['🍒','🍋','🍇','🥝','🍓','🍊','🍉','🫐'];
     const direction={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
     let rhythm=null, player=null, aim=null, audioError='', lastAudioTick=0;
-    let recording=null,importNumber=0,loadingFile=false;
+    let recording=null,importNumber=0,loadingFile=false,lastHud=0,rhythmPalette=null;
     const soundPanel=E('section','lxp-song-audio');
     const soundStatus=E('p');soundStatus.setAttribute('role','status');
     const chooseFile=E('input');chooseFile.type='file';chooseFile.accept='audio/*,.mp3,.wav,.m4a,.ogg,.flac';
@@ -81,7 +85,7 @@
       URL.revokeObjectURL(clipUrl);clipUrl='';clipStart=null;
     }
     function prepareClip(){
-      const source=hasRecording()?recording:rhythm.track;
+      const source=hasRecording()?recording:allTracks.find(track=>track.id===rhythm.track.id);
       if(clipSource===source && clipStart===source.start)return;
       releaseClip();backupAudio=false;clipSource=source;clipStart=source.start;
       function load(blob){
@@ -89,8 +93,8 @@
         clipUrl=URL.createObjectURL(blob);media.src=clipUrl;
         media.hidden=!hasRecording() && Boolean(rhythm?.track.artist);
       }
-      if(hasRecording())load(R.recordingClip(rhythm.track,recording));
-      else R.renderScore(source).then(load).catch(()=>{ /* The live synthesizer also plays this score. */ });
+      if(hasRecording())load(recording.file);
+      else if(!source.custom)R.renderScore(source).then(load).catch(()=>{ /* The live synthesizer also plays this score. */ });
     }
     const removeFile=B('Fjern sangfil',()=>{releaseClip();recording=null;openGame('osu',true);});
     soundPanel.append(E('h3','','Musik'),soundStatus,fileLabel,media,offsetLabel,removeFile);
@@ -105,7 +109,17 @@
         offsetInput.max=(Math.floor(recording.maxStart*100)/100).toFixed(2);
         offsetInput.value=recording.start.toFixed(2);
       }
-      soundStatus.textContent=attached?'Lydfil: '+recording.filename
+      ownOption.textContent=recording?.id===R.customTrack.id?recording.chart.title:'Egen sang …';
+      const duration=seconds=>Math.floor(seconds/60)+':'+String(Math.floor(seconds)%60).padStart(2,'0');
+      for(const group of song.querySelectorAll('optgroup')){
+        for(const option of group.children){
+          if(!option.dataset.label)option.dataset.label=option.textContent;
+          option.textContent=attached && option.value===recording.id
+            ?rhythm.track.title+' · '+duration(rhythm.track.end):option.dataset.label;
+        }
+      }
+      soundStatus.textContent=attached?'Lydfil: '+recording.filename+' · '+duration(rhythm.track.end)
+        :rhythm.track.custom?'Vælg en lydfil. Banen laves ud fra rytmen i hele sangen.'
         :!rhythm.track.artist?rhythm.track.title+' · Instrumental'
         :'Vælg en lokal MP3- eller WAV-fil med '+rhythm.track.title+' for at høre sangen. Du kan også spille med øvebeat.';
     }
@@ -115,7 +129,7 @@
       stopPreview();const request=++importNumber;
       loadingFile=true;render();soundStatus.textContent='Læser lydfilen …';
       try{
-        const loaded=await R.importRecording(file,rhythm.track);
+        const loaded=await R.importRecording(file,allTracks.find(track=>track.id===song.value));
         if(request!==importNumber)return;
         releaseClip();recording=loaded;silent=false;practice.setAttribute('aria-pressed','false');
         openGame('osu',true);
@@ -126,14 +140,98 @@
     offsetInput.addEventListener('change',()=>{
       if(!hasRecording()||running)return;
       const value=offsetInput.valueAsNumber;
-      if(Number.isFinite(value))recording.start=Math.max(0,Math.min(recording.maxStart,value));
+      if(!Number.isFinite(value))return;
+      const previousStart=recording.start;
+      recording.start=Math.max(0,Math.min(recording.maxStart,value));
+      try{recording.chart=R.fullChart(recording.profile,recording);}
+      catch(error){recording.start=previousStart;offsetInput.value=previousStart.toFixed(2);soundStatus.textContent=error.message;return;}
       openGame('osu',true);
     });
-    const recordKey=()=>current.id==='osu'?'osu:'+rhythm.track.id:current.id+':'+state.difficulty;
+    const A=globalThis.lectioPlusAppearance;
+    const D=globalThis.lectioPlusDash;
+    const courseLabel=E('label','lxp-game-difficulty','Bane '),course=E('select');
+    course.setAttribute('aria-label','Geometry Dash-bane');
+    for(const level of D?.levels||[]){
+      const o=E('option','',level.id+' · '+level.title+' · '+level.bpm+' BPM');o.value=level.id;course.append(o);
+    }
+    courseLabel.append(course);course.addEventListener('change',()=>openGame('dash',true));
+    toolbar.append(courseLabel);
+    let dashAudio=null,dashAudioError=false,retryTimer=0,attempt=0;
+    const bindPanel=E('details','lxp-game-bindings'), bindStatus=E('p'),bindTitle=E('summary','','Tastbindinger');
+    bindStatus.setAttribute('role','status');bindPanel.append(bindTitle);
+    const dashMedia=E('audio');
+    let dashLevel=null,dashUrl='';
+    function prepareDashMusic(level){
+      if(dashLevel===level)return;
+      dashLevel=level;
+      if(dashUrl){dashMedia.removeAttribute('src');dashMedia.load();URL.revokeObjectURL(dashUrl);dashUrl='';}
+      if(!level)return;
+      R.renderScore(level).then(blob=>{
+        if(dashLevel!==level)return;
+        dashUrl=URL.createObjectURL(blob);dashMedia.src=dashUrl;
+        if(running&&current?.id==='dash')startDashMusic();
+      }).catch(()=>{ /* The live synthesizer can play the same notes. */ });
+    }
+    function startDashMusic(){
+      if(dashAudio)dashAudio.close();
+      dashAudio=null;
+      try{
+        const audio=dashUrl?R.mediaPlayback(dashMedia,state.level,state.time):R.playback(state.level,state.time);
+        dashAudio=audio;dashAudioError=false;
+        audio.ready.catch(()=>{if(audio===dashAudio){audio.close();dashAudio=null;dashAudioError=true;}});
+      }catch{dashAudioError=true;}
+    }
+    const labels={first:'Slag 1',second:'Slag 2',pause:'Pause / fortsæt',retry:'Start banen forfra'};
+    const bindingButtons=new Map();
+    let capturing=null;
+    const keyName=k=>({Space:'Mellemrum',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→'}[k]||k.toUpperCase());
+    function showBindings(){
+      const bindings=A.osuBindings(prefs().bindings);
+      for(const [id,button] of bindingButtons){
+        button.textContent=capturing===id?'Tryk på en tast …':keyName(bindings[id]);
+        button.setAttribute('aria-label',labels[id]+' · '+button.textContent);
+      }
+      mouseInput.checked=prefs().mouseHits!==false;
+    }
+    for(const [id,label] of Object.entries(labels)){
+      const row=E('div','lxp-bind-row'),button=B('',()=>{
+        if(running)pause();
+        capturing=id;bindStatus.textContent='Tryk på din nye tast. Escape annullerer.';showBindings();
+      });
+      bindingButtons.set(id,button);row.append(E('span','',label),button);bindPanel.append(row);
+      button.addEventListener('blur',()=>{if(capturing===id){capturing=null;bindStatus.textContent='';showBindings();}});
+    }
+    const mouseLabel=E('label'),mouseInput=E('input');mouseInput.type='checkbox';
+    mouseLabel.append(mouseInput,document.createTextNode(' Brug også venstre og højre museknap'));
+    mouseInput.addEventListener('change',()=>void save({mouseHits:mouseInput.checked}));
+    bindPanel.append(mouseLabel,B('Gendan standardtaster',async()=>{
+      capturing=null;await save({bindings:A.osuBindings(),mouseHits:true});showBindings();
+    }),bindStatus);
+    bindPanel.addEventListener('keydown',async event=>{
+      if(!capturing)return;
+      event.preventDefault();event.stopPropagation();
+      if(event.repeat)return;
+      if(event.key==='Escape'){capturing=null;bindStatus.textContent='';showBindings();return;}
+      const key=A.osuKey(event.key);
+      if(!key||event.ctrlKey||event.altKey||event.metaKey){bindStatus.textContent='Vælg én tast, fx F, J eller mellemrum.';return;}
+      const bindings=A.osuBindings(prefs().bindings);
+      if(Object.entries(bindings).some(([id,k])=>id!==capturing&&k===key)){
+        bindStatus.textContent='Tasten bruges allerede. Vælg en anden.';return;
+      }
+      bindings[capturing]=key;capturing=null;
+      const saved=await save({bindings});showBindings();bindStatus.textContent=saved?'Gemt · '+keyName(key):'Tasten kunne ikke gemmes.';
+    });
+    function clearRetry(){clearTimeout(retryTimer);retryTimer=0;}
+    function retryDash(){openGame('dash',true);toggle();}
+    const recordKey=()=>current.id==='dash'?'dash:'+state.level.id:current.id==='osu'?'osu:'+(rhythm.track.recordId||rhythm.track.id):current.id+':'+state.difficulty;
     const prefs=()=>getPreferences().games||{difficulty:'normal',bests:{}};
-    async function save(changes){try{if(await onChange({games:{...prefs(),...changes}})===false)throw Error('storage');}catch{feedback.textContent='Indstillingen eller rekorden kunne ikke gemmes. Du kan stadig spille.';}}
+    async function save(changes){
+      try{if(await onChange({games:{...prefs(),...changes}})!==false)return true;}catch{}
+      feedback.textContent='Indstillingen eller rekorden kunne ikke gemmes. Du kan stadig spille.';return false;
+    }
     const setText=(el,text)=>{if(el.textContent!==text)el.textContent=text;};
     function stop(){
+      clearRetry();if(dashAudio){dashAudio.close();dashAudio=null;}
       stopPreview();
       if(player){if(rhythm)rhythm.time=player.now();player.close();player=null;}
       running=false;keys.clear();if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
@@ -143,7 +241,7 @@
       if(state.status!=='playing'){openGame(current.id,true);}
       if(running){pause();return;}
       if(current.id==='osu'){
-        if(rhythm.track.artist && !hasRecording() && !silent && !beatChosen){chooseFile.click();return;}
+        if(!hasRecording() && (rhythm.track.custom || rhythm.track.artist && !silent && !beatChosen)){chooseFile.click();return;}
         stopPreview();audioError='';
         const nativePlayer=Boolean(clipUrl) && !silent && !backupAudio;
         const failed=()=>{if(nativePlayer)backupAudio=true;
@@ -159,6 +257,10 @@
           const active=player;player.ready.catch(()=>{if(player===active)failed();});
         } catch {failed();return;}
       }
+      if(current.id==='dash'){
+        attempt+=started?0:1;
+        startDashMusic();
+      }
       running=true;started=true;previous=0;render();arena.focus({preventScroll:true});frame=requestAnimationFrame(loop);
     }
     function loop(now){
@@ -172,12 +274,29 @@
           else audioError='Lyden starter ikke. Tjek fanens lyd og lydudgangen.';
           stop();render();return;
         }
-        player.schedule();R.advance(rhythm,position);
+        player.schedule();R.follow(rhythm,position,aim,keys.size>0);R.advance(rhythm,position);
         state.time=rhythm.time;state.score=rhythm.score;
         if(state.time>=rhythm.track.end)state.status='won';
+      }else if(current.id==='dash'){
+        // Input and physics keep running even when a device suspends its audio clock.
+        if(dashAudio){
+          try{
+            dashAudio.schedule();
+            if(dashUrl&&!dashMedia.paused&&dashMedia.readyState>=3&&Math.abs(dashMedia.currentTime-state.time)>.25)
+              dashMedia.currentTime=state.time;
+          }catch{dashAudio.close();dashAudio=null;dashAudioError=true;}
+        }
+        C.step(state,dt,keys);
       }else C.step(state,dt,keys);
-      render();
-      if(state.status!=='playing'){stop();render();return;}
+      if((rhythm||current.id==='dash') && ctx && now-lastHud<100 && state.status==='playing')draw();
+      else {lastHud=now;render();}
+      if(state.status!=='playing'){
+        stop();render();
+        if(current.id==='dash'&&state.status==='lost'){
+          retryTimer=setTimeout(()=>{if(visible&&!play.hidden&&!document.hidden&&current.id==='dash')retryDash();},750);
+        }
+        return;
+      }
       frame=requestAnimationFrame(loop);
     }
     function action(type,value){
@@ -199,13 +318,18 @@
       const game=C.catalog.find(g=>g.id===id);if(!game)return;
       if(current?.id===id&&!reset)return;
       const keepBeat=beatChosen && id==='osu' && current?.id===id && rhythm?.track.id===song.value;
-      stop();current=game;state=C.create(id,{difficulty:game.live?(reset?difficulty.value:prefs().difficulty):'normal'});recorded=false;started=false;lastGrid='';flagMode=false;
-      importNumber++;loadingFile=false;beatChosen=keepBeat;aim=null;audioError='';songLabel.hidden=practice.hidden=id!=='osu';
-      rhythm=id==='osu'?R.session(allTracks.find(t=>t.id===song.value)||allTracks[0]):null;
-      setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live||id==='osu';
+      if(id==='dash' && (current?.id!=='dash'||state.level.id!==Number(course.value)))attempt=0;
+      stop();capturing=null;dashAudioError=false;courseLabel.hidden=id!=='dash';current=game;state=C.create(id,{level:course.value,difficulty:game.live?(reset?difficulty.value:prefs().difficulty):'normal'});recorded=false;started=false;lastGrid='';flagMode=false;
+      importNumber++;loadingFile=false;beatChosen=keepBeat;aim=null;audioError='';ownButton.hidden=songLabel.hidden=practice.hidden=id!=='osu';rhythmPalette=null;
+      const selected=allTracks.find(t=>t.id===song.value)||allTracks[0];
+      rhythm=id==='osu'?R.playingSession(recording?.id===selected.id?recording.chart:selected):null;
+      setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live||id==='osu'||id==='dash';
       tip.textContent=game.category==='For to'?'Giv turen videre til den anden spiller.':game.category==='Bonus'?'Dine valg bliver kun i denne runde.':'Pause virker med P eller Escape. Spillet pauser automatisk, når du forlader det.';
+      if(id==='osu')tip.textContent='Du kan ændre slag, pause og genstart under Tastbindinger. Escape sætter også spillet på pause.';
+      prepareDashMusic(id==='dash'?state.level:null);
+      if(id==='dash')tip.textContent='Efter et styrt starter banen igen. Din bedste procent gemmes for hver bane.';
       surface.replaceChildren();controls.replaceChildren();extra.replaceChildren();canvas=ctx=null;
-      if(rhythm){extra.append(soundPanel);prepareClip();updateSoundPanel();}
+      if(rhythm){extra.append(bindPanel,soundPanel);showBindings();prepareClip();updateSoundPanel();}
       if(game.live){
         canvas=E('canvas','lxp-game-canvas');canvas.width=id==='snake'?720:id==='blocks'?480:1280;canvas.height=id==='snake'?720:id==='blocks'?800:720;
         canvas.setAttribute('role','img');canvas.setAttribute('aria-label',game.title+' spillebane');canvas.append(document.createTextNode('Spillet kræver en browser med canvas.'));surface.append(canvas);ctx=canvas.getContext('2d');
@@ -223,6 +347,7 @@
     }
     function finishText(){
       if(current.id==='osu')return rhythm.track.title+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt · '+Math.round(rhythm.points/(300*rhythm.track.targets.length)*100)+' % præcision · Bedste serie '+rhythm.longest;
+      if(current.id==='dash')return state.level.title+' · '+state.score+' % · '+(state.status==='won'?'Gennemført!':'Nyt forsøg …');
       if(current.id==='lights')return 'Alle lys er slukket på '+state.moves+' træk!';
       if(state.status==='lost')return current.id==='pong'?'Computeren vandt denne runde':'Spillet er slut';
       if(state.status==='draw')return 'Uafgjort — prøv igen!';
@@ -235,17 +360,18 @@
       if(!state)return;
       const finished=state.status!=='playing';
       const localTwo=current.category==='For to';
-      setText(score,current.id==='lights'?'Træk '+state.moves:current.id==='pong'?`Dig ${state.score} : ${state.opponent} Computer`:localTwo?`Træk ${state.moves}`:current.id==='memory'?`Forsøg ${state.attempts} · Par ${state.matched.length/2}/8`:current.id==='choices'?`Valg ${state.index}/24`:`Point ${state.score}`);
+      setText(score,current.id==='dash'?state.score+' %':current.id==='lights'?'Træk '+state.moves:current.id==='pong'?`Dig ${state.score} : ${state.opponent} Computer`:localTwo?`Træk ${state.moves}`:current.id==='memory'?`Forsøg ${state.attempts} · Par ${state.matched.length/2}/8`:current.id==='choices'?`Valg ${state.index}/24`:`Point ${state.score}`);
       setText(clock,`${Math.floor(state.time/60)}:${String(Math.floor(state.time)%60).padStart(2,'0')}`);
       best.hidden=localTwo||['choices','memory','mines','lights'].includes(current.id);
-      setText(best,'Rekord '+Math.max(prefs().bests[recordKey()]||0,state.score));
+      setText(best,'Rekord '+Math.max(prefs().bests[recordKey()]||0,state.score)+(current.id==='dash'?' %':''));
       start.textContent=finished?'Spil igen':running?'Pause':started?'Fortsæt':'Start spil';
-      const needsFile=rhythm?.track.artist&&!hasRecording()&&!silent&&!beatChosen;
-      playBeat.hidden=!(needsFile&&!running);playBeat.disabled=loadingFile;
+      const needsFile=rhythm?.track.artist&&!hasRecording()&&(rhythm.track.custom||!silent&&!beatChosen);
+      playBeat.hidden=!(needsFile&&!rhythm.track.custom&&!running);playBeat.disabled=loadingFile;
       if(needsFile)start.textContent='Vælg sangfil';
+      course.disabled=running;
       if(rhythm)media.controls=!running;
       start.disabled=Boolean(current.live&&!ctx)||loadingFile;
-      chooseFile.disabled=running||loadingFile;removeFile.disabled=offsetInput.disabled=running||loadingFile;difficulty.disabled=running;song.disabled=practice.disabled=running;
+      chooseFile.disabled=running||loadingFile;removeFile.disabled=offsetInput.disabled=running||loadingFile;difficulty.disabled=running;song.disabled=ownButton.disabled=running;practice.disabled=running||Boolean(rhythm?.track.custom&&!hasRecording());
       veil.hidden=!(current.live&&!started||started&&!running&&!finished);
       veilTitle.textContent=started?'På pause':'Klar til '+current.title+'?';veilCopy.textContent=started?'Fortsæt, når du er klar.':current.controls;veilButton.textContent=started?'Fortsæt':'Start spil';veilButton.disabled=start.disabled;
       if(rhythm?.track.artist && !started){
@@ -259,7 +385,8 @@
       if(finished){
         setText(feedback,finishText());
         if(!recorded){recorded=true;if(!best.hidden&&state.score>(prefs().bests[recordKey()]||0))void save({bests:{...prefs().bests,[recordKey()]:state.score}});}
-      }else if(current.id==='osu')setText(feedback,audioError||(silent?'Uden lyd':hasRecording()?'Sangfil: '+recording.filename:rhythm.track.artist?(beatChosen?'Øvebeat':'Ingen sangfil valgt'):'Instrumental')+' · '+rhythm.track.bpm+' BPM · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
+      }else if(current.id==='osu')setText(feedback,audioError||(silent?'Uden lyd':hasRecording()?'Sangfil: '+recording.filename:rhythm.track.artist?(beatChosen?'Øvebeat':'Ingen sangfil valgt'):'Instrumental')+(rhythm.track.bpm?' · '+rhythm.track.bpm+' BPM':'')+' · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
+      else if(current.id==='dash')setText(feedback,state.level.title+' · Forsøg '+Math.max(1,attempt)+' · '+(state.mode==='ship'?'Skib':'Terning')+(dashAudioError?' · Uden lyd':''));
       else if(current.id==='lights')setText(feedback,state.board.flat().filter(Boolean).length+' lys tilbage');
       else if(current.id==='breakout')setText(feedback,`♥ ${state.lives} liv · ${state.bricks.length} mursten tilbage${state.launch?' · Send bolden for at fortsætte':''}`);
       else if(current.id==='blocks')setText(feedback,`${state.lines} rækker ryddet · Niveau ${1+Math.floor(state.lines/10)}`);
@@ -310,28 +437,111 @@
     }
     function colors(){const css=getComputedStyle(node);return {bg:css.getPropertyValue('--lxp-bg').trim()||'#10141c',surface:css.getPropertyValue('--lxp-surface').trim()||'#1a2030',ink:css.getPropertyValue('--lxp-text').trim()||'#edf0f6',muted:css.getPropertyValue('--lxp-muted').trim()||'#8894aa',accent:css.getPropertyValue('--lxp-accent').trim()||'#f2ae3b',border:css.getPropertyValue('--lxp-border').trim()||'#344057'};}
     function draw(){
-      const p=colors(),w=canvas.width/2,h=canvas.height/2;ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle=p.bg;ctx.fillRect(0,0,w,h);
+      const p=(rhythm||current.id==='dash')?(rhythmPalette||=colors()):colors(),w=canvas.width/2,h=canvas.height/2;ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle=p.bg;ctx.fillRect(0,0,w,h);
       const rect=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
       const circle=(x,y,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();};
       const text=(v,x,y,size=16,color=p.ink)=>{ctx.fillStyle=color;ctx.font=`600 ${size}px system-ui`;ctx.fillText(String(v),x,y);};
       if(current.id==='osu'){
         const lead=.95;
+        function drawSlider(path,color){
+          ctx.lineCap='round';
+          ctx.beginPath();ctx.moveTo(path.x,path.y);
+          ctx.quadraticCurveTo(path.cx,path.cy,path.ex,path.ey);
+          ctx.strokeStyle=color;ctx.lineWidth=35;ctx.stroke();
+          ctx.strokeStyle=p.surface;ctx.lineWidth=29;ctx.stroke();
+        }
+        const accents=[p.accent,'#41c4ac','#b58aef','#64acf1'];
         let last=rhythm.index;
         while(last+1<rhythm.track.targets.length && rhythm.track.targets[last+1].time-rhythm.time<=lead)last++;
         for(let i=Math.min(last,rhythm.track.targets.length-1);i>=rhythm.index;i--){
           const target=rhythm.track.targets[i],left=target.time-rhythm.time;
           if(left>lead)continue;
           const active=i===rhythm.index, r=28;
-          ctx.globalAlpha=active?1:.46;
-          circle(target.x,target.y,r,active?p.accent:p.muted);
+          const accent=accents[Math.floor(i/8)%accents.length];
+          ctx.globalAlpha=Math.min(1,(lead-left)*8)*(active?1:.76);
+          if(target.spinEnd){
+            circle(320,180,86,p.surface);
+            ctx.lineWidth=4;ctx.strokeStyle=p.muted;ctx.beginPath();ctx.arc(320,180,79,0,2*Math.PI);ctx.stroke();
+            ctx.strokeStyle=accent;ctx.lineWidth=8;ctx.beginPath();
+            ctx.arc(320,180,79,-Math.PI/2,-Math.PI/2+2*Math.PI*Math.min(1,(rhythm.rotation||0)/target.required));
+            ctx.stroke();ctx.textAlign='center';text('Hold og drej',320,185,18,p.ink);ctx.textAlign='start';
+            continue;
+          }
+          const path=rhythm.sliders.get(i);
+          if(path)drawSlider(path,accent);
+          circle(target.x,target.y,r,accent);
           circle(target.x,target.y,r-3,p.surface);
-          ctx.textAlign='center';text(i+1,target.x,target.y+6,17,p.ink);ctx.textAlign='start';
+          ctx.textAlign='center';text(i%8+1,target.x,target.y+6,17,p.ink);ctx.textAlign='start';
           ctx.beginPath();ctx.arc(target.x,target.y,r+Math.max(0,left)*37,0,Math.PI*2);
-          ctx.strokeStyle=active?p.accent:p.muted;ctx.lineWidth=2;ctx.stroke();
+          ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();
         }
         ctx.globalAlpha=1;
-        rect(0,h-4,w*Math.min(1,rhythm.time/rhythm.track.end),4,p.accent);
+        if(rhythm.following){
+          drawSlider(rhythm.following,p.accent);
+          const ball=R.sliderPoint(rhythm.following,rhythm.time);
+          circle(ball.x,ball.y,18,p.accent);circle(ball.x,ball.y,11,p.surface);
+        }
+        rect(0,h-4,w*Math.min(1,rhythm.time/(rhythm.track.end||1)),4,p.accent);
         text(rhythm.verdict||'Følg ringen',16,27,15,p.muted);
+      }else if(current.id==='dash'){
+        const {level,x,y}=state,ground=288,runner=104,offset=x-runner;
+        const glow=level.color;
+        const polygon=(points,fill,edge)=>{
+          ctx.beginPath();ctx.moveTo(...points[0]);for(const vertex of points.slice(1))ctx.lineTo(...vertex);
+          ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.stroke();}
+        };
+        rect(0,0,w,h,'#0e132b');
+        ctx.globalAlpha=.1+.07*(1-(x%100)/100);
+        for(let col=-(x*.26%50);col<w;col+=50)rect(col,0,1,ground,glow);
+        for(let row=38;row<ground;row+=50)rect(0,row,w,1,glow);
+        ctx.globalAlpha=1;
+        for(let k=-1;k<7;k++){
+          const base=k*150-(x*.14%150);
+          polygon([[base,ground],[base+80,ground-98],[base+150,ground]],'#1d2946');
+          polygon([[base+80,ground-98],[base+112,ground-16],[base+150,ground]],'#17213a');
+        }
+        rect(0,ground,w,h-ground,'#1d3045');rect(0,ground,w,3,glow);
+        for(let k=-(offset%36);k<w;k+=36)rect(k,ground+8,2,h-ground-8,'#2b4258');
+        for(const o of level.objects){
+          const left=o.x-offset;
+          if(left+o.width< -22||left>w+22)continue;
+          const ow=o.width,top=ground-o.height;
+          switch(o.kind){
+            case 'gap':rect(left,ground,ow,h-ground,'#0a1022');break;
+            case 'spike':
+              polygon([[left,ground],[left+ow/2,top],[left+ow,ground]],'#ec6894','#ffe4ef');break;
+            case 'block':
+              rect(left,top,ow,o.height,'#314866');rect(left,top,ow,3,glow);
+              rect(left+5,top+7,ow-10,3,'#53738b');break;
+            case 'pad':
+              polygon([[left-2,ground],[left+4,ground-8],[left+ow-3,ground-8],[left+ow+2,ground]],'#ffca4e','#fff5b4');break;
+            case 'orb':
+              circle(left+13,top,15,'#ffc14d');circle(left+13,top,10,'#614b38');circle(left+13,top,5,'#ffeeb0');break;
+            case 'cube':case 'ship':
+              ctx.strokeStyle=o.kind==='ship'?'#60befb':'#73e9ab';ctx.lineWidth=4;
+              ctx.beginPath();ctx.ellipse(left,ground-100,12,65,0,0,Math.PI*2);ctx.stroke();
+              text(o.kind==='ship'?'SKIB':'TERNING',left-18,ground-178,10,'#d7eaff');break;
+            case 'gate':
+              rect(left,0,ow,top-91,'#304664');rect(left,top,ow,o.height,'#304664');
+              rect(left,top-94,ow,3,glow);rect(left,top,ow,3,glow);break;
+          }
+        }
+        const finish=level.length-offset;
+        if(finish<w){
+          for(let k=0;k<12;k++)for(let j=0;j<2;j++)rect(finish+j*7,ground-7*(k+1),7,7,(j+k)%2?'#16233d':'#f0f7ff');
+        }
+        if(state.mode==='ship'){rect(0,0,w,ground-257,'#1d2946');rect(0,ground-257,w,2,glow);}
+        const cy=ground-y-11;
+        ctx.save();ctx.translate(runner,cy);ctx.rotate(state.rotation);
+        if(state.mode==='cube'){
+          rect(-12,-12,24,24,'#e9fcff');rect(-10,-10,20,20,glow);
+          rect(-7,-5,4,4,'#17243a');rect(3,-5,4,4,'#17243a');rect(-4,4,9,3,'#17243a');
+        }else{
+          polygon([[-14,-8],[17,0],[-14,8],[-8,0]],glow,'#efffff');
+          polygon([[-13,-4],[-22,0],[-13,4]],'#ffae56');
+        }
+        ctx.restore();rect(20,18,145,4,'#30435d');rect(20,18,145*x/level.length,4,glow);
+        text(state.score+' %',177,25,12,'#efffff');
       }else if(current.id==='dino'){
         rect(0,318,640,2,p.border);for(let i=0;i<12;i++)rect((i*70-state.distance*8)%780,336,28,2,p.border);
         for(const o of state.obstacles){rect(o.x,o.y,o.w,o.h,'#45b68c');rect(o.x-6,o.y+10,8,6,'#45b68c');rect(o.x+o.w-2,o.y+4,8,6,'#45b68c');}
@@ -357,11 +567,26 @@
     node.addEventListener('keydown',event=>{
       if(!visible||play.hidden||!state)return;
       if(event.ctrlKey||event.metaKey||event.altKey||event.target.closest('select,input,textarea'))return;
+      if(rhythm){
+        if(bindPanel.contains(event.target))return;
+        const key=A.osuKey(event.key),bindings=A.osuBindings(prefs().bindings);
+        if(event.target.closest('button')&&(key==='Space'||key==='Enter'))return;
+        if(event.key==='Escape'||key===bindings.pause){
+          event.preventDefault();if(!event.repeat && started && state.status==='playing'){if(running)pause();else toggle();}return;
+        }
+        if(key===bindings.retry && !event.repeat && started){event.preventDefault();openGame('osu',true);toggle();return;}
+        if(running && (key===bindings.first||key===bindings.second)){
+          event.preventDefault();if(!event.repeat && aim){keys.add('hit-'+(event.code||key));rhythmHit(aim);}
+        }
+        return;
+      }
       if(event.key==='Escape'||event.key.toLowerCase()==='p'){event.preventDefault();if(running)pause();return;}
       if(event.target.closest('button')&&(event.key===' '||event.key==='Enter'))return;
-      if(current.id==='osu'){
-        if(running && ['z','x'].includes(event.key.toLowerCase())){
-          event.preventDefault();if(!event.repeat && aim)rhythmHit(aim);
+      if(current.id==='dash'){
+        if([' ','ArrowUp','w','W'].includes(event.key)){
+          event.preventDefault();if(event.repeat)return;
+          if(!running){if(started)return;toggle();}
+          keys.add('dash-'+event.key);keys.add('jump');C.act(state,'jump');
         }
         return;
       }
@@ -372,7 +597,7 @@
       if(['pong','breakout'].includes(current.id)&&dir)keys.add(dir);else if(!event.repeat||['left','right','down'].includes(type))action(type);
     });
     node.addEventListener('keyup',event=>{if(direction[event.key])keys.delete(direction[event.key]);});
-    window.addEventListener('keyup',event=>{if(direction[event.key])keys.delete(direction[event.key]);});
+    window.addEventListener('keyup',event=>{keys.delete('hit-'+(event.code||A.osuKey(event.key)));if(current?.id==='dash'){keys.delete('dash-'+event.key);if(keys.size===1)keys.delete('jump');}if(direction[event.key])keys.delete(direction[event.key]);});
     node.addEventListener('focusout',event=>{if(running&&event.relatedTarget&&!node.contains(event.relatedTarget))pause();});
     function position(event){
       const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/640,r.height/360);
@@ -390,15 +615,26 @@
       const scale=Math.min(r.width/640,r.height/360),left=r.left+(r.width-640*scale)/2,top=r.top+(r.height-360*scale)/2;
       C.act(state,'pointer',current.id==='pong'?(event.clientY-top)/scale:(event.clientX-left)/scale);
     });
-    arena.addEventListener('pointerdown',event=>{if(event.target!==canvas)return;arena.focus({preventScroll:true});if(current.id==='osu'&&event.button===0){aim=position(event);rhythmHit(aim);}else if(current.id==='dino')action('jump');else if(current.id==='breakout')action('launch');});
+    arena.addEventListener('pointerdown',event=>{if(event.target!==canvas)return;arena.focus({preventScroll:true});if(current.id==='dash'&&event.button===0){
+        if(!running){if(started)return;toggle();}event.preventDefault();canvas.setPointerCapture?.(event.pointerId);keys.add('dash-pointer-'+event.pointerId);keys.add('jump');C.act(state,'jump');
+      }else if(current.id==='osu'&&event.pointerType!=='mouse'&&event.button===0&&running){event.preventDefault();keys.add('pointer-'+event.pointerId);canvas.setPointerCapture?.(event.pointerId);aim=position(event);rhythmHit(aim);}else if(current.id==='dino')action('jump');else if(current.id==='breakout')action('launch');});
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])
+      window.addEventListener(type,event=>{keys.delete('pointer-'+event.pointerId);if(current?.id==='dash'){keys.delete('dash-pointer-'+event.pointerId);if(keys.size===1)keys.delete('jump');}});
+    arena.addEventListener('mousedown',event=>{
+      if(!rhythm||!running||event.target!==canvas||![0,2].includes(event.button)||prefs().mouseHits===false)return;
+      if(event.sourceCapabilities?.firesTouchEvents)return;
+      event.preventDefault();keys.add('mouse-'+event.button);aim=position(event);rhythmHit(aim);
+    });
+    window.addEventListener('mouseup',event=>keys.delete('mouse-'+event.button));
+    arena.addEventListener('contextmenu',event=>{if(rhythm&&running&&prefs().mouseHits!==false)event.preventDefault();});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){stopPreview();pause();}});
-    window.addEventListener('blur',()=>{if(running)pause();});window.addEventListener('pagehide',()=>stop());
+    window.addEventListener('blur',()=>{clearRetry();if(running)pause();});window.addEventListener('pagehide',()=>stop());
     function update(open){
       visible=open;node.hidden=!open;
-      if(!open){stopPreview();if(running)pause();return;}
+      if(!open){clearRetry();stopPreview();if(running)pause();return;}
       const id=location.hash.split('/')[1],game=C.catalog.find(g=>g.id===id);
       lobby.hidden=Boolean(game);play.hidden=!game;
-      if(game){openGame(game.id);render();}else{stopPreview();if(running)pause();showCards();}
+      if(game){openGame(game.id);render();}else{clearRetry();stopPreview();if(running)pause();showCards();}
     }
     return {node,update,entries:C.catalog.map(g=>({href:'#lxp-games/'+g.id,key:'games',label:g.title,icon:'game',context:'Spil'}))};
   };

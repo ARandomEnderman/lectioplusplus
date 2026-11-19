@@ -1,5 +1,9 @@
 # LectioPlus+
 
+## Version 0.1.8
+
+osu! understøtter hele lokale sange, sliders, spinners og egne tastbindinger. Geometry Dash · Neonbaner tilføjer 15 originale baner med musik og lokale rekorder.
+
 ## Version 0.1.7
 
 Rytmecirkler har nu 30 baner. I de 10 nye popbaner kan du spille til en lokal sangfil. Vælg fx **California Gurls**, tryk **Vælg sangfil**, og start banen. Filen bliver i fanen. Du kan også vælge **Spil med øvebeat**. De 20 instrumentalbaner har indbygget musik.

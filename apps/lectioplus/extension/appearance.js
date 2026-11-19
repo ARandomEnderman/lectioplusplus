@@ -27,9 +27,20 @@
     navigationDensity: 'comfortable', navigationGroups: 'collapsed', tableDensity: 'comfortable', sectionShortcuts: true,
     scheduleSize: '76', scheduleView: 'auto', showBreaks: true, colorLessons: true, showLessonRoom: true,
     dashboard: defaultDashboard(), navigation: defaultNavigation(), customSidebar: [], toolbox: toolbox(), games: games() };
+  function osuKey(key){
+    if(typeof key!=='string')return '';
+    if(key===' '||key==='Space')return 'Space';
+    if(/^(?:Arrow(?:Up|Down|Left|Right)|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown)$/.test(key))return key;
+    return /^[\p{L}\p{N}\p{P}\p{S}]$/u.test(key)?key.toLowerCase():'';
+  }
+  function osuBindings(input={}){
+    const defaults={first:'z',second:'x',pause:'p',retry:'r'};
+    const result=Object.fromEntries(Object.keys(defaults).map(key=>[key,osuKey(input?.[key])||defaults[key]]));
+    return new Set(Object.values(result)).size===4?result:defaults;
+  }
   function games(value={}){
     const input=value&&typeof value==='object'?value:{},allowed=['dino','snake','blocks','pong','breakout','2048','mines','memory','tic','four','choices'];
-    return {difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=id==='osu' ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(0,63))};
+    return {bindings:osuBindings(input.bindings),mouseHits:input.mouseHits!==false,difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=id==='dash'? /^(?:[1-9]|1[0-5])$/.test(difficulty)&&v<=100 : id==='osu' ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(-95))};
   }
   function choice(value, options, fallback) { return options.includes(value) ? value : fallback; }
   function cleanText(value, length) { return typeof value === 'string' ? value.slice(0, length) : ''; }
@@ -258,5 +269,5 @@
     } };
   }
 
-  globalThis.lectioPlusAppearance = { defaults, normalize, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, sidebarIcons, navigationItems, defaultNavigation, themes, designs };
+  globalThis.lectioPlusAppearance = { defaults, normalize, osuBindings, osuKey, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, sidebarIcons, navigationItems, defaultNavigation, themes, designs };
 })();

@@ -28,7 +28,7 @@ assert(Math.abs(R.firstBeat(buffer,track.bpm)-.31)<.015);
   const recording=await R.importRecording(file,track);
   assert.equal(recording.id,track.id);
   await assert.rejects(R.importRecording({...file,size:70*1024*1024},track),/64 MB/);
-  await assert.rejects(R.importRecording(file,{...track,end:100}),/for kort/);
+  assert.equal((await R.importRecording(file,{...track,end:100})).chart.end,buffer.duration);
   let args,closed=false;
   globalThis.AudioContext=class{
     currentTime=2;
@@ -38,10 +38,10 @@ assert(Math.abs(R.firstBeat(buffer,track.bpm)-.31)<.015);
     close(){closed=true;return Promise.resolve();}
   };
   let p=R.playRecording(track,recording,0);
-  assert(Math.abs(args[0]-(2+1.5-recording.start))<.00001);
+  assert(args[0]===2);
   assert.equal(args[1],0);assert.equal(p.now(),0);p.close();assert(closed);
   p=R.playRecording(track,recording,8);
-  assert.equal(args[0],2);assert(Math.abs(args[1]-(8+recording.start-1.5))<.00001);
+  assert.equal(args[0],2);assert(args[1]===8);
   assert.equal(p.now(),8);p.close();
   console.log('10 pop charts, beat alignment, import limits and recording pause/resume passed');
 })().catch(e=>{console.error(e);process.exit(1);});

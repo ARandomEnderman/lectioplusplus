@@ -14,12 +14,12 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
     resume(){return Promise.resolve();}
     close(){return Promise.resolve();}
   };
-  w.HTMLCanvasElement.prototype.getContext=function(){return this.classList.contains('lxp-game-canvas')?{setTransform(){},clearRect(){},fillRect(){draws++;},beginPath(){},arc(){},stroke(){},fill(){},fillText(){}}:null;};
+  w.HTMLCanvasElement.prototype.getContext=function(){return this.classList.contains('lxp-game-canvas')?{setTransform(){},clearRect(){},fillRect(){draws++;},beginPath(){},closePath(){},lineTo(){},ellipse(){},save(){},translate(){},rotate(){},restore(){},moveTo(){},quadraticCurveTo(){},arc(){},stroke(){},fill(){},fillText(){}}:null;};
   for(const s of d.querySelectorAll('script[src]'))w.eval(fs.readFileSync(ext+s.getAttribute('src').replace('../extension/',''),'utf8'));
   await wait();const games=d.querySelector('.lxp-games'),arena=()=>games.querySelector('.lxp-game-arena'),toolbar=()=>games.querySelector('.lxp-game-toolbar');
   const route=async id=>{w.location.hash=id;await wait();};
   const click=(scope,label)=>{const b=[...scope.querySelectorAll('button')].find(b=>b.textContent===label||b.getAttribute('aria-label')===label);ok(b&&!b.disabled,'click '+label);b.click();return b;};
-  ok(!games.hidden&&games.querySelectorAll('.lxp-game-card').length===13,'lobby contains thirteen games');
+  ok(!games.hidden&&games.querySelectorAll('.lxp-game-card').length===14,'lobby contains fourteen games');
   ok(d.querySelector('.lxp-nav a[href="#lxp-games"]')?.getAttribute('aria-current')==='page','sidebar game tab active');
   click(games.querySelector('.lxp-games-filters'),'For to');ok(games.querySelectorAll('.lxp-game-card').length===2,'category filter');click(games.querySelector('.lxp-games-filters'),'Alle');
   for(const game of w.lectioPlusGamesCore.catalog){
@@ -31,6 +31,22 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
     click(toolbar(),'Fortsæt');click(toolbar(),'Start forfra');ok(games.dataset.gameState==='ready','restart '+game.id);
     ok(!games.querySelector('img[src],iframe'),'no remote profiles or embeds '+game.id);
   }
+  await route('#lxp-games/osu');
+  const binds=games.querySelector('.lxp-game-bindings'),first=binds.querySelector('button');
+  const press=(el,key,type='keydown')=>el.dispatchEvent(new w.KeyboardEvent(type,{key,bubbles:true,cancelable:true}));
+  first.click();press(first,'x');ok(binds.textContent.includes('allerede'),'duplicate bind rejected');
+  press(first,'f');await wait();ok(first.textContent==='F','bind updates on screen');
+  ok(JSON.parse(w.localStorage.getItem('lectioPlusPreview')).games.bindings.first==='f','bind survives persistence');
+  first.click();press(first,'Escape');ok(first.textContent==='F','cancel keeps binding');
+  click(toolbar(),'Spil med øvebeat');
+  const canvas=games.querySelector('canvas'),oldHit=w.lectioPlusRhythm.hit;
+  let strikes=0;w.lectioPlusRhythm.hit=()=>strikes++;
+  canvas.dispatchEvent(new w.MouseEvent('pointermove',{clientX:100,clientY:100,bubbles:true}));
+  press(arena(),'z');press(arena(),'f');ok(strikes===1,'custom strike replaces old key');press(arena(),'f','keyup');
+  press(arena(),'p');ok(games.dataset.gameState==='paused','osu pause key');
+  press(arena(),'p');ok(games.dataset.gameState==='playing','osu resume key');
+  w.lectioPlusRhythm.hit=oldHit;press(arena(),'Escape');
+  click(binds,'Gendan standardtaster');await wait();ok(first.textContent==='Z','defaults restored');
   await route('#lxp-games/dino');click(toolbar(),'Start spil');await route('#home');const pausedDraws=draws;await wait();ok(games.hidden&&draws===pausedDraws,'leaving games suspends animation');await route('#lxp-games/dino');ok(games.dataset.gameState==='paused','return does not resume silently');
   click(toolbar(),'Fortsæt');w.dispatchEvent(new w.Event('blur'));ok(games.dataset.gameState==='paused','window blur pauses');click(toolbar(),'Fortsæt');
   Object.defineProperty(d,'hidden',{configurable:true,value:true});d.dispatchEvent(new w.Event('visibilitychange'));ok(games.dataset.gameState==='paused','hidden browser tab pauses');Object.defineProperty(d,'hidden',{configurable:true,value:false});
