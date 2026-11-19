@@ -14,8 +14,8 @@ const pause=()=>new Promise(r=>setTimeout(r,35));
  const route=async id=>{w.location.hash='#lxp-tools/'+id;await pause()};
  const prefs=()=>w.lectioPlusAppearance.normalize(JSON.parse(w.localStorage.getItem('lectioPlusPreview')||'{}'));
  const X=w.lectioPlusExpanded;
- ok(X.tools.length===72,'72 new tools');
- ok(new Set(w.lectioPlusSchoolCatalog.tools.map(t=>t.id)).size===126,'126 unique tools retain all 54 previous tools');
+ ok(X.tools.length===74,'74 expanded tools');
+ ok(new Set(w.lectioPlusSchoolCatalog.tools.map(t=>t.id)).size===128,'128 unique tools retain all 54 previous tools');
  for(const tool of X.tools){await route(tool.id);ok(stage().querySelector('.lxp-expanded'),'opens '+tool.id);ok(stage().querySelector('input,select,textarea,button'),'controls '+tool.id);if(tool.calculate){await click('Beregn '+tool.title);ok(!stage().querySelector('.lxp-tool-error'),'default calculation '+tool.id);ok(stage().querySelector('.lxp-tool-results'),'result '+tool.id);}}
  await route('code-workshop');ok(stage().querySelector('.CodeMirror'),'CodeMirror editor initializes');
  change('Arbejdsform','lessons');let visited=0;

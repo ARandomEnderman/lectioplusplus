@@ -8,12 +8,18 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
   w.structuredClone=structuredClone;w.matchMedia=q=>({matches:q.includes('dark'),addEventListener(){},removeEventListener(){}});w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.Range.prototype.getBoundingClientRect=()=>({left:0,top:0,right:0,bottom:0,width:0,height:0});w.Range.prototype.getClientRects=()=>[];
-  w.HTMLCanvasElement.prototype.getContext=function(){return this.classList.contains('lxp-game-canvas')?{setTransform(){},clearRect(){},fillRect(){draws++;},beginPath(){},arc(){},fill(){},fillText(){}}:null;};
+  w.AudioContext=class {
+    get currentTime(){return 0;}
+    createGain(){return {gain:{},connect(){}};}
+    resume(){return Promise.resolve();}
+    close(){return Promise.resolve();}
+  };
+  w.HTMLCanvasElement.prototype.getContext=function(){return this.classList.contains('lxp-game-canvas')?{setTransform(){},clearRect(){},fillRect(){draws++;},beginPath(){},arc(){},stroke(){},fill(){},fillText(){}}:null;};
   for(const s of d.querySelectorAll('script[src]'))w.eval(fs.readFileSync(ext+s.getAttribute('src').replace('../extension/',''),'utf8'));
   await wait();const games=d.querySelector('.lxp-games'),arena=()=>games.querySelector('.lxp-game-arena'),toolbar=()=>games.querySelector('.lxp-game-toolbar');
   const route=async id=>{w.location.hash=id;await wait();};
   const click=(scope,label)=>{const b=[...scope.querySelectorAll('button')].find(b=>b.textContent===label||b.getAttribute('aria-label')===label);ok(b&&!b.disabled,'click '+label);b.click();return b;};
-  ok(!games.hidden&&games.querySelectorAll('.lxp-game-card').length===11,'lobby contains ten classics and bonus');
+  ok(!games.hidden&&games.querySelectorAll('.lxp-game-card').length===13,'lobby contains thirteen games');
   ok(d.querySelector('.lxp-nav a[href="#lxp-games"]')?.getAttribute('aria-current')==='page','sidebar game tab active');
   click(games.querySelector('.lxp-games-filters'),'For to');ok(games.querySelectorAll('.lxp-game-card').length===2,'category filter');click(games.querySelector('.lxp-games-filters'),'Alle');
   for(const game of w.lectioPlusGamesCore.catalog){

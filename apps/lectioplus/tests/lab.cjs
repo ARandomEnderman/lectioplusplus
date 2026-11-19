@@ -6,7 +6,7 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;console.log('PASS',label)};
  w.structuredClone=structuredClone;w.matchMedia=q=>({matches:q.includes('dark'),addEventListener(){},removeEventListener(){}});w.HTMLCanvasElement.prototype.getContext=()=>null;w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  const manifest=JSON.parse(fs.readFileSync(root+'/extension/manifest.json','utf8'));for(const name of ['appearance.js','privacy.js',...manifest.content_scripts.at(-1).js])w.eval(fs.readFileSync(root+'/extension/'+name,'utf8'));await pause();
  const L=w.lectioPlusLabCore,close=(a,b)=>Math.abs(a-b)<1e-9*Math.max(1,Math.abs(b));
- ok(w.lectioPlusSchoolCatalog.tools.length===126,'126 tools including the online translator are registered');
+ ok(w.lectioPlusSchoolCatalog.tools.length===128,'128 tools including the online translator are registered');
  ok(!w.lectioPlusAppearance.defaults.showClicker&&!d.querySelector('.lxp-nav-link[href="#lxp-clicker"]'),'new installation has Strafe Clicker disabled');
  ok(w.lectioPlusAppearance.normalize({showClicker:true}).showClicker,'an explicitly enabled clicker preference is retained');
  for(const i of L.ions){const ion=L.ion(i.symbol);ok(ion.shells.reduce((a,b)=>a+b,0)===ion.electrons&&ion.electrons===ion.z-ion.charge,'controlled ion charge and shells: '+i.symbol);}
