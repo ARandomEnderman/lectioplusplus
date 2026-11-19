@@ -42,7 +42,7 @@
   const defaults = appearance.defaults;
   const darkMode = matchMedia('(prefers-color-scheme: dark)');
   const narrow = matchMedia('(max-width: 760px)');
-  const storage = preview ? null : globalThis.chrome?.storage;
+  const storage = preview ? null : (globalThis.browser?.storage ?? globalThis.chrome?.storage);
   const icon = globalThis.lectioPlusIcon;
   const lectio = globalThis.lectioPlusData;
   const initialUrl = location.href;

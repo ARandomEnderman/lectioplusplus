@@ -1,6 +1,8 @@
 (() => {
   'use strict';
   const catalog = [
+    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Ram cirklerne i takt til 20 kendte melodier.',controls:'Klik eller tryk på den næste cirkel, når ringen møder kanten. Du kan også sigte med musen og bruge Z eller X.',live:true},
+    {id:'lights',title:'Lys ud',symbol:'💡',category:'Hjernevridere',description:'Sluk hele brættet. Hvert tryk skifter flere lys.',controls:'Vælg et felt for at skifte det og dets naboer oppe, nede og til siderne. Sluk alle 25 lys.'},
     {id:'dino',title:'Dinohop',symbol:'🦖',category:'Arkade',description:'Hop over kaktusser, og hold løbet i gang.',controls:'Mellemrum, ↑ eller Hop. Ét hop ad gangen.',live:true},
     {id:'snake',title:'Snake',symbol:'🐍',category:'Arkade',description:'Saml frugter, og giv slangen plads til at vokse.',controls:'Piletaster, WASD eller retningsknapper. Undgå vægge og din egen hale.',live:true},
     {id:'blocks',title:'Tetris · Blokfald',symbol:'🧩',category:'Arkade',description:'Drej brikkerne, og ryd hele rækker.',controls:'← → flytter · ↑ drejer · ↓ sænker · mellemrum slipper brikken.',live:true},
@@ -27,6 +29,11 @@
     if(id==='blocks'){Object.assign(s,{board:empty(10,20),bag:[],lines:0,clock:0});s.nextPiece=takePiece(s);spawnPiece(s);}
     if(id==='pong'){Object.assign(s,{paddle:142,ai:142,opponent:0,serve:0.8});servePong(s,1);}
     if(id==='breakout'){Object.assign(s,{paddle:270,lives:3,bricks:Array.from({length:40},(_,i)=>({x:24+i%8*74,y:48+Math.floor(i/8)*26,w:66,h:18,color:Math.floor(i/8)}))});serveBreakout(s);}
+    if(id==='lights'){
+      s.board=empty(5,5);s.moves=0;
+      for(const pos of shuffle(Array.from({length:25},(_,i)=>i),rng).slice(0,8))switchLights(s,pos%5,Math.floor(pos/5));
+      if(!s.board.flat().some(Boolean))switchLights(s,2,2);
+    }
     if(id==='2048'){s.board=empty(4,4);addTile(s);addTile(s);}
     if(id==='mines')Object.assign(s,{board:empty(9,9),open:empty(9,9),flags:empty(9,9),seeded:false,mines:10});
     if(id==='memory')Object.assign(s,{cards:shuffle(Array.from({length:16},(_,i)=>i%8),rng),matched:[],flipped:[],attempts:0,wait:0});
@@ -90,8 +97,20 @@
   }
   function servePong(s,dir){s.ball={x:320,y:180,vx:dir*250*s.factor,vy:(s.rng()<0.5?-1:1)*125*s.factor};s.serve=0.8;}
   function serveBreakout(s){s.ball={x:s.paddle+50,y:318,vx:145*s.factor,vy:-220*s.factor};s.launch=true;}
+  function switchLights(s,x,y){
+    for(const [dx,dy] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]]){
+      const row=s.board[y+dy];
+      if(row && row[x+dx]!==undefined) row[x+dx]^=1;
+    }
+  }
   function act(s,action,value){
     if(s.status!=='playing')return;
+    if(s.id==='lights' && action==='cell' && Array.isArray(value)){
+      const [x,y]=value;
+      if(![x,y].every(v=>Number.isInteger(v)&&v>=0&&v<5))return;
+      switchLights(s,x,y);s.moves++;
+      if(!s.board.flat().some(Boolean))s.status='won';
+    }
     if(s.id==='dino'&&(action==='jump'||action==='up')&&s.y>=276){s.vy=-540;}
     if(s.id==='snake'){
       const dir={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[action];

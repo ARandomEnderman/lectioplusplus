@@ -91,3 +91,9 @@
 @media(max-width:380px){.lxp-games-cards { grid-template-columns:minmax(0,1fr); }}
 @media(prefers-reduced-motion:reduce){.lxp-games .lxp-game-card { transition:none; }.lxp-games .lxp-game-card:hover { transform:none; }}
 html[data-lxp-reduced-motion="true"] .lxp-game-card { transition:none; transform:none; }
+.lxp-game-grid-lights { grid-template-columns:repeat(5,minmax(0,1fr)); max-width:440px; gap:8px; }
+.lxp-game-grid-lights .lxp-game-cell { font-size:clamp(18px,4vw,32px); border-radius:12px; }
+.lxp-game-grid-lights [aria-pressed=true] { background:var(--lxp-accent); color:var(--lxp-bg); }
+.lxp-game-difficulty select { max-width:100%; min-width:0; }
+.lxp-game-toolbar button[aria-pressed=true] { border-color:var(--lxp-accent); background:var(--lxp-active); color:var(--lxp-accent); }
+.lxp-game-card[data-game="osu"] .lxp-game-card-art { color:var(--lxp-accent); background:repeating-radial-gradient(circle at center,transparent 0 24px,var(--lxp-border) 25px 26px,transparent 27px 43px),var(--lxp-bg); }

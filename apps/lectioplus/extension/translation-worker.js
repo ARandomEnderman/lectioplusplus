@@ -1,5 +1,5 @@
 'use strict';
-importScripts('translation.js');
+if (typeof importScripts === 'function') importScripts('translation.js');
 const pending=new Set();
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(message?.type!=='lxp-translate')return;

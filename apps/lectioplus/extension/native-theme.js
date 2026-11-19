@@ -6,7 +6,7 @@
   let body = document.body;
   const embedded = window !== window.top;
   const blankDocument = /^about:(?:blank|srcdoc)(?:#.*)?$/;
-  const storage = globalThis.chrome?.storage;
+  const storage = (globalThis.browser?.storage ?? globalThis.chrome?.storage);
   const system = matchMedia('(prefers-color-scheme: dark)');
 
   function lectioPath(path) {

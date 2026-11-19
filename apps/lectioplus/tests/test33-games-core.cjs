@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const env={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension/games-core.js'),'utf8'),env);const C=env.lectioPlusGamesCore;
 let checks=0;const ok=(v,label)=>{assert.ok(v,label);checks++;},same=(a,b,label)=>{assert.equal(JSON.stringify(a),JSON.stringify(b),label);checks++;};
 const make=(id)=>C.create(id,{rng:()=>0.35}),tick=(s,n=1,keys)=>{for(let i=0;i<n;i++)C.step(s,0.016,keys);};
-ok(C.catalog.length===11&&new Set(C.catalog.map(g=>g.id)).size===11,'ten classics and one bonus');
+ok(C.catalog.length===13&&new Set(C.catalog.map(g=>g.id)).size===13,'thirteen games');
 for(const game of C.catalog){const s=make(game.id);ok(s.status==='playing'&&Number.isFinite(s.score),game.id+' starts');ok(game.controls.length>20,game.id+' has controls');}
 let s=make('dino');C.act(s,'jump');ok(s.vy<0,'jump');tick(s,5);const vy=s.vy;C.act(s,'jump');ok(s.vy===vy,'no double jump');tick(s,55);ok(s.y===276&&s.vy===0,'lands on ground');s.obstacles=[{x:80,y:276,w:28,h:42}];tick(s);ok(s.status==='lost','dino collision');
 s=make('snake');C.act(s,'left');ok(!s.next,'no reverse');C.act(s,'up');C.act(s,'left');same(s.next,[0,-1],'only one turn per cell');tick(s,12);same(s.snake[0],[7,7],'queued turn');

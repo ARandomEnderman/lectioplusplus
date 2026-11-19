@@ -1,5 +1,11 @@
 # LectioPlus+
 
+## Version 0.1.6
+
+- Under **Spil** kan du vælge mellem 20 offlinebaner i **osu! · Rytmecirkler**. Hver bane har sin egen melodi, sværhedsgrad og rekord. **Lys ud** er et nyt puslespil på et 5 × 5-bræt.
+- Under **Hjælpemidler → Matematik → Funktioner** kan du undersøge en potensfunktion og bestemme forskriften ud fra to punkter.
+- Firefox til computer har fået en separat, usigneret pakke. Hent `lectioplus-firefox.zip` fra udgivelsen, åbn `about:debugging#/runtime/this-firefox`, og vælg ZIP-filen som midlertidig tilføjelse. Det kræver Firefox 154 eller nyere og skal gentages efter genstart.
+
 ## Version 0.1.5
 
 Samler ændringerne til og med Test 34: navnesøgning under Elever og Lærere, ti klassiske spil, 125 Python-opgaver med tydeligere vejledning, interaktivt input og terminal samt flere fagværktøjer og egne sidebjælkelinks. Markeringen af det aktuelle klokkeslæt fra 0.1.4 er bevaret.

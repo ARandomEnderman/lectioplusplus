@@ -4,6 +4,21 @@ const X=lectioPlusExpanded,C=lectioPlusChemistry;let checks=0;
 function close(actual,expected,tol=1e-8){assert.ok(Math.abs(actual-expected)<=tol*Math.max(1,Math.abs(expected)),`${actual} != ${expected}`);checks++;}
 function calc(id,data={}){const t=X.tools.find(t=>t.id===id);return t.calculate({...Object.fromEntries(t.fields.map(f=>[f.id,f.value])),...data});}
 for(const t of X.tools.filter(t=>t.calculate)){const r=calc(t.id);assert.ok(r.rows.length);checks++;for(const f of t.fields.filter(f=>f.type==='number')){assert.throws(()=>calc(t.id,{[f.id]:''}));assert.throws(()=>calc(t.id,{[f.id]:'NaN'}));checks+=2;}}
+for (const [a, x, expected] of [[2,4,48], [-1,4,0.75], [0,1,3], ['0,5',4,6]]) {
+  const result = calc('power-function', {a,x});
+  close(result.rows[1][1], expected);
+  close(result.plot[1].points[0][1], expected);
+}
+for (const [x1,y1,x2,y2,a,b] of [[2,12,4,48,2,3],[4,2,2,4,-1,8],[2,7,5,7,0,7],[1,3,4,6,0.5,3]]) {
+  const result = calc('power-two-points', {x1,y1,x2,y2});
+  close(result.rows[0][1], a);
+  close(result.rows[1][1], b);
+  for (const [x,y] of result.table.body) close(y, b*x**a);
+}
+for (const invalid of [{x1:4}, {x1:0}, {y1:-2}, {y2:0}]) {
+  assert.throws(() => calc('power-two-points', invalid));
+  checks++;
+}
 close(calc('projectile',{v:10,angle:45,g:10}).rows[1][1],10);
 close(calc('forces',{forces:'10; 0\n10; 180',mass:2}).rows[2][1],0);
 close(calc('energy-bars',{m:2,start:10,height:5,heat:0,g:10}).rows[0][1],100);

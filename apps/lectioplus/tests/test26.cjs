@@ -23,7 +23,7 @@ const pause=()=>new Promise(r=>setTimeout(r,25));
   if(tool.calculate){await click('Beregn '+tool.title);ok(!panel().querySelector('.lxp-tool-error')&&panel().querySelector('.lxp-tool-results'),'default result '+tool.id);}
   inventory.push({id:tool.id,controls:controls.length,tables:panel().querySelectorAll('table').length});
  }
- ok(inventory.length===126,'all 126 tool routes audited');console.log('PASS all 126 routes, field labels and default calculations');
+ ok(inventory.length===128,'all 128 tool routes audited');console.log('PASS all 128 routes, field labels and default calculations');
  // Use a known expanded calculator to check empty and completed result states.
  const expanded=w.lectioPlusExpanded.tools.find(t=>t.calculate);await route(expanded.id);await click('Indlæs eksempel');ok(panel().querySelector('.lxp-tool-results'),'expanded example still calculates');ok(panel().querySelector('.lxp-tool-actions .lxp-primary-button'),'main calculation action is prominent');
  await route('regression');const first=panel().querySelector('.lxp-data-table input');first.value='1,25';first.dispatchEvent(new w.Event('input',{bubbles:true}));

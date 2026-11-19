@@ -1,6 +1,6 @@
 name: 'release extension'
 
-# Releases the LectioPlus+ extension for Chrome and Safari automatically:
+# Releases the LectioPlus+ extension for Chrome, Edge, Firefox and Safari automatically:
 # on every push to main that touches the extension, if "version" in
 # apps/lectioplus/extension/manifest.json has no vX.Y.Z tag yet, the extension
 # is built and published as release vX.Y.Z (the tag is created by the release).
@@ -63,6 +63,9 @@ jobs:
           mkdir -p dist
           (cd "$EXTENSION_DIR" && zip -r -X "$GITHUB_WORKSPACE/dist/lectioplus-chrome.zip" .)
           cp apps/lectioplus/safari/install.sh dist/install-safari.sh
+
+      - name: Package the unsigned Firefox desktop extension
+        run: python3 apps/lectioplus/firefox/package.py dist/lectioplus-firefox.zip
 
       - uses: actions/upload-artifact@v4
         with:
@@ -133,6 +136,9 @@ jobs:
             3. Slå LectioPlus+ til under **Indstillinger → Udvidelser**.
 
             Kræver Safari 16 eller nyere.
+
+            ## Firefox til computer
+            Fra Firefox 154 kan du hente `lectioplus-firefox.zip` og vælge den under **Indlæs midlertidig tilføjelse** på `about:debugging#/runtime/this-firefox`. Den usignerede udvidelse skal indlæses igen efter genstart af Firefox.
 
             ## Chrome og Edge
             1. Hent `lectioplus-chrome.zip`, og pak den ud.
