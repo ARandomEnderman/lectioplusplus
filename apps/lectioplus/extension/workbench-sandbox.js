@@ -1,0 +1,36 @@
+(() => {
+  'use strict';
+  let connected=false,worker,url;
+  addEventListener('message',event=>{
+    if(connected||event.source!==parent||event.data?.type!=='lxp-workbench-sandbox'||!event.ports[0])return;
+    connected=true;const port=event.ports[0];let runId=0,ready=false;
+    port.onmessage=({data})=>{
+      if(data?.type==='stdin'){
+        if(ready&&data.id===runId&&Number.isSafeInteger(data.requestId)&&typeof data.value==='string'&&data.value.length<=4096&&!/[\r\n]/.test(data.value))worker.postMessage(data);
+        return;
+      }
+      if(worker)return;
+      runId=data.id;
+      const report=error=>port.postMessage({id:data.id,type:'error',message:'Kodeværkstedet kunne ikke starte: '+String(error?.message||error||'Ukendt fejl').slice(0,1000)+' [LXP30-WORKER]'});
+      try{
+        url=URL.createObjectURL(new Blob([data.files.worker],{type:'text/javascript'}));
+        // Chromium can reject blob module workers from opaque origins before
+        // any code runs (crbug.com/40067939). This entry has no static imports;
+        // a classic worker supports the runtime's later dynamic imports too.
+        worker=new Worker(url,{type:'classic',name:'LectioPlus+ kodeværksted'});
+        worker.onmessage=e=>{
+          if(e.data?.type==='worker-ready'){
+            if(ready)return;
+            if(e.data.protocol!==3){report('Filerne har forskellige versioner. Opdatér hele extension-mappen.');return;}
+            ready=true;port.postMessage({id:data.id,type:'progress',phase:'loading',stage:'worker-ready'});
+            try{worker.postMessage(data);}catch(error){report(error);}
+          }else if(ready)port.postMessage(e.data);
+        };
+        worker.onerror=event=>{event.preventDefault();report(event.message||'Browseren kunne ikke indlæse programprocessen.');};
+        worker.onmessageerror=()=>report('Resultatet fra programmet kunne ikke læses.');
+      }catch(error){report(error);}
+    };
+    port.start();port.postMessage({type:'sandbox-ready',protocol:3});
+  });
+  addEventListener('pagehide',()=>{worker?.terminate();if(url)URL.revokeObjectURL(url);});
+})();

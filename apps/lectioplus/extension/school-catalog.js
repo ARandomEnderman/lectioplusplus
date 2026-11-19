@@ -12,6 +12,7 @@
     const tool={id,category,title,description,fields,help,calculate(raw,options={angle:'deg'}){
       const data={...raw};
       for(const field of tool.fieldsFor?.(data)||fields){
+        try {
         if(field.hidden)continue;
         let value=data[field.id];
         if(field.optional&&(value===null||String(value??'').trim()==='')){data[field.id]=null;continue;}
@@ -23,6 +24,7 @@
         }else if(field.type==='select'&&!field.options.some(([id])=>id===value))fail('Vælg en gyldig mulighed.');
         else if(value===undefined)fail(`${field.label}: udfyld feltet.`);
         data[field.id]=value;
+        } catch(error) { error.field=field.id; throw error; }
       }
       const answer=calculate(data,options);
       for(const [,value] of answer.rows)if(typeof value==='number')F(value);
@@ -94,6 +96,7 @@
     ['planner','study','Læseplan','Fordel sider eller opgaver over dine studiedage.']
   ].map(([id,category,title,description])=>({id,category,title,description,special:true})));
   tools.push(...(globalThis.lectioPlusLabCore?.tools||[]));
+  tools.push(...(globalThis.lectioPlusExpanded?.tools||[]));
   const modes={
     percent:v=>({a:{label:v.mode==='change'?'Førværdi':'Tal'},b:{label:v.mode==='change'?'Efterværdi':'Procent (%)'}}),
     geometry:v=>({a:{label:{circle:'Radius',rectangle:'Bredde',triangle:'Grundlinje',cylinder:'Radius',sphere:'Radius'}[v.shape]},b:{label:'Højde',hidden:['circle','sphere'].includes(v.shape)}}),
@@ -102,5 +105,67 @@
     force:v=>({m:{hidden:v.mode==='pressure'},a:{hidden:v.mode==='pressure'},force:{hidden:v.mode!=='pressure'},area:{hidden:v.mode!=='pressure'}})
   };
   for(const tool of tools)if(modes[tool.id])tool.fieldsFor=v=>{const changes=modes[tool.id](v);return tool.fields.map(f=>({...f,...changes[f.id]}));};
-  globalThis.lectioPlusSchoolCatalog={tools,categories:[['all','Alle'],['favorites','Favoritter'],['math','Matematik'],['chemistry','Kemi'],['physics','Fysik'],['language','Sprog og opgaver'],['study','Studieteknik']]};
+  const guides={
+    statistics:'Skriv ét tal pr. række. Tilføj eller fjern rækker efter behov, og tryk Beregn. Du kan også indsætte en hel talrække under tekstvisningen.',
+    regression:'Skriv X og Y for samme måling på samme række. Tilføj dine målepunkter, og tryk Beregn for at finde den rette linje.',
+    basic:'Brug knapperne eller tastaturet. Tryk = for resultatet. Ekstra funktioner og historik kan foldes ud.',
+    graph:'Skriv en funktion med x, vælg intervallet, og tryk Tegn graf. Brug værditabellen til at aflæse punkter.',
+    periodic:'Søg efter et grundstof, eller vælg det i tabellen. Nedenunder finder du atommodel, farveforklaring og isotoper.',
+    units:'Vælg først størrelsen, fx længde. Skriv værdien, vælg Fra og Til, og tryk Omregn.',
+    text:'Indsæt din tekst. Ord, tegn og læsetid opdateres, mens du skriver.',
+    sources:'Udfyld spørgsmålene om din kilde. Saml derefter svarene til din egen arbejdskladde.',
+    argument:'Udfyld påstand, belæg og de øvrige dele. Saml dem til en kladde, som du selv kan arbejde videre med.',
+    flashcards:'Skriv et spørgsmål og et svar, og tilføj kortet. Vend kortet, når du vil kontrollere dit svar.',
+    notes:'Vælg et fag og en note, eller opret en ny. Giv den en titel, skriv din tekst, og husk at gemme.',
+    pomodoro:'Start timeren, når du vil arbejde koncentreret. Varigheden for fokus og pause ændres i Indstillinger.',
+    planner:'Skriv hvor meget du skal læse, og hvor mange studiedage du har. Lav derefter din læseplan.',
+    punctuation:'Indsæt tekst, vælg metode, og start rettelsen. Sammenlign forslaget med originalen, før du kopierer det.',
+    translate:'Vælg sprogene, skriv teksten, og start oversættelsen. Kontrollér resultatet, især fagudtryk.',
+    ionmodel:'Vælg et atom eller en ion. Sammenlign elektroner og ladning i de viste modeller.',
+    atomcompare:'Vælg to grundstoffer og deres massetal. Sammenlign protoner, neutroner og elektroner.',
+    formulas:'Søg efter en formel eller vælg et fag. Åbn det tilhørende værktøj, hvis du vil regne med dine egne tal.',
+    interactive:'Vælg en figur. Flyt skyderne, og følg ændringerne i figuren og tallene.',
+    stoichiometry:'Skriv reaktionen og mængderne af reaktanterne. Beregn derefter begrænsende reaktant og udbytte.',
+    worksheet:'Gem resultater fra beregningsværktøjerne her. Tilføj dine egne kommentarer, og kopiér arket, når du er klar.',
+    molecules:'Vælg atomer og bindinger i byggeren, eller åbn et eksempel. Drej modellen, og se om molekylet genkendes.',
+    report:'Udfyld rapportens afsnit og dine målinger. Gem arbejdet, før du genindlæser siden.',
+    precision:'Vælg den ønskede beregning og indtast dine målinger. Brug forklaringen til at se, hvordan præcisionen behandles.',
+    circuits:'Vælg serie eller parallel, angiv spænding og modstande, og beregn værdierne i diagrammet.',
+    simulation:'Vælg mønt eller terning og antal kast. Kør forsøget, og sammenlign de observerede udfald med teorien.',
+    board:'Opret en opgave med fag og delmål. Flyt den mellem kolonnerne, efterhånden som du arbejder.',
+    glossary:'Søg efter et dansk eller engelsk begreb. Læs forklaringen og eksemplet, eller åbn det tilhørende værktøj.',
+    profiles:'Gem dine nuværende visningsindstillinger som en profil. Vælg en gemt profil, når du vil skifte layout.'
+  };
+  const keywords={
+    basic:'plus minus gange dividere regne calculator',calculator:'videnskabelig sinus cosinus tangent kvadratrod potens calculator',
+    quadratic:'ligninger andengrad rødder roots',linear:'ligninger ubekendte',graph:'funktioner koordinatsystem kurve plot',
+    percent:'rabat procentregning ændring',statistics:'gennemsnit median spredning',periodic:'grundstoffer protoner neutroner elektroner atomer',
+    ions:'salt salte ionforbindelser navngivning',molar:'molekylevægt molekylvægt atomvægt molvægt',molecules:'molekyle molekyler bygge byggemodel',
+    units:'omregning kilometer meter temperatur celsius',punctuation:'komma punktum tegnsætning grammatik dansk',
+    translate:'oversæt oversættelse engelsk dansk tysk translate translator',notes:'noter kladde fagnoter',
+    pomodoro:'fokus pause timer tid',formulas:'formler fysik matematik kemi',glossary:'begreber dansk engelsk ordbog'
+  };
+  for(const tool of tools){
+    tool.guide=tool.guide||guides[tool.id]||'Tilpas eksempelværdierne til din opgave, og tryk Beregn. Resultatet vises ved siden af eller under felterne. Fold mellemregningerne ud, hvis du vil følge beregningen.';
+    tool.keywords=tool.keywords||keywords[tool.id]||'';
+  }
+  const baseGroups={
+    'Regning':['basic','calculator','percent','units'], 'Algebra':['quadratic','linear','fraction'], 'Funktioner':['graph'], 'Geometri':['geometry','triangle','vectors'], 'Statistik':['statistics','regression'], 'Sandsynlighed':['probability'],
+    'Atomer og bindinger':['periodic','molecules'], 'Molarmasse og mængder':['molar','moles'], 'Salte og ioner':['ions'], 'Reaktioner':['balance','stoichiometry'], 'Opløsninger':['concentration','dilution'], 'Syrer og ligevægt':['ph'],
+    'Mekanik':['motion','force','energy'], 'Elektricitet':['ohm','circuits'], 'Bølger og optik':['waves'], 'Varme og stof':['gas','decay'],
+    'Skrivning og kilder':['punctuation','text'], 'Oversættelse og begreber':['translate','glossary'], 'Noter og ark':['notes','worksheet','report'], 'Overblik og repetition':['flashcards','board','pomodoro'], 'Opsætning':['profiles'], 'Kom i gang':['formulas']
+  };
+  for(const [group,ids]of Object.entries(baseGroups))for(const tool of tools)if(ids.includes(tool.id)&&!tool.group)tool.group=group;
+  const fieldHelp={
+    quadratic:{a:'Tallet foran x². Fx 1 i x² − 5x + 6 = 0.',b:'Tallet foran x. Fx −5 i x² − 5x + 6 = 0.',c:'Det faste tal. Fx 6 i x² − 5x + 6 = 0.'},
+    calculator:{expression:'Skriv fx (2 + 3) * 4. Brug ^ til potenser og sqrt(9) til kvadratrod.'},
+    molar:{formula:'Fx H2O eller Ca(OH)2. Brug store og små bogstaver som i grundstofsymbolerne.',charge:'Neutralt stof: 0. Positiv ion: fx 2. Negativ ion: fx −1.'},
+    ions:{positive:'Vælg ionen med positiv ladning.',negative:'Kun kombinationer fra det kontrollerede katalog kan vælges.',sampleMass:'Lad stå tomt for kun at se navn og formel.'},
+    probability:{p:'0,5 betyder 50 %. Skriv sandsynligheden som et tal fra 0 til 1.'},
+    balance:{reaction:'Skriv fx H2 + O2 -> H2O. Angiv stofferne uden tal foran formlerne.'},
+    concentration:{volume:'Hele opløsningens volumen i liter. Fx 250 mL = 0,250 L.'},
+    dilution:{v2:'Den færdige opløsnings samlede volumen, angivet i mL.'}
+  };
+  for(const tool of tools)for(const f of tool.fields||[])if(fieldHelp[tool.id]?.[f.id])f.help=fieldHelp[tool.id][f.id];
+  globalThis.lectioPlusSchoolCatalog={tools,categories:[['all','Alle'],['favorites','Favoritter'],['math','Matematik'],['chemistry','Kemi'],['physics','Fysik'],...(globalThis.lectioPlusExpanded?[['biology','Biologi'],['programming','Programmering']]:[]),['language','Sprog og opgaver'],['study','Studieteknik']]};
 })();

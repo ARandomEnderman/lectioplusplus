@@ -78,6 +78,9 @@ body.lxp-dock-open #lxp-workspace,body.lxp-dock-open #lxp-overview,body.lxp-dock
 .lxp-molecule-palette { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
 .lxp-atom-palette-button { display:grid; place-items:center; min-width:54px; height:48px; border:1px solid var(--lxp-border); border-bottom:5px solid var(--atom-color); border-radius:10px; color:var(--lxp-text); background:var(--lxp-bg); font-weight:700; font-size:17px; cursor:grab; touch-action:none; }
 .lxp-atom-palette-button:active { cursor:grabbing; }
+.lxp .lxp-atom-palette-button { min-width:88px; height:auto; min-height:64px; padding:10px; gap:4px; }
+.lxp-atom-palette-button small { font-size:11px; font-weight:500; }
+.lxp-selected-atom { padding:12px 14px; margin:12px 0; border:1px solid var(--lxp-border); border-radius:9px; background:var(--lxp-active); color:var(--lxp-text); font-size:14px; font-weight:600; }
 .lxp-molecule-stage { display:block; width:100%; max-height:400px; border:1px dashed var(--lxp-border); border-radius:12px; background:var(--lxp-bg); touch-action:none; user-select:none; }
 .lxp-molecule-stage-wrap { margin:16px 0; }
 .lxp-molecule-stage.lxp-drop-active { border:2px solid var(--lxp-accent); }

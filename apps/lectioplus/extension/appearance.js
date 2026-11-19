@@ -6,7 +6,7 @@
     ['schedule', 'Dagens skema', 'half'], ['tasks', 'Næste afleveringer', 'half'],
     ['messages', 'Beskeder', 'full'], ['shortcuts', 'Genveje', 'half'], ['clicker', 'Strafe Clicker', 'full']
   ];
-  const navigationItems = [['home','Overblik'],['schedule','Skema'],['tasks','Opgaver'],['homework','Lektier'],['messages','Beskeder'],['tools','HjælpeMiddler'],['clicker','Strafe Clicker'],['attendance','Fravær'],['grades','Karakterer'],['study','Studieplan'],['documents','Dokumenter'],['books','Bøger'],['surveys','Spørgeskemaer'],['support','SPS'],['electives','Valgfag'],['profile','Profil'],['school','Hovedmenu']];
+  const navigationItems = [['home','Overblik'],['schedule','Skema'],['tasks','Opgaver'],['homework','Lektier'],['messages','Beskeder'],['tools','Hjælpemidler'],['games','Spil'],['clicker','Strafe Clicker'],['attendance','Fravær'],['grades','Karakterer'],['study','Studieplan'],['documents','Dokumenter'],['books','Bøger'],['surveys','Spørgeskemaer'],['support','SPS'],['electives','Valgfag'],['profile','Profil'],['school','Hovedmenu']];
   const defaultNavigation = () => navigationItems.map(([id]) => ({ id, visible: true, pinned: false }));
   function navigation(values) {
     const seen = new Set();
@@ -15,15 +15,22 @@
       seen.add(item.id);
       return [{ id: item.id, visible: item.visible !== false, pinned: item.pinned === true }];
     });
+    if(!seen.has('games')&&seen.has('tools')){items.splice(items.findIndex(item=>item.id==='tools')+1,0,{id:'games',visible:true,pinned:false});seen.add('games');}
     return [...items, ...defaultNavigation().filter((item) => !seen.has(item.id))];
   }
+  const sidebarIcons=[['external','Link'],['book','Bog'],['calendar','Kalender'],['file','Dokument'],['chart','Graf'],['grid','Værktøjer'],['home','Hjem'],['game','Spil'],['message','Besked'],['help','Hjælp']];
+  function customSidebar(value){const seen=new Set();return (Array.isArray(value)?value:[]).slice(0,20).flatMap(item=>{if(!item||typeof item.id!=='string'||!/^link-[a-z0-9-]{1,64}$/i.test(item.id)||seen.has(item.id))return [];const url=safeUrl(cleanText(item.url,2000)),label=cleanText(item.label,60).trim();if(!url||!label)return [];seen.add(item.id);return [{id:item.id,label,url,icon:choice(item.icon,[...sidebarIcons.map(x=>x[0]),'emoji'],'external'),emoji:cleanText(item.emoji,16),newTab:item.newTab!==false}];});}
   const defaultDashboard = () => ({ columns: 'two', title: 'Dit overblik', custom: [],
     slots: widgets.map(([id, , width]) => ({ id, width, visible: id !== 'shortcuts' })) });
   const defaults = { enabled: true, theme: 'dark', design: 'strafe', density: 'comfortable', hideProfilePhoto: false, anonymizeName: false,
     showClicker: false, tabBranding: true, reducedMotion: false, contentWidth: 'normal', font: 'system',
     navigationDensity: 'comfortable', navigationGroups: 'collapsed', tableDensity: 'comfortable', sectionShortcuts: true,
     scheduleSize: '76', scheduleView: 'auto', showBreaks: true, colorLessons: true, showLessonRoom: true,
-    dashboard: defaultDashboard(), navigation: defaultNavigation(), toolbox: toolbox() };
+    dashboard: defaultDashboard(), navigation: defaultNavigation(), customSidebar: [], toolbox: toolbox(), games: games() };
+  function games(value={}){
+    const input=value&&typeof value==='object'?value:{},allowed=['dino','snake','blocks','pong','breakout','2048','mines','memory','tic','four','choices'];
+    return {difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');return !rest.length&&allowed.includes(id)&&['easy','normal','hard'].includes(difficulty)&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(0,33))};
+  }
   function choice(value, options, fallback) { return options.includes(value) ? value : fallback; }
   function cleanText(value, length) { return typeof value === 'string' ? value.slice(0, length) : ''; }
   function safeUrl(value) {
@@ -64,7 +71,24 @@
       remember: input.remember !== false, lastTool: ids([input.lastTool], 1)[0] || '', favorites: ids(input.favorites, 50),
       workMinutes: Number.isInteger(input.workMinutes) && input.workMinutes >= 1 && input.workMinutes <= 120 ? input.workMinutes : 25,
       breakMinutes: Number.isInteger(input.breakMinutes) && input.breakMinutes >= 1 && input.breakMinutes <= 60 ? input.breakMinutes : 5,
+      view: toolView(input.view), toolViews: toolViews(input.toolViews), workspaces: workspaces(input.workspaces),
+      code: {colors:input.code?.colors!==false,lineNumbers:input.code?.lineNumbers!==false,fontSize:choice(input.code?.fontSize,['12','14','16','18','20','24'],'16'),theme:choice(input.code?.theme,['theme','dark','light'],'theme'),wrap:input.code?.wrap===true,height:Math.round(Math.max(600,Math.min(1600,Number(input.code?.height)||820))),terminalHeight:Math.round(Math.max(120,Math.min(600,Number(input.code?.terminalHeight)||240))),sidebarWidth:Math.round(Math.max(200,Math.min(440,Number(input.code?.sidebarWidth)||260))),sidebarOpen:input.code?.sidebarOpen!==false},
       notes: cleanText(input.notes, 20000), cards, lab: labState(input.lab) };
+  }
+  function toolView(value) {
+    const v=value&&typeof value==='object'?value:{};
+    return {layout:choice(v.layout,['split','stack'],'split'),columns:choice(v.columns,['one','two'],'one'),
+      size:choice(v.size,['compact','normal','large'],'normal'),width:choice(v.width,['normal','wide'],'normal'),
+      resultSide:choice(v.resultSide,['right','left'],'right'),guide:v.guide!==false,hints:v.hints!==false,working:v.working===true};
+  }
+  function workspaces(value) {
+    if(!value||typeof value!=='object'||Array.isArray(value))return {};
+    let budget=2500000;
+    return Object.fromEntries(Object.entries(value).filter(([key,v])=>/^[a-z][a-z0-9-]{0,59}$/.test(key)&&!['constructor','prototype','__proto__'].includes(key)&&typeof v==='string').slice(0,256).flatMap(([key,v])=>{if(!v||v.length>100000||v.length>budget)return [];try{JSON.parse(v);}catch{return [];}budget-=v.length;return [[key,v]];}));
+  }
+  function toolViews(value) {
+    if(!value||typeof value!=='object'||Array.isArray(value))return {};
+    return Object.fromEntries(Object.entries(value).filter(([id])=>/^[a-z][a-z0-9-]{0,29}$/.test(id)&&!['constructor','prototype','__proto__'].includes(id)).slice(0,180).map(([id,v])=>[id,toolView(v)]));
   }
   function labState(value) {
     const src=value&&typeof value==='object'?value:{};
@@ -116,7 +140,9 @@
       showLessonRoom: values.showLessonRoom !== false,
       dashboard: dashboard(values.dashboard),
       navigation: navigation(values.navigation),
-      toolbox: toolbox(values.toolbox)
+      customSidebar: customSidebar(values.customSidebar),
+      toolbox: toolbox(values.toolbox),
+      games: games(values.games)
     };
   }
 
@@ -232,5 +258,5 @@
     } };
   }
 
-  globalThis.lectioPlusAppearance = { defaults, normalize, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, navigationItems, defaultNavigation, themes, designs };
+  globalThis.lectioPlusAppearance = { defaults, normalize, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, sidebarIcons, navigationItems, defaultNavigation, themes, designs };
 })();

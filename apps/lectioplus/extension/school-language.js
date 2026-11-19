@@ -4,10 +4,10 @@
     'Lommeregner':'Scientific calculator','Ligninger':'Equation solver','To ligninger':'Simultaneous equations','Brøker':'Fractions','Procent':'Percentages','Vækst og rente':'Growth and interest','Statistik':'Statistics','Lineær regression':'Linear regression','Binomialfordeling':'Binomial distribution','Geometri':'Geometry','Retvinklet trekant':'Right triangle','Graftegner':'Graph plotter','Periodisk system':'Periodic table','Molarmasse og ioner':'Molar mass and ions','Byg en ionforbindelse':'Ionic compounds','Afstem reaktion':'Balance an equation','Masse og stofmængde':'Mass and amount','Koncentration':'Concentration','Fortynding':'Dilution','pH og pOH':'pH and pOH','Enhedsomregner':'Unit converter','Bevægelse':'Motion','Kraft og tryk':'Force and pressure','Energi':'Energy','Elektricitet':'Electricity','Bølger':'Waves','Idealgasloven':'Ideal gas law','Halveringstid':'Half-life','Tekstværktøj':'Text tools','Kildekritik':'Source evaluation','Argumentation':'Argument builder','Flashcards':'Flashcards','Mine noter':'My notes','Studietimer':'Study timer','Læseplan':'Study plan',
   };
   const dictionary={...titles,
-    'HjælpeMiddler':'Study tools','DIN VÆRKTØJSKASSE':'YOUR TOOLBOX','Indstillinger':'Settings','Indstillinger for HjælpeMiddler':'Study tool settings','Indstillinger for dine værktøjer':'Your tool settings','Find et værktøj…':'Find a tool…','Søg i HjælpeMiddler':'Search study tools',
+    'Hjælpemidler':'Study tools','DIN VÆRKTØJSKASSE':'YOUR TOOLBOX','Indstillinger':'Settings','Indstillinger for Hjælpemidler':'Study tool settings','Indstillinger for dine værktøjer':'Your tool settings','Find et værktøj…':'Find a tool…','Søg i Hjælpemidler':'Search study tools',
     'Alle':'All','Favoritter':'Favorites','Matematik':'Mathematics','Kemi':'Chemistry','Fysik':'Physics','Sprog og opgaver':'Languages and assignments','Studieteknik':'Study skills','← Alle værktøjer':'← All tools','☆ Føj til favoritter':'☆ Add to favorites','★ Favorit':'★ Favorite','Markér værktøj som favorit':'Mark tool as favorite','Åbn værktøj →':'Open tool →','★ Favorit · Åbn →':'★ Favorite · Open →',
-    'Valgene gælder kun HjælpeMiddler og gemmes på denne enhed. Beregninger afrundes først, når resultatet vises.':'These settings only apply to Study tools and are saved on this device. Calculations are rounded only for display.',
-    'Sprog i HjælpeMiddler':'Study tools language','Dansk':'Danish','Dansk + engelske værktøjsnavne':'Danish + English tool names','Antal decimaler':'Decimal places','Lommeregner og graf: vinkler':'Calculator and graph: angles','Grader (DEG)':'Degrees (DEG)','Radianer (RAD)':'Radians (RAD)',
+    'Valgene gælder kun Hjælpemidler og gemmes på denne enhed. Beregninger afrundes først, når resultatet vises.':'These settings only apply to Study tools and are saved on this device. Calculations are rounded only for display.',
+    'Sprog i Hjælpemidler':'Study tools language','Dansk':'Danish','Dansk + engelske værktøjsnavne':'Danish + English tool names','Antal decimaler':'Decimal places','Lommeregner og graf: vinkler':'Calculator and graph: angles','Grader (DEG)':'Degrees (DEG)','Radianer (RAD)':'Radians (RAD)',
     'Vis formler og mellemregninger':'Show formulas and working','Vis gitter i grafen':'Show graph grid','Kompakt værktøjsoversigt':'Compact tool overview','Beregn automatisk efter ændringer':'Calculate automatically after changes','Husk seneste værktøj':'Remember last tool','Fokustid (minutter)':'Focus time (minutes)','Pause (minutter)':'Break (minutes)','Til':'On','Fra':'Off','Gemt på denne enhed.':'Saved on this device.','Kunne ikke gemme ændringen. Prøv igen.':'Could not save the change. Please try again.',
     'Nye tider bruges, når du nulstiller timeren eller starter næste session. Egne noter og flashcards kommer med i Indstillinger → Backup.':'New durations apply when you reset the timer or start the next session. Your notes and flashcards are included in Settings → Backup.',
     'Du har ingen matchende favoritter. Åbn et værktøj og tryk på stjernen.':'No matching favorites. Open a tool and select the star.','Ingen værktøjer matcher. Prøv et andet søgeord.':'No matching tools. Try another search.',
@@ -64,6 +64,70 @@
 
 
   });
+  Object.assign(dictionary,{
+    'Hvad skal du arbejde med? Vælg et fag, eller søg efter din opgave.':'What are you working on? Choose a subject or search for your task.',
+    'Søg fx lommeregner, ioner eller komma…':'Search for a calculator, ions or punctuation…',
+    'Ryd værktøjssøgning':'Clear tool search','Ryd':'Clear','Overblik':'Overview','Vælg et fag':'Choose a subject',
+    'Regn, tegn grafer og undersøg tal.':'Calculate, plot graphs and explore numbers.',
+    'Atomer, ioner, molekyler og reaktioner.':'Atoms, ions, molecules and reactions.',
+    'Bevægelse, energi, kredsløb og enheder.':'Motion, energy, circuits and units.',
+    'Arbejd med tekst, sprog og argumenter.':'Work with text, languages and arguments.',
+    'Noter, formler og planlægning af din tid.':'Notes, formulas and planning your time.',
+    'Kom hurtigt i gang':'Quick start','Vis alle værktøjer':'Browse all tools','← Til oversigten':'← Back to overview',
+    'Dine genveje':'Your shortcuts','Favoritter vises først her.':'Your favorites appear first here.',
+    'Søgeresultater':'Search results','Alle værktøjer':'All tools','Ingen værktøjer fundet':'No tools found',
+    'Prøv fx procent, molarmasse eller oversæt.':'Try percentages, molar mass or translate.','Søg i alle fag':'Search all subjects',
+    'Sådan bruger du det:':'How to use it:',
+    'Tilpas eksempelværdierne til din opgave, og tryk Beregn. Resultatet vises ved siden af eller under felterne. Fold mellemregningerne ud, hvis du vil følge beregningen.':'Adjust the example values for your task and select Calculate. The result appears next to or below the inputs. Expand the working to follow the calculation.',
+    'Brug knapperne eller tastaturet. Tryk = for resultatet. Ekstra funktioner og historik kan foldes ud.':'Use the buttons or your keyboard. Press = for the result. Expand extra functions and history when needed.',
+    'Skriv en funktion med x, vælg intervallet, og tryk Tegn graf. Brug værditabellen til at aflæse punkter.':'Enter a function using x, choose the interval and select Plot graph. Use the table to read points.',
+    'Søg efter et grundstof, eller vælg det i tabellen. Nedenunder finder du atommodel, farveforklaring og isotoper.':'Search for an element or select it in the table. Below it you will find the atom model, color key and isotopes.',
+    'Vælg først størrelsen, fx længde. Skriv værdien, vælg Fra og Til, og tryk Omregn.':'Choose a quantity, such as length. Enter the value, choose From and To, and select Convert.',
+    'Indsæt din tekst. Ord, tegn og læsetid opdateres, mens du skriver.':'Paste your text. Word count, characters and reading time update as you type.',
+    'Udfyld spørgsmålene om din kilde. Saml derefter svarene til din egen arbejdskladde.':'Answer the questions about your source, then assemble your answers into a draft.',
+    'Udfyld påstand, belæg og de øvrige dele. Saml dem til en kladde, som du selv kan arbejde videre med.':'Enter your claim, evidence and the other parts. Assemble them into a draft to develop further.',
+    'Skriv et spørgsmål og et svar, og tilføj kortet. Vend kortet, når du vil kontrollere dit svar.':'Enter a question and answer, then add the card. Flip it to check your answer.',
+    'Vælg et fag og en note, eller opret en ny. Giv den en titel, skriv din tekst, og husk at gemme.':'Choose a subject and note, or create a new one. Give it a title, write your text and remember to save.',
+    'Start timeren, når du vil arbejde koncentreret. Varigheden for fokus og pause ændres i Indstillinger.':'Start the timer for focused work. Change focus and break durations in Settings.',
+    'Skriv hvor meget du skal læse, og hvor mange studiedage du har. Lav derefter din læseplan.':'Enter how much you need to read and how many study days you have, then create your plan.',
+    'Indsæt tekst, vælg metode, og start rettelsen. Sammenlign forslaget med originalen, før du kopierer det.':'Paste text, choose a method and start the correction. Compare the suggestion with your original before copying.',
+    'Vælg sprogene, skriv teksten, og start oversættelsen. Kontrollér resultatet, især fagudtryk.':'Choose languages, enter text and start the translation. Check the result, especially technical terms.',
+    'Vælg et atom eller en ion. Sammenlign elektroner og ladning i de viste modeller.':'Choose an atom or ion. Compare electrons and charge in the models.',
+    'Vælg to grundstoffer og deres massetal. Sammenlign protoner, neutroner og elektroner.':'Choose two elements and their mass numbers. Compare protons, neutrons and electrons.',
+    'Søg efter en formel eller vælg et fag. Åbn det tilhørende værktøj, hvis du vil regne med dine egne tal.':'Search for a formula or choose a subject. Open the related tool to calculate with your own values.',
+    'Vælg en figur. Flyt skyderne, og følg ændringerne i figuren og tallene.':'Choose a figure. Move the sliders and follow the changes in the figure and values.',
+    'Skriv reaktionen og mængderne af reaktanterne. Beregn derefter begrænsende reaktant og udbytte.':'Enter the reaction and reactant amounts, then calculate the limiting reactant and yield.',
+    'Gem resultater fra beregningsværktøjerne her. Tilføj dine egne kommentarer, og kopiér arket, når du er klar.':'Save results from calculation tools here. Add comments and copy the sheet when ready.',
+    'Vælg atomer og bindinger i byggeren, eller åbn et eksempel. Drej modellen, og se om molekylet genkendes.':'Choose atoms and bonds in the builder or open an example. Rotate the model and check whether the molecule is recognized.',
+    'Udfyld rapportens afsnit og dine målinger. Gem arbejdet, før du genindlæser siden.':'Fill in your report sections and measurements. Save before reloading the page.',
+    'Vælg den ønskede beregning og indtast dine målinger. Brug forklaringen til at se, hvordan præcisionen behandles.':'Choose a calculation and enter your measurements. Use the explanation to see how precision is handled.',
+    'Vælg serie eller parallel, angiv spænding og modstande, og beregn værdierne i diagrammet.':'Choose series or parallel, enter voltage and resistances, and calculate the values in the diagram.',
+    'Vælg mønt eller terning og antal kast. Kør forsøget, og sammenlign de observerede udfald med teorien.':'Choose a coin or die and the number of throws. Run the experiment and compare observed outcomes with theory.',
+    'Opret en opgave med fag og delmål. Flyt den mellem kolonnerne, efterhånden som du arbejder.':'Create a task with a subject and milestones. Move it between columns as you work.',
+    'Søg efter et dansk eller engelsk begreb. Læs forklaringen og eksemplet, eller åbn det tilhørende værktøj.':'Search for a Danish or English term. Read the explanation and example or open the related tool.',
+    'Gem dine nuværende visningsindstillinger som en profil. Vælg en gemt profil, når du vil skifte layout.':'Save your display settings as a profile. Choose a saved profile to switch layouts.'
+  });
+  Object.assign(dictionary,{
+    'Skriv ét tal pr. række. Tilføj eller fjern rækker efter behov, og tryk Beregn. Du kan også indsætte en hel talrække under tekstvisningen.':'Enter one value per row. Add or remove rows, then select Calculate. You can also paste a list in text mode.',
+    'Skriv X og Y for samme måling på samme række. Tilføj dine målepunkter, og tryk Beregn for at finde den rette linje.':'Enter X and Y for the same measurement on the same row. Add your points and select Calculate to fit the line.',
+    'Tilpas indtastning og layout':'Customize inputs and layout','Tilpasningen gælder':'Apply customization to','Indstillinger for dette værktøj':'Settings for this tool',
+    'Alle værktøjer':'All tools','Kun dette værktøj':'Only this tool','Roligt':'Simple','Side om side':'Side by side','Kompakt':'Compact',
+    'Ét felt ad gangen ned gennem siden':'Fields arranged vertically','Indtastning og resultat ved siden af hinanden':'Inputs and results side by side','Flere felter og mindre afstand':'More fields with less spacing',
+    'Placering af felter og resultat':'Input and result layout','Under hinanden':'Stacked','Felter pr. række':'Fields per row','Ét felt':'One field','To felter':'Two fields',
+    'Størrelse på felter':'Field size','Stor':'Large','Normal':'Normal','Arbejdsområdets bredde':'Workspace width','Bred':'Wide','Resultat i delt visning':'Result in split view','Til højre':'On the right','Til venstre':'On the left',
+    'Vis brugsvejledning':'Show tool guide','Vis hjælp ved felterne':'Show field help','Fold mellemregninger ud automatisk':'Expand working automatically','Brug fælles layout':'Use shared layout','Brug fælles layout for dette værktøj':'Use shared layout for this tool',
+    'Dette værktøj har sit eget layout. Vælg Kun dette værktøj for at ændre det.':'This tool has its own layout. Select Only this tool to change it.',
+    'Dette værktøj følger det fælles layout. Vælg Kun dette værktøj for at lave en undtagelse.':'This tool uses the shared layout. Select Only this tool to customize it separately.',
+    'Ændringer vises med det samme og gemmes på denne enhed. Specialværktøjer beholder deres nødvendige grupper og byggefelter. På smalle skærme står resultatet under felterne.':'Changes appear immediately and are saved on this device. Specialized tools keep their required groups and canvases. On narrow screens results appear below the inputs.',
+    'Indsæt eller redigér som tekst':'Paste or edit as text','Ét tal i hvert felt. Komma eller punktum kan bruges som decimaltegn.':'One value per field. Use a comma or period as the decimal separator.',
+    'Dine målinger':'Your measurements','Indtast dine tal':'Enter your values','Målepunkter – X og Y på samme række':'Data points – X and Y on the same row','Dine målepar':'Your measurement pairs','Dine modstande':'Your resistors',
+    'Værdi':'Value','Handling':'Action','Fjern':'Remove','＋ Tilføj række':'＋ Add row','Tilføj række':'Add row',
+    'Ryd værdier':'Clear values','Skriv dine egne værdier. Eksemplet kan hentes igen.':'Enter your own values. You can load the example again.',
+    'Felterne starter med et eksempel. Ret tallene til din opgave, eller vælg Ryd værdier.':'The fields start with an example. Adjust the values for your task or select Clear values.',
+    'Valgfrit – kan stå tomt.':'Optional – may be left blank.','Brug et helt tal.':'Use a whole number.',
+    'Grundstoffets navn':'Element name','Brint':'Hydrogen','Kulstof (karbon)':'Carbon','Kvælstof':'Nitrogen','Ilt':'Oxygen','Klor':'Chlorine',
+    'Vælg et atom i byggefeltet for at se grundstoffets navn.':'Select an atom in the canvas to see its element name.'
+  });
   function translate(text,language,context){
     if(language==='da')return text;
     const table=language==='mixed'?titles:dictionary;
@@ -71,6 +135,10 @@
     if(language==='en'&&context?.closest('.lxp-toggle-state'))return text==='Til'?'On':text==='Fra'?'Off':text;
     if(Object.hasOwn(table,trimmed))return prefix+table[trimmed]+suffix;
     if(language==='mixed')return text;
+    if(trimmed.startsWith('Brug layout: '))return 'Use layout: '+translate(trimmed.slice(13),'en');
+    if(trimmed.startsWith('Valgt atom: '))return 'Selected atom: '+trimmed.slice(12).split(' · ').map((part,i)=>i===0?translate(part,'en'):part.replace('nr. ','no. ')).join(' · ');
+    if(/^Vis værktøjer til /.test(trimmed))return 'Show tools for '+translate(trimmed.slice('Vis værktøjer til '.length),'en');
+    if(/^\d+ værktøjer$/.test(trimmed))return trimmed.replace('værktøjer','tools');
     const patterns=[[/^(\d+) værktøjer til beregninger, opgaver og en bedre studiedag\.$/,'$1 tools for calculations, assignments and a better study day.'],[/^(\d+) værktøjer( matcher søgningen)?$/,'$1 matching tools'],[/^(\d+) grundstoffer matcher\.$/,'$1 elements match.'],[/^Kort (\d+) af (\d+)$/,'Card $1 of $2'],[/^Dag (\d+)$/,'Day $1'],[/^Vinkeltilstand: grader$/,'Angle mode: degrees'],[/^Vinkeltilstand: radianer$/,'Angle mode: radians'],[/^(\w+): (\d+) atomer på hver side\.$/,'$1: $2 atoms on each side.']];
     for(const [pattern,replacement] of patterns)if(pattern.test(trimmed))return trimmed.replace(pattern,replacement);
     for(const start of ['Kategori: ','Beregn '])if(trimmed.startsWith(start))return (start==='Kategori: '?'Category: ':'Calculate ')+translate(trimmed.slice(start.length),'en');

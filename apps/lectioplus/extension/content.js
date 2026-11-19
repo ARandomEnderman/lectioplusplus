@@ -52,7 +52,9 @@
   const navigationSelector = '#m_mastermenu, #m_MobilMenuNav, #mobilMereSheetMenu, nav, [role="navigation"], [role="tablist"], .ls-master-header-container, .ls-subnav-container, .ls-subnav1, .ls-subnav2, [id*="menutab" i], [class*="menutab" i]';
   const activityPage = { key: 'activity', label: 'Aktivitet', icon: 'calendar' };
   // Extension-owned tab (not a Lectio page): an embed of Strafe Clicker, opened via the #lxp-clicker hash.
-  const toolsPage = { key: 'tools', label: 'HjælpeMiddler', icon: 'grid', href: '#lxp-tools' };
+  const toolsPage = { key: 'tools', label: 'Hjælpemidler', icon: 'grid', href: '#lxp-tools' };
+  const gamesPage = { key: 'games', label: 'Spil', icon: 'game', href: '#lxp-games' };
+  const gamesHash = () => /^#lxp-games(?:\/|$)/.test(location.hash);
   const toolsHash = () => /^#lxp-tools(?:\/|$)/.test(location.hash);
   const clickerHash = '#lxp-clicker';
   const clickerUrl = 'https://clicker.strafe-mc.com/#/clicker';
@@ -181,7 +183,7 @@
   }
 
   function searchablePages() {
-    const entries = [...links.values(), toolsPage, ...schoolTools.entries];
+    const entries = [...links.values(), toolsPage, gamesPage, ...schoolTools.entries, ...games.entries];
     const known = new Set(entries.map((entry) => entry.href));
     const extraLinks = source.querySelectorAll(`:is(${navigationSelector}, #m_Content_elevUL) a[href]`);
     for (const link of extraLinks) {
@@ -199,6 +201,7 @@
   }
 
   function pageInfo() {
+    if (gamesHash()) return gamesPage;
     if (toolsHash()) return toolsPage;
     if (preferences.showClicker && location.hash === clickerHash) return clickerPage;
     if (preview) {
@@ -256,6 +259,7 @@
   const nativeOverview = element('section', 'lxp-native-overview');
   nativeOverview.id = 'lxp-native-overview';
   const schoolTools = globalThis.lectioPlusSchoolTools({ ui: { element, button, icon }, getPreferences: () => preferences, onChange: savePreferences });
+  const games = globalThis.lectioPlusGames({ getPreferences: () => preferences, onChange: savePreferences });
   const clickerView = element('main', 'lxp-clicker-view');
   clickerView.id = 'lxp-clicker';
   clickerView.hidden = true;
@@ -284,7 +288,7 @@
   const restore = button('lxp-restore', 'Aktivér LectioPlus+', () => failed ? location.reload() : savePreferences({ enabled: true }), 'Aktivér LectioPlus+');
   root.hidden = true;
   restore.hidden = true;
-  root.append(skip, sidebar, topbar, navigationStatus, sectionNav, overview, workspace.node, clickerView, schoolTools.node, nativeOverview);
+  root.append(skip, sidebar, topbar, navigationStatus, sectionNav, overview, workspace.node, clickerView, schoolTools.node, games.node, nativeOverview);
   if(schoolTools.dockNode)root.append(schoolTools.dockNode);
   native.before(root);
   document.body.append(search, settings, restore);
@@ -402,14 +406,16 @@
     const home = activePage?.key === 'home';
     const toolsOpen = enabled && activePage?.key === 'tools';
     schoolTools.update(toolsOpen);
+    const gamesOpen = enabled && activePage?.key === 'games';
+    games.update(gamesOpen);
     const clickerOpen = enabled && preferences.showClicker && activePage?.key === 'clicker';
     if (!enabled || !preferences.showClicker) clickerView.querySelector('iframe')?.remove();
     // A delegated menu action may open a real Lectio dialog inside the source.
     // Reveal that form for its lifetime, then automatically resume the modern view.
     const nativeDialog = source === native && [...native.querySelectorAll('dialog[open], [role="dialog"][aria-hidden="false"]')].some(dialog => !dialog.closest('[hidden]') && getComputedStyle(dialog).display !== 'none');
-    const enhanced = enabled && !showNative && !nativeDialog && !clickerOpen && !toolsOpen && (home || workspaceReady);
-    updateSectionNavigation(enhanced || toolsOpen);
-    if (toolsOpen) sectionNav.hidden = true;
+    const enhanced = enabled && !showNative && !nativeDialog && !clickerOpen && !toolsOpen && !gamesOpen && (home || workspaceReady);
+    updateSectionNavigation(enhanced || toolsOpen || gamesOpen);
+    if (toolsOpen || gamesOpen) sectionNav.hidden = true;
     overview.hidden = !enhanced || !home;
     workspace.node.hidden = !enhanced || home;
     clickerView.hidden = !clickerOpen;
@@ -422,13 +428,13 @@
       frame.referrerPolicy = 'no-referrer';
       clickerView.append(frame);
     }
-    setBodyState('lxp-native-hidden', enhanced || clickerOpen || toolsOpen || (enabled && source !== native));
-    setBodyState('lxp-inline-native', enabled && !showNative && !enhanced && !clickerOpen && !toolsOpen);
+    setBodyState('lxp-native-hidden', enhanced || clickerOpen || toolsOpen || gamesOpen || (enabled && source !== native));
+    setBodyState('lxp-inline-native', enabled && !showNative && !enhanced && !clickerOpen && !toolsOpen && !gamesOpen);
     setBodyState('lxp-activity-page', enabled && source === native && activePage?.key === 'activity');
-    updateNativeOverview(enabled && !enhanced && !clickerOpen && !toolsOpen && source === native);
+    updateNativeOverview(enabled && !enhanced && !clickerOpen && !toolsOpen && !gamesOpen && source === native);
     const originalButton = topbar.querySelector('[data-lxp-original]');
     if (originalButton) {
-      originalButton.hidden = clickerOpen || toolsOpen;
+      originalButton.hidden = clickerOpen || toolsOpen || gamesOpen;
       const label = showNative ? 'Tilbage til LectioPlus+' : 'Lectios værktøjer';
       originalButton.setAttribute('aria-expanded', String(showNative));
       originalButton.setAttribute('aria-label', label);
@@ -436,7 +442,7 @@
       originalButton.lastElementChild.textContent = label;
     }
     globalThis.lectioPlusNativeTheme?.flush();
-    skip.href = toolsOpen ? '#lxp-tools' : clickerOpen ? clickerHash : enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
+    skip.href = gamesOpen ? '#lxp-games' : toolsOpen ? '#lxp-tools' : clickerOpen ? clickerHash : enhanced ? (home ? '#lxp-overview' : '#lxp-workspace') : !nativeOverview.hidden ? '#lxp-native-overview' :
       (document.getElementById('m_outerContentFrameDiv') ? '#m_outerContentFrameDiv' : '#masterContent');
   }
 
@@ -509,7 +515,7 @@
     navigationProgress();
     if (href === sourceUrl) {
       if (!fromHistory && location.href !== href) history.pushState({ lectioPlusNavigation: true }, '', href);
-      if (activePage?.key === 'clicker' || activePage?.key === 'tools') refresh();
+      if (activePage?.key === 'clicker' || activePage?.key === 'tools' || activePage?.key === 'games') refresh();
       if (showNative) {
         showNative = false;
         updateViewVisibility();
@@ -572,13 +578,13 @@
     const pinned = ordered.filter((item) => item.pinned).map((item) => item.id);
     const customOrder = preferences.navigation.some((item, index) => item.id !== appearance.navigationItems[index][0]);
     const groups = customOrder ? [['Menuer', ordered.map((item) => item.id)]] : [
-      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages', 'tools', 'clicker']],
+      ['Skole', ['home', 'schedule', 'tasks', 'homework', 'messages', 'tools', 'games', 'clicker']],
       ['Elev', ['attendance', 'grades', 'study', 'documents', 'books']],
       ['Flere menuer', ['surveys', 'support', 'electives', 'profile', 'school']]
     ];
     if (pinned.length) groups.unshift(['Favoritter', pinned]);
     for (const [label, keys] of groups) {
-      const group = keys.filter((key) => ordered.some((item) => item.id === key) && (label === 'Favoritter' || !pinned.includes(key))).map((key) => (key === 'tools' ? toolsPage : key === 'clicker' ? (preferences.showClicker ? clickerPage : null) : links.get(key))).filter(Boolean);
+      const group = keys.filter((key) => ordered.some((item) => item.id === key) && (label === 'Favoritter' || !pinned.includes(key))).map((key) => (key === 'tools' ? toolsPage : key === 'games' ? gamesPage : key === 'clicker' ? (preferences.showClicker ? clickerPage : null) : links.get(key))).filter(Boolean);
       if (!group.length) continue;
       let container = navigation;
       if (label === 'Flere menuer' && preferences.navigationGroups !== 'flat') {
@@ -596,6 +602,11 @@
         link.addEventListener('click', () => setSidebar(false));
         container.append(link);
       }
+    }
+
+    if(preferences.customSidebar.length){
+      navigation.append(element('div','lxp-nav-heading','Mine links'));
+      for(const item of preferences.customSidebar){const link=anchor('lxp-nav-link lxp-custom-nav-link',item.url,item.icon==='emoji'?element('span','',item.emoji||'🔗'):icon(item.icon),element('span','',item.label));if(item.newTab){link.target='_blank';link.rel='noopener noreferrer';}link.addEventListener('click',()=>setSidebar(false));navigation.append(link);}
     }
 
     if (!preview && searchablePages().some((entry) => entry.context)) {
@@ -1051,7 +1062,7 @@
       showNative = false;
       if (previousPage?.key === 'home') cancelHomeSources();
     }
-    const navPrefs = JSON.stringify([preferences.showClicker, preferences.navigationGroups, preferences.navigation]);
+    const navPrefs = JSON.stringify([preferences.showClicker, preferences.navigationGroups, preferences.navigation, preferences.customSidebar]);
     if (navigationPreferences !== navPrefs || previousPage?.key !== activePage.key || previousPage?.label !== activePage.label || previousPage?.parent !== activePage.parent || previousLinks !== JSON.stringify([...links])) {
       navigationPreferences = navPrefs;
       renderNavigation();
@@ -1133,7 +1144,7 @@
       navigatePreview();
     });
     if (!preview) window.addEventListener('hashchange', () => {
-      if (preferences.enabled && (activePage?.key === 'clicker' || activePage?.key === 'tools' || location.hash === clickerHash || toolsHash())) refresh();
+      if (preferences.enabled && (activePage?.key === 'clicker' || activePage?.key === 'tools' || activePage?.key === 'games' || location.hash === clickerHash || toolsHash() || gamesHash())) refresh();
     });
     if (!preview) window.addEventListener('popstate', () => {
       if (!preferences.enabled) return;

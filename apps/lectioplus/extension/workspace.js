@@ -113,11 +113,17 @@
       const details = element('span', 'lxp-event-copy', element('strong', '', lesson.title));
       if (meta) details.append(element('span', 'lxp-event-meta', meta));
       const body = element('span', 'lxp-event-body', ...[when, details].filter(Boolean));
+      if (lesson.hasContent) {
+        const marker = element('span', 'lxp-event-content', icon('file'), element('span', '', 'Indhold'));
+        marker.setAttribute('aria-hidden', 'true');
+        body.append(marker);
+      }
       if (lesson.status) body.append(element('span', `lxp-event-status lxp-${lesson.status === 'Aflyst' ? 'red' : 'amber'}`, lesson.status));
       const item = readSource(lesson.link, `lxp-event lxp-event-${accent}`, `Åbn ${lesson.title}`, body);
       if (lesson.node.id) item.dataset.lxpSourceId = lesson.node.id;
-      if (!list) {
-        const description = [lesson.title, lesson.time, lesson.detail, lesson.status].filter(Boolean).join(' · ');
+      item.classList.toggle('lxp-event-with-content', lesson.hasContent);
+      if (!list || lesson.hasContent) {
+        const description = [lesson.title, lesson.time, lesson.detail, lesson.status, lesson.hasContent && 'Tekst eller materiale til lektionen'].filter(Boolean).join(' · ');
         item.setAttribute('aria-label', description);
         item.dataset.lxpHint = description.split(' · ').join('\n');
         if (!item.matches('a, button')) item.tabIndex = 0;
@@ -351,7 +357,9 @@
       }
 
       paint();
-      return [heading, controls, stage];
+      const contentLegend = element('p', 'lxp-schedule-content-legend', icon('file'), 'Indhold: Tekst, lektier eller materiale. Åbn lektionen for at læse det.');
+      contentLegend.hidden = !schedule.lessons.some(lesson => lesson.hasContent);
+      return [heading, controls, contentLegend, stage];
     }
 
     function homeworkEntry(row) {
