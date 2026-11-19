@@ -32,6 +32,19 @@
     return clean(value).toLocaleLowerCase('da-DK');
   }
 
+  function hasLessonContent(node) {
+    // Read Lectio's actual content markers, never words from the lesson title.
+    // A marker describes content availability, not whether homework is complete.
+    return [...node.querySelectorAll(iconSelector)].some(marker => {
+      for (let part = marker; part && part !== node; part = part.parentElement) {
+        if (part.hidden || part.matches('template, script, style') ||
+            part.style.display === 'none' || part.style.visibility === 'hidden') return false;
+      }
+      // aria-hidden on an icon only hides its glyph from screen readers.
+      return /^(sms|bookmark)$/.test(clean(marker.textContent || ''));
+    });
+  }
+
   function dateKey(year, month, day) {
     const date = new Date(Date.UTC(+year, +month - 1, +day));
     if (+year < 2000 || +year > 2100 || date.getUTCMonth() !== +month - 1 || date.getUTCDate() !== +day) return '';
@@ -184,7 +197,7 @@
       const minutes = timesIn(range.time).map((time) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3)));
       const start = minutes[0] ?? null;
       const end = minutes.length === 2 && minutes[1] > start ? minutes[1] : null;
-      return { node, link, title, detail, room, subject, date, status, start, end, ...range, searchable: clean(`${text(node)} ${tooltip}`) };
+      return { node, link, title, detail, room, subject, date, status, start, end, hasContent: hasLessonContent(node), ...range, searchable: clean(`${text(node)} ${tooltip}`) };
     });
     const gridDays = new Set([...week.slice(0, 5), ...days]);
     return { host, lessons, days: [...gridDays].sort(), confirmedDays: [...days].sort(), weekLabel };

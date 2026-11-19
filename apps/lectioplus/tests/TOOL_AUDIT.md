@@ -1,4 +1,4 @@
-# Kontrol af HjælpeMiddler – Test 11
+# Kontrol af Hjælpemidler – Test 11
 
 Kontrolleret 16. november 2026. Beregninger, inputgrænser og brugerforløb testes med fiktive data. Tabellen beskriver den faktiske dækning; den er ikke en garanti for fejlfrihed ved alle tænkelige input.
 

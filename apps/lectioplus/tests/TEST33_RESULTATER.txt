@@ -1,0 +1,2049 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> node navigation.cjs && node weeks.cjs && node native-routes.cjs && node customization.cjs && node visual-editor.cjs && node toggles.cjs && node transactions.cjs && node school-core.cjs && node tool-audit.cjs && node tool-visuals.cjs && node school-ui.cjs && node transitions.cjs && node extension-audit.cjs && node startup-recovery.cjs && node homework.cjs && node calculator-extras.cjs && node atoms.cjs && node lab.cjs && node translation.cjs && node privacy.cjs && node test14.cjs && node test15.cjs && node test17.cjs && node test21.cjs && node test22.cjs && node punctuation-model.cjs && node punctuation-ui.cjs && node punctuation-transport.cjs && node punctuation-startup.cjs && node expanded-core.cjs && node test24.cjs && node workbench-runtime.mjs && node workbench-transport.cjs && node test25.cjs && node workbench-stream.cjs && node test26.cjs && node --experimental-vm-modules workbench-bootstrap.cjs && node --experimental-vm-modules test27.cjs && node --experimental-vm-modules test28.cjs && node test29.cjs && node --experimental-vm-modules test30.cjs && node test31-transport.cjs && node --experimental-vm-modules --experimental-wasm-jspi test31-runtime.cjs && node --experimental-vm-modules --experimental-wasm-jspi test31-ui.cjs && node --experimental-vm-modules --experimental-wasm-jspi test32-lessons.cjs && node test33-games-core.cjs && node --experimental-vm-modules --experimental-wasm-jspi test33-ui.cjs
+
+PASS shell starts
+PASS every fixture lesson is shown
+PASS 08–16 is eight hours, not a row per lesson start
+PASS normal schedule size is roomier by default
+PASS normal size applies to the time scale
+PASS morning break keeps its actual time interval
+PASS lunch break keeps its actual time interval
+PASS size selector can add more room
+PASS no empty rows for staggered starts
+PASS actual start minutes parsed
+PASS overlapping lessons get separate lanes
+PASS unknown time remains visible outside the clock
+PASS short event retains full accessible time
+PASS search filters lessons
+PASS filtering does not erase genuine breaks
+PASS search keeps the shared clock stable
+PASS today switches to one day
+PASS today uses Copenhagen fixture date
+PASS correct source view: home
+PASS navigation: home
+PASS correct source view: schedule
+PASS navigation: schedule
+PASS correct source view: tasks
+PASS navigation: tasks
+PASS correct source view: homework
+PASS navigation: homework
+PASS correct source view: messages
+PASS navigation: messages
+PASS correct source view: attendance
+PASS navigation: attendance
+PASS shared native layout: attendance
+PASS correct source view: grades
+PASS navigation: grades
+PASS shared native layout: grades
+PASS correct source view: study
+PASS navigation: study
+PASS shared native layout: study
+PASS correct source view: documents
+PASS navigation: documents
+PASS shared native layout: documents
+PASS correct source view: books
+PASS navigation: books
+PASS shared native layout: books
+PASS correct source view: surveys
+PASS navigation: surveys
+PASS shared native layout: surveys
+PASS correct source view: support
+PASS navigation: support
+PASS shared native layout: support
+PASS correct source view: profile
+PASS navigation: profile
+PASS shared native layout: profile
+PASS correct source view: school
+PASS navigation: school
+PASS correct source view: schedule/activity
+PASS detail receives shared layout: schedule/activity
+PASS navigation: schedule/activity
+PASS correct source view: schedule/feedback
+PASS detail receives shared layout: schedule/feedback
+PASS navigation: schedule/feedback
+PASS correct source view: tasks/detail
+PASS detail receives shared layout: tasks/detail
+PASS navigation: tasks/detail
+PASS correct source view: tasks/group
+PASS detail receives shared layout: tasks/group
+PASS navigation: tasks/group
+PASS correct source view: homework/detail
+PASS detail receives shared layout: homework/detail
+PASS navigation: homework/detail
+PASS correct source view: messages/sent
+PASS detail receives shared layout: messages/sent
+PASS navigation: messages/sent
+PASS correct source view: messages/trash
+PASS detail receives shared layout: messages/trash
+PASS navigation: messages/trash
+PASS correct source view: messages/thread
+PASS detail receives shared layout: messages/thread
+PASS navigation: messages/thread
+PASS correct source view: messages/compose
+PASS detail receives shared layout: messages/compose
+PASS navigation: messages/compose
+PASS correct source view: attendance/causes
+PASS detail receives shared layout: attendance/causes
+PASS navigation: attendance/causes
+PASS correct source view: grades/remarks
+PASS detail receives shared layout: grades/remarks
+PASS navigation: grades/remarks
+PASS correct source view: study/course
+PASS detail receives shared layout: study/course
+PASS navigation: study/course
+PASS correct source view: documents/folder
+PASS detail receives shared layout: documents/folder
+PASS navigation: documents/folder
+PASS correct source view: documents/edit
+PASS detail receives shared layout: documents/edit
+PASS navigation: documents/edit
+PASS correct source view: books/history
+PASS detail receives shared layout: books/history
+PASS navigation: books/history
+PASS correct source view: surveys/answer
+PASS detail receives shared layout: surveys/answer
+PASS navigation: surveys/answer
+PASS correct source view: surveys/report
+PASS detail receives shared layout: surveys/report
+PASS navigation: surveys/report
+PASS correct source view: support/appointments
+PASS detail receives shared layout: support/appointments
+PASS navigation: support/appointments
+PASS correct source view: profile/contact
+PASS detail receives shared layout: profile/contact
+PASS navigation: profile/contact
+PASS correct source view: school/students
+PASS detail receives shared layout: school/students
+PASS navigation: school/students
+PASS correct source view: school/teachers
+PASS detail receives shared layout: school/teachers
+PASS navigation: school/teachers
+PASS correct source view: school/classes
+PASS detail receives shared layout: school/classes
+PASS navigation: school/classes
+PASS correct source view: school/rooms
+PASS detail receives shared layout: school/rooms
+PASS navigation: school/rooms
+PASS correct source view: school/teams
+PASS detail receives shared layout: school/teams
+PASS navigation: school/teams
+PASS correct source view: school/advanced
+PASS detail receives shared layout: school/advanced
+PASS navigation: school/advanced
+PASS correct source view: electives
+PASS navigation: electives
+PASS correct source view: school/changes-day
+PASS detail receives shared layout: school/changes-day
+PASS navigation: school/changes-day
+PASS correct source view: school/changes-week
+PASS detail receives shared layout: school/changes-week
+PASS navigation: school/changes-week
+PASS correct source view: school/month
+PASS detail receives shared layout: school/month
+PASS navigation: school/month
+PASS correct source view: school/groups
+PASS detail receives shared layout: school/groups
+PASS navigation: school/groups
+PASS correct source view: school/resources
+PASS detail receives shared layout: school/resources
+PASS navigation: school/resources
+PASS correct source view: school/descriptions
+PASS detail receives shared layout: school/descriptions
+PASS navigation: school/descriptions
+PASS original form controls and handlers survive
+PASS native pages retain input state across preview navigation
+PASS long page sections use one compact selector without dropping sections
+PASS message folders remain available in the enhanced overview
+PASS submenu opens its native detail view
+PASS detail breadcrumb returns to its parent
+PASS parent stays selected on detail pages
+PASS unrecognized data tables receive shared styling
+PASS form tables are distinguished from data tables
+PASS global search discovers submenus
+PASS no runtime errors:
+PASS mobile starts on a single day
+PASS native day-header row parsed cell by cell
+PASS native cell date and timeline read
+PASS changed status and room preserved
+TOTAL 164 checks
+PASS ISO week 2026-11-16
+PASS ISO week 2026-12-31
+PASS ISO week 2027-01-01
+PASS ISO week 2027-01-04
+PASS ISO week 2024-12-30
+PASS invalid week rejected: 2021-W53
+PASS invalid week rejected: 2026-W00
+PASS invalid week rejected: 2026-W54
+PASS invalid week rejected: 2026-W01x
+PASS invalid week rejected: not-a-week
+PASS week URL preserves source identity, updates padded week and clears old hash
+PASS week helper refuses non-schedule URLs
+PASS schedule always exposes modern week controls even without original arrows
+PASS preview advances a week
+PASS preview returns to previous week
+PASS next week crosses the ISO year boundary
+PASS this-week control uses the preview clock and returns home
+PASS empty week cannot navigate to an unintended page
+PASS week changes have no DOM errors
+TOTAL 19 week-navigation checks
+PASS real route family: SkemaNy.aspx
+PASS no runtime error: SkemaNy.aspx
+PASS real route family: OpgaverElev.aspx
+PASS no runtime error: OpgaverElev.aspx
+PASS real route family: material_lektieoversigt.aspx
+PASS no runtime error: material_lektieoversigt.aspx
+PASS real route family: beskeder2.aspx
+PASS no runtime error: beskeder2.aspx
+PASS real route family: beskeder2.aspx?type=visbesked&id=fake
+PASS detail workflow keeps native form
+PASS no runtime error: beskeder2.aspx?type=visbesked&id=fake
+PASS real route family: beskeder2.aspx?type=nybesked
+PASS detail workflow keeps native form
+PASS no runtime error: beskeder2.aspx?type=nybesked
+PASS real route family: ElevAflevering.aspx?exerciseid=fake
+PASS detail workflow keeps native form
+PASS no runtime error: ElevAflevering.aspx?exerciseid=fake
+PASS real route family: subnav/fravaerelev.aspx
+PASS no runtime error: subnav/fravaerelev.aspx
+PASS real route family: subnav/fravaerelev_fravaersaarsager.aspx
+PASS no runtime error: subnav/fravaerelev_fravaersaarsager.aspx
+PASS real route family: grades/grade_report.aspx
+PASS no runtime error: grades/grade_report.aspx
+PASS real route family: studieplan/forloeb_vis.aspx?phaseid=fake
+PASS no runtime error: studieplan/forloeb_vis.aspx?phaseid=fake
+PASS real route family: DokumentOversigt.aspx?folderid=fake
+PASS no runtime error: DokumentOversigt.aspx?folderid=fake
+PASS real route family: DokumentFolderRediger.aspx
+PASS no runtime error: DokumentFolderRediger.aspx
+PASS real route family: spoergeskema/spoergeskema_rapport.aspx
+PASS no runtime error: spoergeskema/spoergeskema_rapport.aspx
+PASS real route family: spoergeskema/spoergeskema_besvar.aspx?id=fake
+PASS no runtime error: spoergeskema/spoergeskema_besvar.aspx?id=fake
+PASS active native tab mirrored
+PASS postback delegates exactly once to original control
+PASS generic menu callbacks do not leave original mode permanently enabled
+PASS delegation does not replace source control
+PASS delegated Lectio dialogs remain accessible
+PASS closing native dialog restores previous modern visibility
+PASS disabling restores native page layout
+PASS disabling removes classification attributes
+PASS data and form classification
+PASS authored content and schedule layouts excluded
+PASS wide table becomes keyboard-scrollable
+PASS original scroll-host attributes restored
+PASS form value preserved
+TOTAL 46 route and native DOM checks
+PASS default layout works without saved settings
+PASS old appearance-only preferences migrate to defaults
+PASS invalid inputs and duplicate custom IDs rejected
+PASS unknown and duplicate slots rejected
+PASS safe links reject scripts and credentials
+PASS custom text and widget limits enforced
+PASS dashboard shortcut opens the right settings category
+PASS seven settings categories
+PASS tabs support keyboard navigation
+PASS title and columns update after save
+PASS move button reorders persisted slots
+PASS reorder keeps keyboard focus
+PASS drag/drop reorders persisted slots
+PASS widget width reflected in dashboard
+PASS hide widget removes it from overview
+PASS hidden widget can be restored
+PASS custom title rendered as text
+PASS custom text cannot execute HTML
+PASS custom editing updates existing field
+PASS remove custom field in draft
+PASS undo restores removed field
+PASS editor refuses invalid URLs
+PASS custom web links open safely
+PASS reset preserves own fields but restores standard layout
+PASS reset restores title and columns
+PASS game iframe created on open
+PASS hiding clicker removes live frame and both entry points
+PASS hiding open game returns to dashboard and persists
+PASS direct game hash cannot reopen disabled feature
+PASS flat navigation exposes secondary links
+PASS expanded navigation keeps secondary menu visible
+PASS navigation density applied
+PASS appearance options applied
+PASS tab branding toggle restores original title
+PASS settings size controls schedule
+PASS hiding pause markers preserves the clock
+PASS room hidden in week cards
+PASS optional single subject color preserves cancellation color
+PASS default day mode applies immediately
+PASS default week mode applies immediately
+PASS section shortcuts and table density configurable
+PASS empty layout keeps customization reachable
+PASS dashboard and feature preferences survive reload
+PASS own content survives reload
+PASS storage failures show an honest unsaved status
+PASS customization has no runtime errors
+TOTAL 46 customization checks
+PASS dashboard opens a wide visual workspace
+PASS palette and canvas have distinct areas
+PASS each visible widget has a content preview
+PASS hero preview mirrors dashboard title
+PASS sample preview data is explicitly labelled
+PASS preview cannot navigate, load game or submit forms
+PASS drag target gives visible insertion feedback
+PASS drag keeps live overview unchanged before Save
+PASS drag from palette inserts hidden field before chosen card
+PASS saved palette drop updates actual overview
+PASS drop clears temporary drag styling
+PASS dragging a placed field moves it without duplication
+PASS palette plus button works without drag
+PASS untrusted external drop is ignored
+PASS cancelled drag clears highlights
+PASS mobile preview selected accessibly
+PASS desktop preview restored
+PASS title remains a draft until saved
+PASS canvas and live overview reflect title changes
+PASS other settings return to normal dialog width
+PASS realistic activity structure receives native styling
+PASS material link original click handler retained
+PASS theme changes preserve activity form state
+PASS read-only lesson note remains disabled
+PASS dark scheme overrides inherited native control scheme
+PASS light scheme overrides inherited native control scheme
+PASS option surface explicitly follows theme tokens
+PASS option text explicitly follows contrast token
+PASS visual editor and activity checks have no runtime errors
+TOTAL 29 visual editor and dropdown checks
+PASS Tilpas fanens navn og ikon: initial state is visible and accessible
+PASS Tilpas fanens navn og ikon: clicking the row updates visible state once
+PASS Tilpas fanens navn og ikon: visible state matches saved preference
+PASS Tilpas fanens navn og ikon: change confirmation names new state
+PASS Tilpas fanens navn og ikon: direct click switches back
+PASS Færre animationer: initial state is visible and accessible
+PASS Færre animationer: clicking the row updates visible state once
+PASS Færre animationer: visible state matches saved preference
+PASS Færre animationer: change confirmation names new state
+PASS Færre animationer: direct click switches back
+PASS Skjul mit profilbillede: initial state is visible and accessible
+PASS Skjul mit profilbillede: clicking the row updates visible state once
+PASS Skjul mit profilbillede: visible state matches saved preference
+PASS Skjul mit profilbillede: change confirmation names new state
+PASS Skjul mit profilbillede: direct click switches back
+PASS Vis mit navn som Anonym: initial state is visible and accessible
+PASS Vis mit navn som Anonym: clicking the row updates visible state once
+PASS Vis mit navn som Anonym: visible state matches saved preference
+PASS Vis mit navn som Anonym: change confirmation names new state
+PASS Vis mit navn som Anonym: direct click switches back
+PASS Vis pauser mellem lektioner: initial state is visible and accessible
+PASS Vis pauser mellem lektioner: clicking the row updates visible state once
+PASS Vis pauser mellem lektioner: visible state matches saved preference
+PASS Vis pauser mellem lektioner: change confirmation names new state
+PASS Vis pauser mellem lektioner: direct click switches back
+PASS Forskellige farver til fagene: initial state is visible and accessible
+PASS Forskellige farver til fagene: clicking the row updates visible state once
+PASS Forskellige farver til fagene: visible state matches saved preference
+PASS Forskellige farver til fagene: change confirmation names new state
+PASS Forskellige farver til fagene: direct click switches back
+PASS Vis lokale i ugeplanen: initial state is visible and accessible
+PASS Vis lokale i ugeplanen: clicking the row updates visible state once
+PASS Vis lokale i ugeplanen: visible state matches saved preference
+PASS Vis lokale i ugeplanen: change confirmation names new state
+PASS Vis lokale i ugeplanen: direct click switches back
+PASS Vis Strafe Clicker: initial state is visible and accessible
+PASS Vis Strafe Clicker: clicking the row updates visible state once
+PASS Vis Strafe Clicker: visible state matches saved preference
+PASS Vis Strafe Clicker: change confirmation names new state
+PASS Vis Strafe Clicker: direct click switches back
+PASS Genveje til afsnit på lange sider: initial state is visible and accessible
+PASS Genveje til afsnit på lange sider: clicking the row updates visible state once
+PASS Genveje til afsnit på lange sider: visible state matches saved preference
+PASS Genveje til afsnit på lange sider: change confirmation names new state
+PASS Genveje til afsnit på lange sider: direct click switches back
+PASS shown widget has explicit visible state
+PASS hidden widget has explicit hidden state
+PASS sync updates visual state without causing a save loop
+PASS sync restores off state
+PASS switch interactions have no runtime errors
+PASS popup switch matches persisted state
+PASS popup save failure restores both control and visible state
+TOTAL 52 switch feedback checks
+PASS editor uses exactly the live dashboard lesson content
+PASS real widget previews cannot navigate and contain no duplicate IDs
+PASS draft changes do not alter the page or saved configuration
+PASS undo returns to previous draft
+PASS redo restores draft
+PASS close preserves an unsaved draft with clear action
+PASS Escape cannot silently discard draft
+PASS backup waits for the layout draft to be saved or cancelled
+PASS Cancel clears draft and history
+PASS Save commits layout and resets dirty state
+PASS editing after undo clears redo branch
+PASS hidden sidebar item is saved and removed
+PASS pinned item appears first under Favorites
+PASS favorite state is visible and accessible
+PASS menu arrows persist ordering
+PASS custom menu order follows favorites with no duplicates
+PASS default menu restores groups, visibility and favorites
+PASS backup round-trips own content without activation flag
+PASS backup contains configuration rather than copied school content
+PASS bad JSON rejected
+PASS unknown version rejected
+PASS unknown preference rejected
+PASS unsafe URL rejected
+PASS oversized rejected
+PASS file selection shows review without changing saved data
+PASS reviewed import applies and renders own content
+PASS undo import restores prior configuration
+PASS failed layout save leaves live state unchanged and preserves draft
+PASS failed save can be retried successfully
+PASS external layout changes block stale draft overwrite
+PASS Cancel loads the newest external layout
+PASS new controls complete without runtime errors
+TOTAL 32 transaction, menu and backup checks
+PASS calculator: 2+3*4
+PASS calculator: (2+3)*4
+PASS calculator: 2^3^2
+PASS calculator: -2^2
+PASS calculator: (-2)^2
+PASS calculator: 2^-3
+PASS calculator: 2(3+4)
+PASS calculator: 2pi
+PASS calculator: sin(30)
+PASS calculator: sin(pi/2)
+PASS calculator: log(100)
+PASS calculator: ln(e)
+PASS calculator: 5!
+PASS calculator: 200*15%
+PASS calculator: 1,5+2,5
+PASS calculator: 1e3+2
+PASS invalid expression rejected: 1/0
+PASS invalid expression rejected: sqrt(-1)
+PASS invalid expression rejected: tan(90)
+PASS invalid expression rejected: window.alert(1)
+PASS invalid expression rejected: constructor(1)
+PASS invalid expression rejected: 2**4
+PASS invalid expression rejected: sin 30
+PASS invalid expression rejected: (1+2
+PASS invalid expression rejected: 3 4
+PASS invalid expression rejected: 1+
+PASS invalid expression rejected: 10^10000
+PASS invalid expression rejected: 171!
+PASS invalid expression rejected: (-1)!
+PASS invalid expression rejected: x.y
+PASS statistics and median-of-halves quartiles
+PASS sample vs population deviation
+PASS one value does not invent sample deviation
+PASS linear regression recovers exact line
+PASS quadratic roots
+PASS degenerate quadratic becomes linear
+PASS zero coefficients distinguished
+PASS complex roots represented explicitly
+PASS two linear equations
+PASS inconsistent zero-row system
+PASS fraction signs and simplification
+PASS binomial exact
+PASS binomial probability boundaries
+PASS temperature conversion
+PASS volume conversion
+PASS speed conversion
+PASS 118 unique elements
+PASS 2024 zirconium value
+PASS unassigned atomic weights stay null
+PASS molar mass H2O
+PASS molar mass Ca(OH)2
+PASS molar mass Al2(SO4)3
+PASS molar mass CuSO4·5H2O
+PASS molar mass NH4NO3
+PASS nested square brackets in formulas
+PASS subscripts and ionic electron count
+PASS iron(III) chloride name and formula
+PASS polyatomic ion groups receive parentheses
+PASS 50 reference-backed ion pairs; all other pairs explicitly rejected
+PASS balance H2 + O2 -> H2O
+PASS balance Fe + O2 -> Fe2O3
+PASS balance C3H8 + O2 -> CO2 + H2O
+PASS balance Al + HCl -> AlCl3 + H2
+PASS default calculation: calculator
+PASS default calculation: quadratic
+PASS default calculation: system
+PASS default calculation: fractions
+PASS default calculation: percent
+PASS default calculation: interest
+PASS default calculation: statistics
+PASS default calculation: regression
+PASS default calculation: probability
+PASS default calculation: geometry
+PASS default calculation: triangle
+PASS default calculation: vectors
+PASS default calculation: molar
+PASS default calculation: ions
+PASS default calculation: ionlookup
+PASS default calculation: balance
+PASS default calculation: moles
+PASS default calculation: concentration
+PASS default calculation: dilution
+PASS default calculation: ph
+PASS default calculation: motion
+PASS default calculation: force
+PASS default calculation: energy
+PASS default calculation: ohm
+PASS default calculation: waves
+PASS default calculation: gas
+PASS default calculation: decay
+TOTAL 106 school calculation checks, including all 462 candidate pairs
+PASS calculator independent result {"expression":"(12+8)/5"}
+PASS quadratic independent result {"a":1,"b":-3,"c":-10}
+PASS quadratic independent result {"a":1,"b":-2,"c":5}
+PASS system independent result {"a":3,"b":2,"c":16,"d":1,"e":-1,"f":2}
+PASS fractions independent result {"a":100,"b":-250}
+PASS percent independent result {"mode":"part","a":240,"b":12.5}
+PASS percent independent result {"mode":"new","a":240,"b":-12.5}
+PASS percent independent result {"mode":"change","a":80,"b":100}
+PASS interest independent result {"start":200,"rate":10,"periods":2}
+PASS interest independent result {"start":200,"rate":-100,"periods":0}
+PASS statistics independent result {"data":"1;2;3;4"}
+PASS regression independent result {"xs":"1;2;3","ys":"2;4;4"}
+PASS probability independent result {"n":3,"k":2,"p":0.5}
+PASS geometry independent result {"shape":"circle","a":2,"b":""}
+PASS geometry independent result {"shape":"rectangle","a":3,"b":7}
+PASS geometry independent result {"shape":"triangle","a":10,"b":6}
+PASS geometry independent result {"shape":"cylinder","a":2,"b":5}
+PASS geometry independent result {"shape":"sphere","a":3,"b":"ignored"}
+PASS triangle independent result {"a":3,"b":4}
+PASS molar independent result {"formula":"SO4","charge":-2}
+PASS moles independent result {"formula":"H2O","mode":"mass","value":36.03}
+PASS moles independent result {"formula":"H2O","mode":"moles","value":2}
+PASS concentration independent result {"formula":"NaCl","mass":5.844,"volume":2}
+PASS dilution independent result {"c1":2,"c2":0.1,"v2":250}
+PASS ph independent result {"type":"acid","c":0}
+PASS ph independent result {"type":"acid","c":0.001}
+PASS ph independent result {"type":"base","c":0.001}
+PASS motion independent result {"v0":10,"a":-2,"t":5}
+PASS force independent result {"mode":"force","m":4,"a":-3}
+PASS force independent result {"mode":"pressure","force":100,"area":0.2,"m":"","a":""}
+PASS energy independent result {"m":2,"v":3,"h":5,"g":10}
+PASS ohm independent result {"u":230,"r":46,"t":2}
+PASS waves independent result {"speed":340,"frequency":170}
+PASS gas independent result {"n":1,"t":0,"v":22.41396954501414}
+PASS decay independent result {"start":80,"half":5,"time":15}
+PASS graph compiles once and evaluates valid domain
+PASS decimal proportional equations do not invent huge roots
+PASS decimal inconsistent equations identified
+PASS quadratic survives coefficient scale 1e+150
+PASS quadratic survives coefficient scale 1e-150
+PASS constant response has no invented R²
+PASS Fahrenheit absolute zero is accepted exactly
+PASS unit reference length
+PASS unit reference mass
+PASS unit reference time
+PASS unit reference area
+PASS unit reference volume
+PASS unit reference speed
+PASS unit reference pressure
+PASS unit reference energy
+PASS unit reference temperature
+PASS classic calculator 2+3*4=
+PASS classic calculator 200+10%=
+PASS classic calculator 200-10%=
+PASS classic calculator 200*10%=
+PASS classic calculator 200/10%=
+PASS classic calculator 2+3===
+PASS classic calculator 0,1+0,2=
+PASS classic calculator 2+-3=
+PASS classic division by zero is an error
+PASS classic clear and sign recover after error
+PASS tiny statistics retain mean and median
+PASS scaled statistics avoid false overflow
+PASS new entry clears previous equation history
+PASS constant datasets remain constant despite floating-point summation
+PASS primary atomic-weight snapshot has all 118 rows
+PASS CIAAW atomic weight H
+PASS CIAAW atomic weight He
+PASS CIAAW atomic weight Li
+PASS CIAAW atomic weight Be
+PASS CIAAW atomic weight B
+PASS CIAAW atomic weight C
+PASS CIAAW atomic weight N
+PASS CIAAW atomic weight O
+PASS CIAAW atomic weight F
+PASS CIAAW atomic weight Ne
+PASS CIAAW atomic weight Na
+PASS CIAAW atomic weight Mg
+PASS CIAAW atomic weight Al
+PASS CIAAW atomic weight Si
+PASS CIAAW atomic weight P
+PASS CIAAW atomic weight S
+PASS CIAAW atomic weight Cl
+PASS CIAAW atomic weight Ar
+PASS CIAAW atomic weight K
+PASS CIAAW atomic weight Ca
+PASS CIAAW atomic weight Sc
+PASS CIAAW atomic weight Ti
+PASS CIAAW atomic weight V
+PASS CIAAW atomic weight Cr
+PASS CIAAW atomic weight Mn
+PASS CIAAW atomic weight Fe
+PASS CIAAW atomic weight Co
+PASS CIAAW atomic weight Ni
+PASS CIAAW atomic weight Cu
+PASS CIAAW atomic weight Zn
+PASS CIAAW atomic weight Ga
+PASS CIAAW atomic weight Ge
+PASS CIAAW atomic weight As
+PASS CIAAW atomic weight Se
+PASS CIAAW atomic weight Br
+PASS CIAAW atomic weight Kr
+PASS CIAAW atomic weight Rb
+PASS CIAAW atomic weight Sr
+PASS CIAAW atomic weight Y
+PASS CIAAW atomic weight Zr
+PASS CIAAW atomic weight Nb
+PASS CIAAW atomic weight Mo
+PASS CIAAW atomic weight Tc
+PASS CIAAW atomic weight Ru
+PASS CIAAW atomic weight Rh
+PASS CIAAW atomic weight Pd
+PASS CIAAW atomic weight Ag
+PASS CIAAW atomic weight Cd
+PASS CIAAW atomic weight In
+PASS CIAAW atomic weight Sn
+PASS CIAAW atomic weight Sb
+PASS CIAAW atomic weight Te
+PASS CIAAW atomic weight I
+PASS CIAAW atomic weight Xe
+PASS CIAAW atomic weight Cs
+PASS CIAAW atomic weight Ba
+PASS CIAAW atomic weight La
+PASS CIAAW atomic weight Ce
+PASS CIAAW atomic weight Pr
+PASS CIAAW atomic weight Nd
+PASS CIAAW atomic weight Pm
+PASS CIAAW atomic weight Sm
+PASS CIAAW atomic weight Eu
+PASS CIAAW atomic weight Gd
+PASS CIAAW atomic weight Tb
+PASS CIAAW atomic weight Dy
+PASS CIAAW atomic weight Ho
+PASS CIAAW atomic weight Er
+PASS CIAAW atomic weight Tm
+PASS CIAAW atomic weight Yb
+PASS CIAAW atomic weight Lu
+PASS CIAAW atomic weight Hf
+PASS CIAAW atomic weight Ta
+PASS CIAAW atomic weight W
+PASS CIAAW atomic weight Re
+PASS CIAAW atomic weight Os
+PASS CIAAW atomic weight Ir
+PASS CIAAW atomic weight Pt
+PASS CIAAW atomic weight Au
+PASS CIAAW atomic weight Hg
+PASS CIAAW atomic weight Tl
+PASS CIAAW atomic weight Pb
+PASS CIAAW atomic weight Bi
+PASS CIAAW atomic weight Po
+PASS CIAAW atomic weight At
+PASS CIAAW atomic weight Rn
+PASS CIAAW atomic weight Fr
+PASS CIAAW atomic weight Ra
+PASS CIAAW atomic weight Ac
+PASS CIAAW atomic weight Th
+PASS CIAAW atomic weight Pa
+PASS CIAAW atomic weight U
+PASS CIAAW atomic weight Np
+PASS CIAAW atomic weight Pu
+PASS CIAAW atomic weight Am
+PASS CIAAW atomic weight Cm
+PASS CIAAW atomic weight Bk
+PASS CIAAW atomic weight Cf
+PASS CIAAW atomic weight Es
+PASS CIAAW atomic weight Fm
+PASS CIAAW atomic weight Md
+PASS CIAAW atomic weight No
+PASS CIAAW atomic weight Lr
+PASS CIAAW atomic weight Rf
+PASS CIAAW atomic weight Db
+PASS CIAAW atomic weight Sg
+PASS CIAAW atomic weight Bh
+PASS CIAAW atomic weight Hs
+PASS CIAAW atomic weight Mt
+PASS CIAAW atomic weight Ds
+PASS CIAAW atomic weight Rg
+PASS CIAAW atomic weight Cn
+PASS CIAAW atomic weight Nh
+PASS CIAAW atomic weight Fl
+PASS CIAAW atomic weight Mc
+PASS CIAAW atomic weight Lv
+PASS CIAAW atomic weight Ts
+PASS CIAAW atomic weight Og
+PASS periodic cells do not overlap
+PASS PubChem compound formula sodium chloride
+PASS PubChem compound formula potassium chloride
+PASS PubChem compound formula calcium chloride
+PASS PubChem compound formula magnesium chloride
+PASS PubChem compound formula iron(II) chloride
+PASS PubChem compound formula iron(III) chloride
+PASS PubChem compound formula copper(II) chloride
+PASS PubChem compound formula ammonium chloride
+PASS PubChem compound formula silver nitrate
+PASS PubChem compound formula sodium nitrate
+PASS PubChem compound formula potassium nitrate
+PASS PubChem compound formula calcium nitrate
+PASS PubChem compound formula magnesium nitrate
+PASS PubChem compound formula ammonium nitrate
+PASS PubChem compound formula sodium sulfate
+PASS PubChem compound formula potassium sulfate
+PASS PubChem compound formula calcium sulfate
+PASS PubChem compound formula magnesium sulfate
+PASS PubChem compound formula copper(II) sulfate
+PASS PubChem compound formula ammonium sulfate
+PASS PubChem compound formula aluminium sulfate
+PASS PubChem compound formula iron(II) sulfate
+PASS PubChem compound formula iron(III) sulfate
+PASS PubChem compound formula barium sulfate
+PASS PubChem compound formula sodium hydroxide
+PASS PubChem compound formula potassium hydroxide
+PASS PubChem compound formula calcium hydroxide
+PASS PubChem compound formula magnesium hydroxide
+PASS PubChem compound formula aluminium hydroxide
+PASS PubChem compound formula copper(II) hydroxide
+PASS PubChem compound formula zinc hydroxide
+PASS PubChem compound formula sodium carbonate
+PASS PubChem compound formula potassium carbonate
+PASS PubChem compound formula calcium carbonate
+PASS PubChem compound formula magnesium carbonate
+PASS PubChem compound formula sodium bicarbonate
+PASS PubChem compound formula potassium bicarbonate
+PASS PubChem compound formula trisodium phosphate
+PASS PubChem compound formula tripotassium phosphate
+PASS PubChem compound formula tricalcium phosphate
+PASS PubChem compound formula monoammonium phosphate
+PASS PubChem compound formula diammonium phosphate
+PASS PubChem compound formula disodium phosphate
+PASS PubChem compound formula monosodium phosphate
+PASS PubChem compound formula zinc oxide
+PASS PubChem compound formula ferric oxide
+PASS PubChem compound formula copper(II) oxide
+PASS PubChem compound formula copper(I) oxide
+PASS PubChem compound formula magnesium oxide
+PASS PubChem compound formula calcium oxide
+PASS Danish name and oxidation state jern(III)chlorid
+PASS Danish name and oxidation state jern(II)chlorid
+PASS Danish name and oxidation state ammoniumsulfat
+PASS Danish name and oxidation state calciumphosphat
+PASS Danish name and oxidation state ammoniumdihydrogenphosphat
+PASS Danish name and oxidation state ammoniumhydrogenphosphat
+PASS Danish name and oxidation state natriumhydrogencarbonat
+PASS Danish name and oxidation state kobber(I)oxid
+PASS reaction reference C2H6 + O2 -> CO2 + H2O
+PASS reaction reference Ca(OH)2 + HCl -> CaCl2 + H2O
+PASS reaction reference Na3PO4 + MgCl2 -> Mg3(PO4)2 + NaCl
+PASS 53 local tools plus online translator including classic calculator; no AI
+TOTAL 348 independent audit checks
+PASS visual result for quadratic
+PASS finite visual coordinates and labels for quadratic
+PASS accessible diagram: quadratic
+PASS visual result for system
+PASS finite visual coordinates and labels for system
+PASS accessible diagram: system
+PASS visual result for fractions
+PASS finite visual coordinates and labels for fractions
+PASS accessible diagram: fractions
+PASS visual result for percent
+PASS finite visual coordinates and labels for percent
+PASS visual result for interest
+PASS finite visual coordinates and labels for interest
+PASS accessible diagram: interest
+PASS visual result for statistics
+PASS finite visual coordinates and labels for statistics
+PASS accessible diagram: statistics
+PASS visual result for regression
+PASS finite visual coordinates and labels for regression
+PASS accessible diagram: regression
+PASS visual result for probability
+PASS finite visual coordinates and labels for probability
+PASS accessible diagram: probability
+PASS visual result for geometry
+PASS finite visual coordinates and labels for geometry
+PASS accessible diagram: geometry
+PASS visual result for triangle
+PASS finite visual coordinates and labels for triangle
+PASS accessible diagram: triangle
+PASS visual result for vectors
+PASS finite visual coordinates and labels for vectors
+PASS accessible diagram: vectors
+PASS visual result for molar
+PASS finite visual coordinates and labels for molar
+PASS visual result for ions
+PASS finite visual coordinates and labels for ions
+PASS accessible diagram: ions
+PASS visual result for ionlookup
+PASS finite visual coordinates and labels for ionlookup
+PASS accessible diagram: ionlookup
+PASS visual result for balance
+PASS finite visual coordinates and labels for balance
+PASS visual result for moles
+PASS finite visual coordinates and labels for moles
+PASS visual result for concentration
+PASS finite visual coordinates and labels for concentration
+PASS visual result for dilution
+PASS finite visual coordinates and labels for dilution
+PASS accessible diagram: dilution
+PASS visual result for ph
+PASS finite visual coordinates and labels for ph
+PASS accessible diagram: ph
+PASS visual result for motion
+PASS finite visual coordinates and labels for motion
+PASS accessible diagram: motion
+PASS visual result for force
+PASS finite visual coordinates and labels for force
+PASS accessible diagram: force
+PASS visual result for energy
+PASS finite visual coordinates and labels for energy
+PASS visual result for ohm
+PASS finite visual coordinates and labels for ohm
+PASS accessible diagram: ohm
+PASS visual result for waves
+PASS finite visual coordinates and labels for waves
+PASS accessible diagram: waves
+PASS visual result for gas
+PASS finite visual coordinates and labels for gas
+PASS visual result for decay
+PASS finite visual coordinates and labels for decay
+PASS accessible diagram: decay
+PASS hypotenuse mode computes missing katete for both result and diagram
+PASS angle mode computes hypotenuse 10 from opposite side 5 at 30 degrees
+PASS perpendicular vector lengths, dot product and angle
+PASS opposite vectors form 180 degrees
+PASS zero vector does not invent an angle
+PASS reverse ion lookup NaCl
+PASS reverse ion lookup KCl
+PASS reverse ion lookup CaCl2
+PASS reverse ion lookup MgCl2
+PASS reverse ion lookup FeCl2
+PASS reverse ion lookup FeCl3
+PASS reverse ion lookup CuCl2
+PASS reverse ion lookup NH4Cl
+PASS reverse ion lookup AgNO3
+PASS reverse ion lookup NaNO3
+PASS reverse ion lookup KNO3
+PASS reverse ion lookup Ca(NO3)2
+PASS reverse ion lookup Mg(NO3)2
+PASS reverse ion lookup NH4NO3
+PASS reverse ion lookup Na2SO4
+PASS reverse ion lookup K2SO4
+PASS reverse ion lookup CaSO4
+PASS reverse ion lookup MgSO4
+PASS reverse ion lookup CuSO4
+PASS reverse ion lookup (NH4)2SO4
+PASS reverse ion lookup Al2(SO4)3
+PASS reverse ion lookup FeSO4
+PASS reverse ion lookup Fe2(SO4)3
+PASS reverse ion lookup BaSO4
+PASS reverse ion lookup NaOH
+PASS reverse ion lookup KOH
+PASS reverse ion lookup Ca(OH)2
+PASS reverse ion lookup Mg(OH)2
+PASS reverse ion lookup Al(OH)3
+PASS reverse ion lookup Cu(OH)2
+PASS reverse ion lookup Zn(OH)2
+PASS reverse ion lookup Na2CO3
+PASS reverse ion lookup K2CO3
+PASS reverse ion lookup CaCO3
+PASS reverse ion lookup MgCO3
+PASS reverse ion lookup NaHCO3
+PASS reverse ion lookup KHCO3
+PASS reverse ion lookup Na3PO4
+PASS reverse ion lookup K3PO4
+PASS reverse ion lookup Ca3(PO4)2
+PASS reverse ion lookup NH4H2PO4
+PASS reverse ion lookup (NH4)2HPO4
+PASS reverse ion lookup Na2HPO4
+PASS reverse ion lookup NaH2PO4
+PASS reverse ion lookup ZnO
+PASS reverse ion lookup Fe2O3
+PASS reverse ion lookup CuO
+PASS reverse ion lookup Cu2O
+PASS reverse ion lookup MgO
+PASS reverse ion lookup CaO
+PASS one mole of calcium chloride gives formal one-to-two ion amounts
+PASS optional empty mass does not produce fictional sample quantities
+PASS CaCl2 illustration has one calcium and two chloride ions
+PASS rectangle preserves input aspect ratio
+PASS zero radius does not show a nonzero sphere
+PASS pH visual agrees with neutral-water result
+PASS percentage bars share a truthful common scale
+PASS decay curve draws actual model samples
+PASS binomial plot represents each discrete outcome and highlights k
+PASS updated tool layout CSS parses
+PASS no arbitrary diagram is invented for an unstructured scientific expression
+TOTAL 141 visual and expanded tool checks
+PASS toolbox starts with six shortcuts and five subjects
+PASS full catalog retains all 54 tools
+PASS toolbox has sidebar navigation
+PASS route: basic
+PASS route: calculator
+PASS UI default result: calculator
+PASS route: quadratic
+PASS UI default result: quadratic
+PASS route: system
+PASS UI default result: system
+PASS route: fractions
+PASS UI default result: fractions
+PASS route: percent
+PASS UI default result: percent
+PASS route: interest
+PASS UI default result: interest
+PASS route: statistics
+PASS UI default result: statistics
+PASS route: regression
+PASS UI default result: regression
+PASS route: probability
+PASS UI default result: probability
+PASS route: geometry
+PASS UI default result: geometry
+PASS route: triangle
+PASS UI default result: triangle
+PASS route: vectors
+PASS UI default result: vectors
+PASS route: graph
+PASS route: periodic
+PASS route: molar
+PASS UI default result: molar
+PASS route: ions
+PASS UI default result: ions
+PASS route: ionlookup
+PASS UI default result: ionlookup
+PASS route: balance
+PASS UI default result: balance
+PASS route: moles
+PASS UI default result: moles
+PASS route: concentration
+PASS UI default result: concentration
+PASS route: dilution
+PASS UI default result: dilution
+PASS route: ph
+PASS UI default result: ph
+PASS route: units
+PASS route: motion
+PASS UI default result: motion
+PASS route: force
+PASS UI default result: force
+PASS route: energy
+PASS UI default result: energy
+PASS route: ohm
+PASS UI default result: ohm
+PASS route: waves
+PASS UI default result: waves
+PASS route: gas
+PASS UI default result: gas
+PASS route: decay
+PASS UI default result: decay
+PASS route: text
+PASS route: sources
+PASS route: argument
+PASS route: flashcards
+PASS route: notes
+PASS route: pomodoro
+PASS route: planner
+PASS route: ionmodel
+PASS route: atomcompare
+PASS route: formulas
+PASS route: interactive
+PASS route: stoichiometry
+PASS route: worksheet
+PASS route: molecules
+PASS route: report
+PASS route: precision
+PASS route: circuits
+PASS route: simulation
+PASS route: board
+PASS route: glossary
+PASS route: profiles
+PASS route: punctuation
+PASS route: translate
+PASS invalid calculation produces clear error
+PASS calculation recovers after an error
+PASS favorites persist visibly
+PASS favorites filter
+PASS search finds tool names and translated descriptions
+PASS tool settings open on the tool page
+PASS tool toggle shows its saved off state
+PASS English interface persists
+PASS language switch preserves calculator input
+PASS mixed terminology preserves Danish controls
+PASS language can switch back to Danish
+PASS periodic table has 118 elements
+PASS periodic search finds symbols
+PASS selected element shows verified iron weight
+PASS graph breaks at singularity and avoids invalid coordinates
+PASS graph includes numerical table
+PASS unit UI converts Fahrenheit to Celsius
+PASS notes persist
+PASS English mode never translates user notes
+PASS flashcard is saved and shown
+PASS flashcard reveals answer
+PASS flashcard removal persists
+PASS flashcard removal can be undone
+PASS backup includes owned study content
+PASS timer duration uses settings
+PASS timer remains running across tools
+PASS study planner distributes work over requested days
+PASS calculation layout separates inputs and visual results
+PASS visuals can be disabled without hiding numerical results
+PASS visual preference restores existing diagram
+PASS triangle switches to the correct known quantities
+PASS triangle derives the missing side and its diagram
+PASS reverse ion lookup shows the amount of each ion
+PASS vectors show arrows and a calculated angle
+PASS classic keypad supports keyboard and contextual percent
+PASS classic calculator works by clicking its buttons
+PASS circle shows radius and hides unused height
+PASS rectangle shows width and height
+PASS changing a select clears stale result and disables irrelevant inputs
+PASS example action resets mode and values
+PASS percentage fields describe the selected operation
+PASS pressure asks for contact force instead of misusing net acceleration
+PASS ion choices only enable referenced pairs
+PASS compound result links to its actual PubChem record
+PASS g alone retains its name and legend
+PASS domain failure cannot hide a later syntax error
+PASS unit selection invalidates previous result without requiring input event
+PASS template preserves literal user text: sources
+PASS template invalidates old draft: sources
+PASS template preserves literal user text: argument
+PASS template invalidates old draft: argument
+PASS word count counts repeated words and punctuation correctly
+PASS reading speed must be positive
+PASS typing during save preserves unsaved edits and truthful status
+PASS rapid double click creates one additional card
+PASS timer catches up correctly when returning from page cache
+PASS plan does not duplicate work when there are more days than pages
+PASS planner invalidates obsolete plan
+PASS AI module and catalog entry removed
+PASS returning to dashboard hides toolbox
+PASS all school tool routes run without DOM errors
+TOTAL 145 school UI checks
+PASS boot also guards a document whose html element is created after injection
+PASS first paint is guarded
+PASS slow document stays guarded beyond old 1.4-second timeout
+PASS ready shell reveals without clearing theme
+PASS successful boot clears watchdogs
+PASS broken initialization fails open after DOM is ready
+PASS stalled document has an absolute fail-open deadline
+PASS disabled extension reveals original immediately
+PASS excluded path untouched: login.aspx
+PASS excluded path untouched: logout.aspx
+PASS excluded path untouched: eksamen.aspx
+PASS excluded path untouched: introduktion.htm
+PASS initial native colors are corrected before animation frames
+PASS new native menu is themed in its mutation batch before paint
+PASS native color scan cancels queued duplicate frame
+PASS same-origin blank editor frame gets an early guard
+PASS editor frame reveals only after native theme is applied
+PASS school selection reveals completed custom picker
+PASS school picker shares boot preferences without a second asynchronous read
+PASS failed school list fetch restores usable original
+PASS schedule fixture starts in modern view
+PASS temporary source removal keeps complete modern schedule instead of exposing original
+PASS replacement source clears busy state without a native flash
+PASS permanently unsupported content falls back to styled native form
+PASS transitions complete without runtime errors
+PASS late source does not build against a missing root
+PASS source appearing after injection starts the modern renderer
+PASS replacing masterContent reconnects the renderer without duplicate UI
+PASS removed shell is reattached with its existing state
+PASS hung preferences read no longer blocks page initialization
+PASS late disabled preference still overrides temporary defaults
+PASS native theme follows a replacement body
+PASS manifest guards both school picker and school pages at document start
+PASS boot opacity blocks descendants that explicitly set visibility visible
+TOTAL 34 startup and transition checks
+PASS older backup gains new defaults and removes only retired AI navigation
+PASS full allowed flashcard and note collection fits backup limit even with escaped characters
+PASS large exported backup imports without truncating owned content
+PASS branding initially applies
+PASS late title/icon changes do not discard chosen tab branding
+PASS branding follows replacement head
+PASS disabling branding restores current native head assets
+PASS branding and backups run without DOM errors
+PASS school picker waits for late original content
+PASS late school list starts and malformed links are skipped individually
+PASS failed school-picker setting rolls back visibly
+PASS school picker recovery has no DOM errors
+PASS empty schedule can derive selected ISO week from its actual URL
+PASS real-route navigation accepts Lectio form outside masterContent and renders selected week
+PASS week fetch keeps modern layout without reload errors
+PASS stylesheet parses: customization.css
+PASS stylesheet parses: games.css
+PASS stylesheet parses: native-pages.css
+PASS stylesheet parses: native.css
+PASS stylesheet parses: popup.css
+PASS stylesheet parses: privacy.css
+PASS stylesheet parses: school-expanded.css
+PASS stylesheet parses: school-lab.css
+PASS stylesheet parses: school-picker.css
+PASS stylesheet parses: school-polish.css
+PASS stylesheet parses: school-tools.css
+PASS stylesheet parses: styles.css
+PASS stylesheet parses: theme.css
+PASS stylesheet parses: workspace.css
+PASS print rules use the currently displayed modern view instead of a stale original week
+PASS test keeps minimal permissions and does not trigger a release
+PASS AI client/server are absent from current source
+TOTAL 34 extension-wide regression checks
+PASS fresh real-route startup reaches the themed overview
+PASS cleared body classes recover without leaving Lectio behind the sidebar
+PASS cleared HTML attributes regain the selected theme
+PASS native controls regain theme protection as well
+PASS recovery preserves the host page classes
+PASS recovery preserves original form and entered values
+PASS recovery does not create duplicate navigation
+PASS intentional original-tools mode survives presentation recovery
+PASS recovery uses current saved theme rather than defaults
+PASS disabled extension remains disabled after host updates
+PASS re-enabling restores current preferences
+PASS applying unchanged appearance does not cause a mutation loop
+PASS startup and presentation repairs have no runtime errors
+PASS pending initial preferences do not expose an incomplete shell
+PASS late preferences finish the actual startup sequence
+PASS successful retry restores both theme and layout after a render failure
+PASS recoverable render failure does not escape startup
+TOTAL 17 fresh startup and presentation recovery checks
+PASS homework retains all rows with shared date and subject cells
+PASS rowspans inherit the correct subject and date
+PASS activity heading is separate from homework body
+PASS homework has its own card layout
+PASS subject and date have separate readable fields
+PASS paragraphs and numbered preparation steps remain separate
+PASS activity link keeps the original target
+PASS material link remains individually usable
+PASS external material opens safely in its own tab
+PASS Lectio file-menu action delegates to the real control
+PASS embedded content has an explicit original-view action
+PASS unsafe addresses and source scripts are never cloned into homework cards
+PASS additional source columns remain accessible
+PASS search includes inherited subject cells
+PASS homework can sort by actual dates
+PASS material target changes update without stale links
+PASS simple homework does not turn the full description into a giant heading
+PASS icon ligatures are excluded from activity titles
+PASS title used for search excludes icon ligatures
+PASS rendered homework title has no smsbookmark prefix
+PASS accessible activity label excludes glyph names
+PASS link labels remove icons while preserving actual words
+PASS body omits icon nodes but retains literal text
+PASS icon cleanup does not mutate original Lectio nodes or actions
+PASS icon font family is omitted without string replacement: ls-fonticon
+PASS icon font family is omitted without string replacement: material-icons
+PASS icon font family is omitted without string replacement: material-icons-outlined
+PASS icon font family is omitted without string replacement: material-icons-round
+PASS icon font family is omitted without string replacement: material-icons-sharp
+PASS icon font family is omitted without string replacement: material-icons-two-tone
+PASS icon font family is omitted without string replacement: material-symbols-outlined
+PASS icon font family is omitted without string replacement: material-symbols-rounded
+PASS icon font family is omitted without string replacement: material-symbols-sharp
+PASS hidden decorative text stays out of labels
+PASS dynamic icon updates do not reintroduce glyph text
+PASS long strings wrap inside homework content
+PASS homework parsing and interactions have no runtime errors
+TOTAL 37 homework layout and content checks
+PASS calculator result: 9 sqrt
+PASS calculator result: 9 square
+PASS calculator result: 4 reciprocal
+PASS calculator result: 7 ± abs
+PASS calculator result: 2 ^ 1 0 =
+PASS calculator result: 2 + 9 sqrt =
+PASS calculator result: 9 sqrt 7
+PASS calculator result: 1 2 + 9 9 CE 3 =
+PASS calculator result: 2 + 3 = C 4 * Ans =
+PASS pi retains full calculation precision
+PASS invalid domain is rejected: 9 ± sqrt
+PASS invalid domain is rejected: 0 reciprocal
+PASS invalid domain is rejected: 0 ^ 0 =
+PASS invalid domain is rejected: 1 0 ^ 9 9 9 =
+PASS M+ changes memory without replacing current input
+PASS M- and MR preserve memory through C
+PASS an error cannot be saved over valid memory
+PASS memory recall can correct an invalid right operand
+PASS MC clears only memory
+PASS history records repeated equals with actual results
+PASS history snapshots cannot mutate calculator state
+PASS a reused result can become the current operand
+PASS history is bounded to the latest 20 results
+PASS clearing history leaves current result intact
+PASS square reports unrepresentable underflow rather than false zero
+PASS standard keypad remains compact with extras collapsed
+PASS extra buttons update display and visible memory state
+PASS memory buttons remain usable after clear
+PASS clicking a history result reuses it
+PASS copy button copies the displayed number and confirms success
+PASS blocked clipboard has an honest manual-copy fallback
+PASS invalid result is visible and cannot be copied as a number
+PASS Delete clears the current entry
+PASS Enter on a focused function keeps native keyboard button activation
+PASS extra calculator functions have no DOM errors
+TOTAL 35 extended calculator checks
+PASS all 118 element records match the dated atomic reference snapshot
+PASS isotope and shell reference Z=1, A=1
+PASS isotope and shell reference Z=1, A=2
+PASS isotope and shell reference Z=6, A=12
+PASS isotope and shell reference Z=6, A=14
+PASS isotope and shell reference Z=8, A=16
+PASS isotope and shell reference Z=11, A=23
+PASS isotope and shell reference Z=17, A=35
+PASS isotope and shell reference Z=24, A=52
+PASS isotope and shell reference Z=29, A=63
+PASS isotope and shell reference Z=46, A=106
+PASS isotope and shell reference Z=103, A=262
+PASS isotope and shell reference Z=118, A=294
+PASS all 354 isotope choices conserve mass number and neutral charge
+PASS all 118 diagrams have exact particle counts, shell counts, legends and finite coordinates
+PASS heavy-element predictions and schematic limits are explicit
+PASS selecting carbon chooses a referenced isotope and updates its model
+PASS isotope selection changes neutrons without changing neutral protons or electrons
+PASS chosen isotope is retained when switching elements
+PASS visual preference hides drawings while retaining exact counts
+PASS atom view and labelled colours return when enabled
+PASS protons, neutrons and electrons use three distinct fixed colours
+PASS periodic-table atom interactions have no DOM errors
+TOTAL 24 atomic model and isotope checks
+PASS 126 tools including the online translator are registered
+PASS new installation has Strafe Clicker disabled
+PASS an explicitly enabled clicker preference is retained
+PASS controlled ion charge and shells: Li
+PASS controlled ion charge and shells: Na
+PASS controlled ion charge and shells: K
+PASS controlled ion charge and shells: Mg
+PASS controlled ion charge and shells: Ca
+PASS controlled ion charge and shells: Al
+PASS controlled ion charge and shells: F
+PASS controlled ion charge and shells: Cl
+PASS controlled ion charge and shells: O
+PASS controlled ion charge and shells: S
+PASS stoichiometric water reaction and product mass
+PASS limiting reactant, excess oxygen and expected yield
+PASS tiny positive amounts do not falsely mark excess reactants as limiting
+PASS multiple products follow balanced coefficients
+PASS series circuit conserves voltage
+PASS parallel circuit conserves current
+PASS zero voltage is handled
+PASS independent uncertainty propagation: add
+PASS independent uncertainty propagation: subtract
+PASS independent uncertainty propagation: multiply
+PASS independent uncertainty propagation: divide
+PASS significant figures retain scale and intended precision
+PASS decimal ties round explicitly without binary floating-point surprises
+PASS simulation bins and expected counts are exact for a controlled RNG
+PASS last random interval is counted
+PASS easy card receives a three-day first review
+PASS hard recall can return after ten minutes
+PASS molecule bonds reference actual atoms: water
+PASS molecule bonds reference actual atoms: carbon
+PASS molecule bonds reference actual atoms: methane
+PASS water model has the documented 104.5 degree angle
+PASS punctuation suggests a comma before men and an ending
+PASS decimal comma is preserved
+PASS sodium ion view has ten electrons plus one legend swatch
+PASS carbon isotope comparison highlights neutron difference
+PASS interactive slider recalculates the model and graph
+PASS interactive triangle updates the hypotenuse
+PASS reaction UI shows amounts and atom-balance visual
+PASS calculation and diagram are saved on the worksheet
+PASS worksheet reconstructs its safe saved diagram
+PASS worksheet supports named calculations and comments
+PASS graph input preset is persisted
+PASS graph preset restores the function
+PASS molecule rotation changes the projected coordinates
+PASS methane view contains carbon and four hydrogens
+PASS parallel circuit renders its correct resistance
+PASS circuit diagram labels current and voltage directly
+PASS circuit builder adds a real calculated component
+PASS coin experiment displays observed and theoretical frequencies
+PASS simulation can accumulate a second batch
+PASS report draft is persisted
+PASS report measurements yield correct regression and plot
+PASS report transfers measurements to the existing regression tool
+PASS personal board saves tasks and subgoals
+PASS keyboard-accessible task status is saved
+PASS subgoal checkbox saves visible completion
+PASS named subject notes save their own content
+PASS switching notes cannot silently discard a draft
+PASS deleted subject notes can be restored
+PASS punctuation changes are opt-in
+PASS selected punctuation changes appear in preview
+PASS only accepted punctuation is applied
+PASS punctuation insertion is undoable
+PASS appearance profile is stored
+PASS profile changes layout while preserving owned notes
+PASS profile switch can be undone
+PASS flashcard difficulty stores a future repetition date
+PASS backup round-trips all new personal work
+PASS saved figures cannot introduce script, remote images or URL fills
+PASS tool dock leaves homework open
+PASS repair rebuilds missing modern content without changing preferences
+PASS new tools and integrated actions have no DOM errors:
+TOTAL 83 new lab and productivity checks
+PASS UTF-8 segmentation preserves exact text within provider byte limit
+PASS UTF-8 segmentation preserves exact text within provider byte limit
+PASS UTF-8 segmentation preserves exact text within provider byte limit
+PASS UTF-8 segmentation preserves exact text within provider byte limit
+PASS UTF-8 segmentation preserves exact text within provider byte limit
+PASS translation uses fixed HTTPS endpoint and correct language pair
+PASS translation sends no credentials, API key or referrer
+PASS same-language translation stays local
+PASS worker rejects messages from unrelated origins
+PASS worker responds asynchronously to an allowed extension content script
+PASS only the translation service receives new host access
+PASS typing never automatically sends text
+PASS explicit translate action sends one request and disables duplicates
+PASS stale translation does not replace a newer input
+PASS provider text cannot become executable HTML
+PASS language swap works without authentication
+PASS provider limit is visible and retry remains available
+PASS translation UI has no DOM errors
+TOTAL 25 translation API and UI checks
+PASS anonymity is optional and off by default
+PASS anonymity accepts only a boolean
+PASS disabled privacy retains displayed names
+PASS own Forside header identifies the full name
+PASS all exact name occurrences are masked without changing other people
+PASS a name split across styled spans appears once
+PASS original inline markup survives masking
+PASS native text data is preserved for Lectio readers
+PASS word boundaries do not hide parts of another name
+PASS link targets and existing click handlers remain intact
+PASS tooltips and accessible link labels hide the full name
+PASS masked text has an explicit accessible name
+PASS native browser title masks the name
+PASS person photo hidden: header-photo
+PASS person photo hidden: card-photo
+PASS person photo hidden: other-photo
+PASS person photo hidden: legacy-photo
+PASS person photo hidden: responsive
+PASS unrelated illustration remains: material
+PASS unrelated illustration remains: logo
+PASS inline portrait background is hidden
+PASS submitted inputs, drafts, option values and hidden state remain unchanged
+PASS editable name content is not rewritten
+PASS page scripts and JSON data are untouched
+PASS late menus and popovers receive anonymity
+PASS late portrait is hidden without navigation
+PASS reused image becomes visible when it is no longer a portrait
+PASS turning anonymity off restores the entire name
+PASS restoration preserves intervening host tooltip changes
+PASS native title restores its source value
+PASS turning photos back on restores images and markers
+PASS name and photo choices are independent
+PASS renderers can retain the original title while masking is active
+PASS branding and anonymity cooperate in the tab title
+PASS idle privacy and tab branding do not form an observer loop
+PASS branding restores the raw label after anonymity is disabled
+PASS cloned and cached text remains reversible
+PASS cloned accessible labels regain the full original name
+PASS reused text nodes no longer hide an unrelated person
+PASS disabling LectioPlus restores original display
+PASS privacy and branding have no DOM errors:
+PASS another student schedule obtains identity from own Forside only once
+PASS another student header is not anonymized as the user
+PASS failed identity lookup never guesses someone else is the user
+PASS failed lookup does not retry on every DOM change
+PASS authentication or exam route untouched: login.aspx
+PASS authentication or exam route untouched: logout.aspx
+PASS authentication or exam route untouched: eksamen.aspx
+PASS same-origin blank frame inherits known identity
+PASS same-origin embedded portrait is detected
+PASS Anonym toggle is immediately below the profile photo toggle
+PASS new toggle exposes visible on/off feedback
+PASS anonymity preference survives backup
+PASS scraped identity and photo IDs never enter the settings backup
+PASS privacy loads early in matching Lectio frames
+TOTAL 55 privacy checks
+PASS split name is masked once
+PASS hyphenated other names are not partially anonymized
+PASS changing one name fragment restores the entire unrelated name
+PASS restoring the full original name masks it again
+PASS a shortened first-name-only value is no longer masked as a full name
+PASS appending a surname outside an existing mask removes the obsolete mask
+PASS unchanged privacy refresh does not rewrite masks or photo markers
+PASS updated privacy passes without runtime errors
+PASS note navigation and editing pause during a pending write
+PASS pending deletion cannot switch to another target
+PASS only the originally chosen note is deleted
+PASS completed deletion unlocks controls and keeps original-note title fixed
+PASS undo restores the chosen note and editable title
+PASS another note action cannot overlap a pending save
+PASS remote refresh preserves the local draft while saving
+PASS queued save checks the latest value before overwriting
+PASS conflicting save keeps draft and unlocks editing
+PASS discard explicitly loads the latest stored version
+PASS queued deletion refuses a note that changed in another tab
+PASS queued save reports a deleted note without discarding its draft
+PASS note concurrency checks have no runtime errors
+PASS capacity is checked again when a queued creation actually runs
+PASS translation reconstruction preserves exact spacing and boundaries: 33 characters
+PASS translation reconstruction preserves exact spacing and boundaries: 28 characters
+PASS translation reconstruction preserves exact spacing and boundaries: 1200 characters
+PASS translation reconstruction preserves exact spacing and boundaries: 700 characters
+PASS translation reconstruction preserves exact spacing and boundaries: 1050 characters
+PASS blank lines are kept locally and each transmitted segment fits the byte limit
+PASS too many separate lines are rejected before any quota is spent
+PASS a whole translation has a deadline as well as individual request timeouts
+PASS valid selected text loads into the translator
+PASS overlong selection never silently reuses an older selection
+PASS character counter counts Unicode characters rather than UTF-16 units
+PASS over-limit text is marked invalid before submission
+PASS fresh successful translation displays the response
+PASS retry clears the previous response while a new result is pending
+PASS failed retry does not leave an old result looking current
+PASS both translation fields support automatic text direction
+PASS translation robustness checks have no runtime errors
+TOTAL 39 Test 14 robustness checks
+PASS punctuation and repeat correction: jeg læser men jeg er træt
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg er træt men jeg skal lave lektier bagefter vil jeg
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg står tidligt op jeg spiser morgenmad bagefter tager
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg tror at du kommer fordi jeg har inviteret dig
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: når jeg kommer hjem laver jeg mad
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: hvis det regner så bliver vi hjemme
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: bogen som jeg læser er god
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg spiser og drikker
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg synes du er flink
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg ved at du kommer
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg gik hjem da det begyndte at regne senere så jeg en
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg kan godt lide at gå ture og bagefter laver jeg mad
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: har du lavet lektier
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: hvorfor er du træt
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg læser
+jeg skriver
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Jeg læser, men jeg er træt.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Vi mødes kl. 9.45. Jeg tager 1,5 liter med.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Jeg bruger bl.a. matematik og kemi.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: jeg åbner opgave.docx og jeg læser den
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Jeg læser på https://example.test/a?x=2,5
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Jeg bruger `x=1.5; y=2`
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Han siger "jeg er glad men jeg er træt"
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Prisen er 1,5 kr.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Det er pH 7.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: I dag har jeg fri.
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction: Jeg læser ,men jeg er træt .
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction:
+PASS non-overlapping punctuation edits
+PASS punctuation and repeat correction:
+PASS non-overlapping punctuation edits
+PASS PubChem graph recognized: CID 962
+PASS atom ordering, orientation and placement do not change identity: 962
+PASS missing bond does not receive a molecule name: 962
+PASS PubChem graph recognized: CID 783
+PASS atom ordering, orientation and placement do not change identity: 783
+PASS missing bond does not receive a molecule name: 783
+PASS PubChem graph recognized: CID 977
+PASS atom ordering, orientation and placement do not change identity: 977
+PASS missing bond does not receive a molecule name: 977
+PASS PubChem graph recognized: CID 947
+PASS atom ordering, orientation and placement do not change identity: 947
+PASS missing bond does not receive a molecule name: 947
+PASS PubChem graph recognized: CID 222
+PASS atom ordering, orientation and placement do not change identity: 222
+PASS missing bond does not receive a molecule name: 222
+PASS PubChem graph recognized: CID 297
+PASS atom ordering, orientation and placement do not change identity: 297
+PASS missing bond does not receive a molecule name: 297
+PASS PubChem graph recognized: CID 280
+PASS atom ordering, orientation and placement do not change identity: 280
+PASS missing bond does not receive a molecule name: 280
+PASS PubChem graph recognized: CID 313
+PASS atom ordering, orientation and placement do not change identity: 313
+PASS missing bond does not receive a molecule name: 313
+PASS PubChem graph recognized: CID 6324
+PASS atom ordering, orientation and placement do not change identity: 6324
+PASS missing bond does not receive a molecule name: 6324
+PASS PubChem graph recognized: CID 6325
+PASS atom ordering, orientation and placement do not change identity: 6325
+PASS missing bond does not receive a molecule name: 6325
+PASS PubChem graph recognized: CID 6326
+PASS atom ordering, orientation and placement do not change identity: 6326
+PASS missing bond does not receive a molecule name: 6326
+PASS PubChem graph recognized: CID 887
+PASS atom ordering, orientation and placement do not change identity: 887
+PASS missing bond does not receive a molecule name: 887
+PASS PubChem graph recognized: CID 702
+PASS atom ordering, orientation and placement do not change identity: 702
+PASS missing bond does not receive a molecule name: 702
+PASS PubChem graph recognized: CID 8254
+PASS atom ordering, orientation and placement do not change identity: 8254
+PASS missing bond does not receive a molecule name: 8254
+PASS PubChem graph recognized: CID 784
+PASS atom ordering, orientation and placement do not change identity: 784
+PASS missing bond does not receive a molecule name: 784
+PASS ethanol and dimethyl ether are distinct despite same formula
+PASS oxygen with two explicit hydrogens is water
+PASS fill carbon valence produces methane
+PASS single O–O is not falsely called O2
+PASS valid structure outside catalog stays unknown
+PASS empty builder has no name
+PASS unconnected atoms are not identified by formula
+PASS deleting atom removes incident bonds
+PASS removing bond updates connectivity
+PASS primary button inserts all corrections without selecting suggestions
+PASS automatic output leaves original available for comparison
+PASS automatic changes are selected and individually reviewable
+PASS copy gets corrected text
+PASS automatic correction can be applied and undone
+PASS changed options invalidate stale correction
+PASS UI respects optional start commas
+PASS manual edits remain copyable
+PASS original water reference model remains default
+PASS build mode opens editor
+PASS palette plus explicit H completion recognizes water
+PASS depth changes 3D sketch without changing name
+PASS undo restores geometry
+PASS load ethanol example
+PASS same formula different bonds displays other name
+PASS saved setup restores atoms and bonds
+PASS recognized molecular sketch can be saved to worksheet
+PASS keyboard-friendly controls connect two atoms
+PASS keyboard atom activation supports connect mode
+PASS invalid bond is rejected without destroying valid graph
+PASS dragged atom remains visible under pointer
+PASS pointer drag adds atom at drop location
+PASS nearby drop creates a valid single bond
+PASS pointer drag moves existing atom
+PASS cancelled drag restores prior geometry
+PASS invalid stored structure cannot inject markup or replace graph
+PASS test15 tools produce no DOM errors:
+TOTAL 151 Test15 punctuation and molecule checks
+PASS punctuation regression and second pass: det var en helt almindelig morgen hvor solen langsomt begyndte at
+PASS edits do not overlap
+PASS punctuation regression and second pass: da jeg kom ned i køkkenet kunne jeg se at min familie allerede sa
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg vågnede ved lyden af vækkeuret og ville blive i sengen fordi
+PASS edits do not overlap
+PASS punctuation regression and second pass: efter noget tid besluttede jeg mig for at stå op og gå ud på bade
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg spiste morgenmad mens jeg kiggede på telefonen for at se om d
+PASS edits do not overlap
+PASS punctuation regression and second pass: før vi gik hjem pakkede vi vores tasker
+PASS edits do not overlap
+PASS punctuation regression and second pass: vi håber på at de kommer
+PASS edits do not overlap
+PASS punctuation regression and second pass: vi talte om hvad vi skal læse
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg ved ikke hvad der sker når hun kommer hjem
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg ved ikke hvem af os der kommer
+PASS edits do not overlap
+PASS punctuation regression and second pass: hun ved hvilken bog jeg læser
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg ved ikke hvilken opgave hun skal løse
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg læser den bog du gav mig
+PASS edits do not overlap
+PASS punctuation regression and second pass: han giver mig det jeg ønsker
+PASS edits do not overlap
+PASS punctuation regression and second pass: bogen du gav mig er god
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg tror bogen er god
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg går med min ven og hans bror går hjem
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg læser i min bog og min ven skriver en besked
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg ser at hun kommer og at han går
+PASS edits do not overlap
+PASS punctuation regression and second pass: hun smiler uden at jeg ved hvorfor
+PASS edits do not overlap
+PASS punctuation regression and second pass: hun går hjem efter at vi har spist
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg er træt selv om jeg har sovet længe
+PASS edits do not overlap
+PASS punctuation regression and second pass: hvad du gør er vigtigt
+PASS edits do not overlap
+PASS punctuation regression and second pass: hvordan går det med din bog
+PASS edits do not overlap
+PASS punctuation regression and second pass: hvilken bog læser du
+PASS edits do not overlap
+PASS punctuation regression and second pass: hvem kommer i morgen
+PASS edits do not overlap
+PASS punctuation regression and second pass: det er sjovt at læse bøger og lære noget nyt
+PASS edits do not overlap
+PASS punctuation regression and second pass: vi er glade for at læse
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg bruger det til at regne senere så jeg en film
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg vasker op og tørrer af
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg spiser frokost bagefter laver jeg lektier derefter går jeg i
+PASS edits do not overlap
+PASS punctuation regression and second pass: Jeg ved ikke, hvad der sker, når hun kommer hjem.
+PASS edits do not overlap
+PASS punctuation regression and second pass: Vi talte om, hvad vi skulle læse.
+PASS edits do not overlap
+PASS punctuation regression and second pass: Jeg tror på, at vi kan nå det.
+PASS edits do not overlap
+PASS punctuation regression and second pass: Jeg har en bog om JavaScript. Den forklarer, hvad bookmark betyde
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg tror at solen og månen skinner
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg tror solen og månen skinner
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg håber at min søster og hendes ven kommer
+PASS edits do not overlap
+PASS punctuation regression and second pass: jeg ved du kommer
+PASS edits do not overlap
+PASS name panel is announced accessibly
+PASS name is directly above the build canvas
+PASS empty canvas does not show an old molecule name
+PASS unfinished molecule explains how to obtain a name
+PASS building water automatically shows its name beside the canvas
+PASS rotation does not repeat live name announcements
+PASS inline name matches recognized molecule: 962
+PASS inline name matches recognized molecule: 783
+PASS inline name matches recognized molecule: 977
+PASS inline name matches recognized molecule: 947
+PASS inline name matches recognized molecule: 222
+PASS inline name matches recognized molecule: 297
+PASS inline name matches recognized molecule: 280
+PASS inline name matches recognized molecule: 313
+PASS inline name matches recognized molecule: 6324
+PASS inline name matches recognized molecule: 6325
+PASS inline name matches recognized molecule: 6326
+PASS inline name matches recognized molecule: 887
+PASS inline name matches recognized molecule: 702
+PASS inline name matches recognized molecule: 8254
+PASS inline name matches recognized molecule: 784
+PASS clear removes the previous name immediately
+PASS undo restores the correct molecular name
+PASS deleting atoms removes an invalidated name
+PASS unknown graph never receives an invented name
+PASS primary UI corrects the long subordinate-clause regression
+PASS UI no longer splits a clause after hvad
+PASS name panel and punctuation have no DOM errors:
+TOTAL 111 Test17 molecule name and punctuation regressions
+PASS ordinary tooltip and literal words do not imply content
+PASS decorative ls-fonticon sms marks content
+PASS lesson title stays readable
+PASS decorative material-icons sms marks content
+PASS lesson title stays readable
+PASS decorative material-symbols-outlined sms marks content
+PASS lesson title stays readable
+PASS decorative ls-fonticon bookmark marks content
+PASS lesson title stays readable
+PASS decorative material-icons bookmark marks content
+PASS lesson title stays readable
+PASS decorative material-symbols-outlined bookmark marks content
+PASS lesson title stays readable
+PASS inactive or unrelated marker is ignored: <span>sms</span>
+PASS inactive or unrelated marker is ignored: <i class="ls-fonticon">calendar</i>
+PASS inactive or unrelated marker is ignored: <i class="ls-fonticon">bookmark_border</i>
+PASS inactive or unrelated marker is ignored: <i class="ls-fonticon" hidden>sms</i>
+PASS inactive or unrelated marker is ignored: <span hidden><i class="ls-fonticon">bookmark</i></span>
+PASS inactive or unrelated marker is ignored: <span style="display:none"><i class="ls-fonticon">sms</i></span>
+PASS inactive or unrelated marker is ignored: <i class="ls-fonticon" style="visibility:hidden">bookmark</i>
+PASS inactive or unrelated marker is ignored: <template><i class="ls-fonticon">sms</i></template>
+PASS combined native markers produce a single content flag
+PASS week card has one content badge
+PASS content badge preserves lesson destination
+PASS content is announced in keyboard/screen-reader label
+PASS lesson hint explains content
+PASS no native glyph names leak into card
+PASS schedule explains content symbol
+PASS short lesson retains marker without changing duration
+PASS day list has visible content text
+PASS removing native markers updates the rendered card
+PASS landing page is a compact starting point
+PASS all five subjects are reachable
+PASS subject shows every chemistry tool
+PASS category shortcut moves focus to its results
+PASS empty category search offers a useful recovery
+PASS broaden search retains query and finds the tool
+PASS clear restores all tools and focuses search
+PASS search accepts a plain keyboard spelling of oversæt
+PASS search matches multiple task keywords
+PASS empty favorites explain how to add one
+PASS existing calculation remains correct
+PASS working is available on demand
+PASS expanded working retains explanation
+PASS save controls follow the active tool
+PASS calculator gets a clear starting instruction
+PASS favorites lead the six unique shortcuts
+PASS switching views preserves unsaved calculation inputs
+PASS notes hide irrelevant calculation save controls
+PASS notes explain saving
+PASS new tool instructions follow English preference
+PASS new category landing follows language
+PASS subject shortcut has translated accessible name
+PASS guide provided for basic
+PASS English guide provided for basic
+PASS guide provided for calculator
+PASS English guide provided for calculator
+PASS guide provided for quadratic
+PASS English guide provided for quadratic
+PASS guide provided for system
+PASS English guide provided for system
+PASS guide provided for fractions
+PASS English guide provided for fractions
+PASS guide provided for percent
+PASS English guide provided for percent
+PASS guide provided for interest
+PASS English guide provided for interest
+PASS guide provided for statistics
+PASS English guide provided for statistics
+PASS guide provided for regression
+PASS English guide provided for regression
+PASS guide provided for probability
+PASS English guide provided for probability
+PASS guide provided for geometry
+PASS English guide provided for geometry
+PASS guide provided for triangle
+PASS English guide provided for triangle
+PASS guide provided for vectors
+PASS English guide provided for vectors
+PASS guide provided for graph
+PASS English guide provided for graph
+PASS guide provided for periodic
+PASS English guide provided for periodic
+PASS guide provided for molar
+PASS English guide provided for molar
+PASS guide provided for ions
+PASS English guide provided for ions
+PASS guide provided for ionlookup
+PASS English guide provided for ionlookup
+PASS guide provided for balance
+PASS English guide provided for balance
+PASS guide provided for moles
+PASS English guide provided for moles
+PASS guide provided for concentration
+PASS English guide provided for concentration
+PASS guide provided for dilution
+PASS English guide provided for dilution
+PASS guide provided for ph
+PASS English guide provided for ph
+PASS guide provided for units
+PASS English guide provided for units
+PASS guide provided for motion
+PASS English guide provided for motion
+PASS guide provided for force
+PASS English guide provided for force
+PASS guide provided for energy
+PASS English guide provided for energy
+PASS guide provided for ohm
+PASS English guide provided for ohm
+PASS guide provided for waves
+PASS English guide provided for waves
+PASS guide provided for gas
+PASS English guide provided for gas
+PASS guide provided for decay
+PASS English guide provided for decay
+PASS guide provided for text
+PASS English guide provided for text
+PASS guide provided for sources
+PASS English guide provided for sources
+PASS guide provided for argument
+PASS English guide provided for argument
+PASS guide provided for flashcards
+PASS English guide provided for flashcards
+PASS guide provided for notes
+PASS English guide provided for notes
+PASS guide provided for pomodoro
+PASS English guide provided for pomodoro
+PASS guide provided for planner
+PASS English guide provided for planner
+PASS guide provided for ionmodel
+PASS English guide provided for ionmodel
+PASS guide provided for atomcompare
+PASS English guide provided for atomcompare
+PASS guide provided for formulas
+PASS English guide provided for formulas
+PASS guide provided for interactive
+PASS English guide provided for interactive
+PASS guide provided for stoichiometry
+PASS English guide provided for stoichiometry
+PASS guide provided for worksheet
+PASS English guide provided for worksheet
+PASS guide provided for molecules
+PASS English guide provided for molecules
+PASS guide provided for report
+PASS English guide provided for report
+PASS guide provided for precision
+PASS English guide provided for precision
+PASS guide provided for circuits
+PASS English guide provided for circuits
+PASS guide provided for simulation
+PASS English guide provided for simulation
+PASS guide provided for board
+PASS English guide provided for board
+PASS guide provided for glossary
+PASS English guide provided for glossary
+PASS guide provided for profiles
+PASS English guide provided for profiles
+PASS guide provided for punctuation
+PASS English guide provided for punctuation
+PASS guide provided for translate
+PASS English guide provided for translate
+PASS new views and updates produce no DOM errors
+TOTAL 162 Test 21 checks
+PASS regression starts with four paired X/Y rows
+PASS clear produces one empty measurement pair
+PASS row editor preserves decimal comma and pairing in regression
+PASS rows synchronize original preset inputs
+PASS empty measurement points to the exact row
+PASS invalid row cannot leave a plausible old result
+PASS removing the incomplete row restores calculation
+PASS uneven pasted columns cannot shift the pairs
+PASS pasted text updates row editor and calculation
+PASS simple preset applies large stacked fields
+PASS layout changes preserve values and rows
+PASS per-tool settings do not overwrite global settings
+PASS guide and width apply to the active tool
+PASS working preference applies to the current result
+PASS another tool still uses shared settings
+PASS per-tool view and data survive navigation
+PASS backup preserves shared and per-tool layouts
+PASS reset removes only this tool override
+PASS invalid view settings and unsafe keys are rejected by normalization
+PASS scalar domain error identifies and focuses its field
+PASS field help is linked to the input
+PASS valid correction clears the field error
+PASS statistics has one number per row
+PASS statistics calculates from individual fields
+PASS example restores the original data and rows
+PASS each resistor gets its own field
+PASS resistor edit reaches the existing circuit engine
+PASS adding a component keeps row editor and serialized values aligned
+PASS blank resistor cannot silently disappear from the circuit
+PASS reaction shows named mass fields
+PASS changed reaction retains amounts by formula, never by position
+PASS new reactant requires its own amount
+PASS named reactant values reach the audited chemistry calculation
+PASS unit change updates labels and invalidates old results
+PASS report rows remain part of the saved draft
+PASS report measurements calculate from paired rows
+PASS single atom is named Brint
+PASS selected atom label names Brint
+PASS palette labels Brint
+PASS single atom is named Kulstof (karbon)
+PASS selected atom label names Kulstof (karbon)
+PASS palette labels Kulstof (karbon)
+PASS single atom is named Kvælstof
+PASS selected atom label names Kvælstof
+PASS palette labels Kvælstof
+PASS single atom is named Ilt
+PASS selected atom label names Ilt
+PASS palette labels Ilt
+PASS single atom is named Klor
+PASS selected atom label names Klor
+PASS palette labels Klor
+PASS molecule name and selected element name are separate
+PASS choosing H in methane names hydrogen
+PASS deletion clears the selected element name
+PASS input editors, settings and atom names run without DOM errors
+TOTAL 55 Test 22 input and customization checks
+PASS pinned asset integrity: ort/ort-wasm-simd-threaded.wasm
+PASS pinned asset integrity: ort/ort-wasm-simd-threaded.mjs
+PASS pinned asset integrity: ort/ort.wasm.bundle.min.mjs
+PASS pinned asset integrity: ort/ThirdPartyNotices.txt
+PASS pinned asset integrity: ort/LICENSE
+PASS pinned asset integrity: model/tokenizer.json
+PASS pinned asset integrity: model/pnc.int8.onnx
+PASS pinned asset integrity: model/config.json
+PASS pinned asset integrity: model/LICENSE
+PASS 232 tokenizations agree with the reference tokenizer
+PASS windows respect the model token limit and special tokens
+PASS long text has no dropped words at overlaps
+PASS very long unknown words do not stall windowing
+PASS blank lines delimit paragraphs; single line wraps stay in context
+PASS case uncertainty cannot turn the more likely no-comma decision into a comma
+PASS recognizes a detached prepositional phrase: efter en lang weekend hvor jeg havde læst meget
+PASS recognizes a detached prepositional phrase: før en lang rejse som vi havde planlagt sammen
+PASS recognizes a detached prepositional phrase: under det store træ der stod i haven
+PASS recognizes a detached prepositional phrase: på en travl dag hvor jeg læste og senere lavede mad
+PASS retains a possible independent sentence: efter en lang weekend var jeg træt
+PASS retains a possible independent sentence: efter en lang weekend hvor jeg havde læst meget gik jeg hjem
+PASS retains a possible independent sentence: efter en lang weekend hvor jeg havde læst meget skulle min søster arbejde
+PASS retains a possible independent sentence: efter en lang weekend hvor vi havde læst meget blev alt stille
+PASS retains a possible independent sentence: efter en lang weekend hvor jeg havde læst meget faldt regn over byen
+PASS retains a possible independent sentence: efter en lang weekend hvor jeg havde læst meget accelererede maskinen igen
+PASS retains a possible independent sentence: efter at vi havde spist gik jeg hjem
+PASS retains a possible independent sentence: i går hvor jeg havde fri tog vi i byen
+PASS boundary guard rejects a moderate-confidence detached phrase without mutating predictions
+PASS bounded heuristic abstains when the model strongly supports a new sentence
+PASS legacy method also avoids splitting a comparative clause after end
+PASS actual WASM inference: vi talte om hvad. Vi havde lavet
+PASS actual WASM inference: historien handlede, om en dreng. Der rejste ud i verden
+PASS actual WASM inference: jeg købte mere end. Jeg havde brug for
+PASS actual WASM inference: jo længere. Vi kom ind i skoven desto mørkere blev der
+PASS actual WASM inference: hvilken bog læser du
+PASS actual WASM inference: hvorfor ændrer farven sig når vi tilsætter syre
+PASS actual WASM inference: hvordan det virker ved jeg ikke
+PASS non-overlapping edits preserve words: vi mødes kl. 9.45 og tager 1,5 liter med
+PASS non-overlapping edits preserve words: jeg åbner opgave.docx og læser på https://exa
+PASS non-overlapping edits preserve words: jeg sender svaret til test@example.test når j
+PASS non-overlapping edits preserve words: hun skrev "jeg er træt men jeg læser" i sin n
+PASS non-overlapping edits preserve words: koden er `x=1.5; y=2` og den virker
+PASS non-overlapping edits preserve words: ```js
+const a = 1.5;
+```
+her er min forklarin
+PASS non-overlapping edits preserve words: jeg læser
+
+jeg skriver
+vi regner
+PASS non-overlapping edits preserve words: pH er 7 og iPhone bruger JavaScript
+PASS non-overlapping edits preserve words: kan du komme? jeg venter! husk tasken
+PASS non-overlapping edits preserve words: jeg læser ,men jeg er træt .
+PASS non-overlapping edits preserve words: <script>alert(1)</script> jeg skriver om kode
+PASS non-overlapping edits preserve words:
+PASS non-overlapping edits preserve words: vi talte om hvad vi skulle lave og om hvordan
+PASS keep mode preserves existing punctuation and casing
+PASS technical mixed case is not rewritten
+LANGUAGE EVALUATION {"texts":25,"exact":25,"oldExact":9,"model":{"tp":95,"fp":0,"fn":0,"f1":1},"oldRules":{"tp":71,"fp":4,"fn":24,"f1":0.8352941176470589}}
+PASS all 25 prose examples match and improve on the old rules
+ADDITIONAL LANGUAGE EVALUATION punctuation-regressions.json 39/39
+PASS all reference texts match: punctuation-regressions.json
+ADDITIONAL LANGUAGE EVALUATION punctuation-contrasts.json 34/34
+PASS all reference texts match: punctuation-contrasts.json
+ADDITIONAL LANGUAGE EVALUATION punctuation-sentences.json 14/14
+PASS all reference texts match: punctuation-sentences.json
+TOTAL 59 local punctuation model checks (language differences remain listed separately)
+PASS trained model is the default method
+PASS model does not pretend to implement a no-start-comma preference
+PASS existing punctuation policy is visible for the model
+PASS button sends exactly the current text to the local engine
+PASS busy state prevents duplicate work and copying an unfinished result
+PASS UI identifies loading stage: tokenizer
+PASS UI identifies loading stage: model
+PASS UI identifies loading stage: runtime
+PASS elapsed time advances while the model is loading
+PASS model progress is visible
+PASS automatic mode inserts all model edits without checkbox work
+PASS model output keeps the original available
+PASS low-confidence edit is explicitly marked for extra review
+PASS copy uses the corrected preview
+PASS apply and undo recover the exact original
+PASS editing source aborts an in-flight analysis
+PASS late model result cannot overwrite new input
+PASS stop preserves the input without accepting a delayed result
+PASS failed model does not silently fall back to the old heuristics
+PASS error remains visible after the progress timer stops and retry is enabled
+PASS model options reach the inference request
+PASS manual review starts without selected changes
+PASS manual corrections remain copyable
+PASS explicit legacy mode exposes only its supported options
+PASS legacy method remains available only when explicitly selected
+PASS model UI has no DOM errors
+PASS frame rejects a parent from an unrelated origin
+PASS localhost preview accepts its same-origin parent on a private channel
+PASS model worker starts lazily on first request
+PASS frame rejects overlapping requests
+PASS frame ignores results from a different request
+PASS frame returns only the active result
+PASS idle worker and model memory are released
+PASS cancel terminates the active worker
+PASS frame enforces the text size limit before starting work
+TOTAL 35 punctuation UI and worker bridge checks
+PASS content client connects lazily through one private channel
+PASS client ignores another request and forwards progress plus its own result
+PASS closing the client removes the frame and timeouts
+PASS frame startup timeout reports an error rather than a silent cancellation
+PASS cancellation while connecting aborts without leaving an iframe
+PASS cancellation during inference closes the worker-owning frame
+PASS inference timeout has a specific error and releases the frame
+PASS double-clicked HTML explains the model limitation without starting a broken worker
+PASS packaged worker performs real local inference and repairs an existing bad full stop
+PASS real worker reports loading and inference progress
+PASS real model reports all local asset and runtime stages
+PASS warm worker reuses its model and respects casing choice
+PASS actual worker keeps the long prepositional continuation in its original sentence
+PASS actual worker does not turn a soft line wrap into a sentence boundary
+PASS empty prose completes without inventing a sentence
+PASS worker validates oversized input and does not echo it in an error
+PASS real worker identifies missing tokenizer.json without echoing text
+PASS real worker identifies missing pnc.int8.onnx without echoing text
+TOTAL 18 local punctuation transport and real worker checks
+PASS installed client and actual frame connect without window.postMessage or MessageChannel
+PASS each frame receives a unique connection identifier
+PASS startup reports connecting and worker stages before inference
+PASS unrelated worker response is ignored
+PASS runtime loading stage crosses the native port
+PASS native round trip returns the actual frame result
+PASS closing releases native ports, worker, frame and timers
+PASS blocked frame produces a startup error and cleans up
+PASS invalidated extension context fails immediately
+PASS worker construction failure reaches the client
+PASS silent worker startup times out and terminates
+PASS repeated loading progress cannot prolong the startup deadline
+PASS hung model loading rejects visibly and releases resources
+PASS a new request can succeed after a startup timeout
+PASS unexpected runtime disconnection reaches the client
+PASS Stop terminates a model that is still loading
+PASS concurrent callers cannot steal a connection that is starting
+PASS native frame rejects a different frame token
+PASS native frame rejects another extension
+PASS native frame rejects an unrelated site
+PASS native frame rejects a caller without a browser tab
+PASS native frame rejects a nested content frame
+TOTAL 22 native punctuation startup and failure checks (simulated browser API)
+TOTAL 492 expanded calculation and data checks
+TOTAL 374 Test 24 workspace checks
+TOTAL 420 real Python/SQLite runtime checks
+TOTAL 57 workbench transport, isolation and asset checks
+TOTAL 52 Test 25 editor and terminal checks
+TOTAL 17 live output and host deadline checks
+PASS all 126 routes, field labels and default calculations
+TOTAL 914 Test 26 navigation, theme and layout checks
+AUDIT 126 tool routes; 200 themed surface samples in light/dark mode; no logged-in browser verification
+(node:313) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 46 browser-branch bootstrap, output and sandbox error checks (Node VM, not a live browser)
+(node:321) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 17 Test 27 terminal checks (JSDOM plus real Python in Node VM)
+(node:329) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 29 Test 28 bootstrap hash, staged failure and VM transport checks; not live Chrome/Edge
+TOTAL 23 Test 29 manifest and sandbox navigation checks; not live Chrome/Edge
+(node:345) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 13 Test 30 classic-worker compatibility and real runtime checks (Node VM, not live Chrome/Edge)
+TOTAL 20 Test 31 input transport, stale reply and paused deadline checks (simulated browser)
+(node:361) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 15 Test 31 real Python interactive input checks (JSPI in Node VM, not live Chrome/Edge)
+(node:369) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 18 Test 31 terminal input controls with real Python (JSDOM/Node VM)
+(node:377) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Niveau 1: 25 opgaver bestået ved både kørsel og bedømmelse
+Niveau 2: 25 opgaver bestået ved både kørsel og bedømmelse
+Niveau 3: 25 opgaver bestået ved både kørsel og bedømmelse
+Niveau 4: 25 opgaver bestået ved både kørsel og bedømmelse
+Niveau 5: 25 opgaver bestået ved både kørsel og bedømmelse
+TOTAL 750 Test 32 exercise executions; 125 lessons, 114 interactive answers (real Python/Node VM, not live Chrome/Edge)
+TOTAL 141 Test 33 game rules, collisions, wins, losses and state checks
+(node:393) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TOTAL 568 Test 33 game navigation, controls, lifecycle, storage and 125 lesson presentations (JSDOM; no live browser)

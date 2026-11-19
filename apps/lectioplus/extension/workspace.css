@@ -306,6 +306,18 @@ body.lxp-enabled.lxp-inline-native #aspnetForm .ls-table-base > :is(thead, tbody
 .lxp-schedule-break { position: absolute; inset-inline: 0; display: flex; align-items: center; justify-content: center; border-block: 1px dashed var(--lxp-border); background: color-mix(in srgb, var(--lxp-subtle) 65%, transparent); color: var(--lxp-muted); font-size: 10px; letter-spacing: .02em; pointer-events: none; }
 .lxp .lxp-day-timeline .lxp-event:not(.lxp-event-tiny) { padding: 7px 8px; }
 .lxp-day-timeline .lxp-event-copy strong { font-size: 13px; }
+
+/* Keep Lectio's content marker visible without making lessons taller. */
+.lxp-event-content { display:inline-flex; align-items:center; gap:4px; width:max-content; color:var(--lxp-event-color); font-size:11px; font-weight:650; }
+.lxp-event-content .lxp-icon { width:14px; height:14px; flex:none; }
+.lxp-day-timeline .lxp-event-content { position:absolute; top:5px; right:4px; padding:2px; border-radius:3px; background:var(--lxp-event-bg); }
+.lxp-day-timeline .lxp-event-content > span { display:none; }
+.lxp-day-timeline .lxp-event-with-content .lxp-event-copy,
+.lxp-day-timeline .lxp-event-with-content .lxp-event-time { padding-right:19px; }
+.lxp-day-timeline .lxp-event-tiny .lxp-event-content { top:0; padding:1px; }
+.lxp-day-list .lxp-event-content,.lxp-undated .lxp-event-content { grid-column:2; }
+.lxp-schedule-content-legend { display:flex; align-items:center; gap:6px; margin:10px 0; color:var(--lxp-muted); font-size:12px; }
+.lxp-schedule-content-legend .lxp-icon { width:15px; height:15px; flex:none; }
 .lxp-week-picker-label { display:flex; align-items:center; gap:7px; color:var(--lxp-muted); font-size:11px; }
 .lxp-week-picker { width:155px; min-width:0; height:38px; box-sizing:border-box; color-scheme:inherit; }
 .lxp-week-actions [aria-disabled="true"] { opacity:.5; cursor:default; }

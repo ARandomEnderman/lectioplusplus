@@ -1,0 +1,74 @@
+{
+  "versions": {
+    "pyodide": "314.0.8",
+    "codemirror": "5.65.20",
+    "sql.js": "1.16.0",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0"
+  },
+  "sources": {
+    "pyodide/LICENSE": "https://raw.githubusercontent.com/pyodide/pyodide/314.0.8/LICENSE",
+    "tesseract.js/LICENSE": "https://raw.githubusercontent.com/naptha/tesseract.js/v7.0.0/LICENSE.md",
+    "tessdata/eng.traineddata.gz": "https://tessdata.projectnaptha.com/4.0.0_fast/eng.traineddata.gz",
+    "tessdata/dan.traineddata.gz": "https://tessdata.projectnaptha.com/4.0.0_fast/dan.traineddata.gz",
+    "tessdata/LICENSE": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/LICENSE",
+    "pyodide/PYTHON-LICENSE.txt": "https://raw.githubusercontent.com/python/cpython/v3.14.2/LICENSE"
+  },
+  "sha256": {
+    "codemirror/LICENSE": "168a4becc968f5001e2ee2e0291b6e4daabafc1894a11ade1e11d56e96096e07",
+    "codemirror/lib/codemirror.css": "eb494ea972d2661ef86f7f6ac656dd6786d721e49c9c1b46e1eb967e4b6f9bf3",
+    "codemirror/lib/codemirror.js": "8e8b5e3cc4be7530a9b6b624bce95ff966cd667283005a103739fe37d3bdd97c",
+    "codemirror/mode/css/css.js": "60f0689e5c6af7f36c341e8e1341a4f10b4f0a04cebfb7341bcbedba9b572b32",
+    "codemirror/mode/htmlmixed/htmlmixed.js": "fe5912e1d10f8fecb98bd31e2f957c0bbc9abf6b505d11b6dbcd27542d0fdcad",
+    "codemirror/mode/javascript/javascript.js": "1311c73c66308ba6f78512b4c2e770a6900c80c3629683763329668ee6111163",
+    "codemirror/mode/python/python.js": "19a59ca387addb04e95002c9adbe2b8c231427ce49369ac537107e3088a6947c",
+    "codemirror/mode/sql/sql.js": "d5edb6bd39caa6155cab6bcdeb380a29229264a8a26e5fddd21ca12f0ebf359f",
+    "codemirror/mode/xml/xml.js": "dc7e44d410399326f802e2924573cbf6f942a79f647fd0b97f0b607973bc9a09",
+    "pyodide/LICENSE": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+    "pyodide/pyodide-lock.json": "5dc2fc119108bc148c7457dc86e7675b5c87e1cafd420b9c34c1eaef7b36c010",
+    "pyodide/pyodide.asm.mjs": "22514b8be6980e28a02c8b1d6387ce8dfe666fc4edf8d547cff5dce29ff4d972",
+    "pyodide/pyodide.asm.wasm": "e14d49ceca9b4a0e274ea918f3a898de2d3880b6e5573a6cfe1a2267ecc70329",
+    "pyodide/pyodide.mjs": "1bb8cc14f9405aaa7cd4e00c12edd0a8539de9cc026618d6ee5a9663f367dc70",
+    "pyodide/python_stdlib.zip": "2bd3394a145bfbbe5bbc9d9d6ab9136abbb986c6fef6c142b3a2962227aa5c28",
+    "sql.js/LICENSE": "f1c6fb37bb37afa4b52c52c37b17c98b2b1d0f900a74a4a8f86cce047cd88f76",
+    "sql.js/dist/sql-wasm.js": "9b96118841c6edfdf53c6f388c1419d1f473cf469df6a6fc2864b386d60bdb5e",
+    "sql.js/dist/sql-wasm.wasm": "43bbcdd44287e5a2db3b6b5af34b1a3485a7a441285d247976c1ebe3c61f8dbf",
+    "tessdata/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "tessdata/dan.traineddata.gz": "c293b04383ae4d01ce3c26357895cd63b13cdad350fdb31591b6db468bb1aad7",
+    "tessdata/eng.traineddata.gz": "18c1ac52b75e35d44735fb6c2a60acfaf23033524653200738e98f0243edb75b",
+    "tesseract.js/LICENSE": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "tesseract.js/dist/tesseract.min.js": "000c27d9cd0def655f77b36c72a389c0ab13793aa31cb4d7aab56d09c0afbc7e",
+    "tesseract.js/dist/tesseract.min.js.LICENSE.txt": "cdf963ced7d25a0f98901a547647b4d6e2dbe0197fd78c87a059a87b0e542fe2",
+    "tesseract.js/dist/worker.min.js": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d",
+    "tesseract.js/dist/worker.min.js.LICENSE.txt": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac",
+    "tesseract.js-core/LICENSE": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+    "tesseract.js-core/tesseract-core-lstm.wasm": "66b17df6e20c5329a17ffa9c202a47eaa3e32500b253d4c7f38e7f2bc01457c3",
+    "tesseract.js-core/tesseract-core-lstm.wasm.js": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680",
+    "pyodide/PYTHON-LICENSE.txt": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231"
+  },
+  "npm": {
+    "pyodide": {
+      "version": "314.0.8",
+      "integrity": "sha512-74Wq1kXOC+CCEzAfxuRAO701nAcCMLjf8NrwvWpu8S41dVMXwXmLQ05dYB+F4e46AdnGo0oq7YHSVUpHsoarLQ=="
+    },
+    "codemirror": {
+      "version": "5.65.20",
+      "integrity": "sha512-i5dLDDxwkFCbhjvL2pNjShsojoL3XHyDwsGv1jqETUoW+lzpBKKqNTUWgQwVAOa0tUm4BwekT455ujafi8payA=="
+    },
+    "sql.js": {
+      "version": "1.16.0",
+      "integrity": "sha512-q/JOZuJfmVh8Zf8Eo+cMJvtxAWeWBqTfJ6AQYGXZmcaLGHMwhA2niH3fQYHrBtPeOss1ttzHec07K5+rHaMRMw=="
+    },
+    "tesseract.js": {
+      "version": "7.0.0",
+      "integrity": "sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA=="
+    },
+    "tesseract.js-core": {
+      "version": "7.0.0",
+      "integrity": "sha512-WnNH518NzmbSq9zgTPeoF8c+xmilS8rFIl1YKbk/ptuuc7p6cLNELNuPAzcmsYw450ca6bLa8j3t0VAtq435Vw=="
+    }
+  },
+  "modifications": {
+    "sql.js/LICENSE": "Added a final newline; license wording is unchanged."
+  }
+}

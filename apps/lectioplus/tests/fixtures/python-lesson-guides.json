@@ -1,0 +1,589 @@
+{
+  "1-1": {
+    "context": "En ny app skal vise en velkomst, når den åbner. Din første opgave er at få en besked frem i terminalen.",
+    "plan": "Brug print til at vise den aftalte velkomsttekst.",
+    "inputs": []
+  },
+  "1-2": {
+    "context": "Du laver velkomsten til en sportsklubs tilmelding. Programmet skal hilse på det navn, brugeren selv indtaster.",
+    "plan": "Gem navnet i en variabel, og sæt det ind i hilsenen.",
+    "inputs": [
+      "Navn"
+    ]
+  },
+  "1-3": {
+    "context": "To venner tæller deres samlede spilpoint. De skal kunne skrive hvert deres antal point og få en samlet score.",
+    "plan": "Omdan begge svar til heltal, før du lægger dem sammen.",
+    "inputs": [
+      "Første heltal",
+      "Andet heltal"
+    ]
+  },
+  "1-4": {
+    "context": "Et lokale skal have nyt gulvtæppe. Lav en lille beregner, der bruger lokalets bredde og længde til at finde arealet.",
+    "plan": "Gang de to mål sammen, og gem resultatet i en variabel.",
+    "inputs": [
+      "Bredde",
+      "Højde"
+    ]
+  },
+  "1-5": {
+    "context": "En lille kiosk vil vise alle priser på samme måde på sin skærm. En pris som 12.5 skal derfor få to decimaler.",
+    "plan": "Læs prisen som float, og formatér den med to decimaler.",
+    "inputs": [
+      "Pris"
+    ]
+  },
+  "1-6": {
+    "context": "En beskedapp vil fortælle, hvor mange tegn brugeren har skrevet. Mellemrum skal tælle med.",
+    "plan": "Brug længden af hele tekstlinjen uden at fjerne tegn.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-7": {
+    "context": "Du laver overskriften til en plakat. Brugeren skriver teksten, og programmet laver den om til store bogstaver.",
+    "plan": "Find tekstmetoden, der ændrer alle bogstaver til store.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-8": {
+    "context": "Et system samler ord fra flere personer. For at behandle dem ens skal alle bogstaver først være små.",
+    "plan": "Brug tekstmetoden til små bogstaver; behold tal og mellemrum.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-9": {
+    "context": "Navne bliver ofte kopieret med ekstra mellemrum i enderne. Lav en lille oprydder, der bevarer mellemrummene inde i navnet.",
+    "plan": "Fjern kun whitespace før og efter selve teksten.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-10": {
+    "context": "Et ordspil viser det første og sidste tegn som ledetråd. Dit program skal lave ledetråden fra et indtastet ord.",
+    "plan": "Find tegnene med indekserne 0 og -1.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-11": {
+    "context": "Du vil lave en enkel baglæns-effekt til en tekstbesked. Brugeren bestemmer selv teksten.",
+    "plan": "Vend rækkefølgen af alle tegn; også tal og mellemrum.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-12": {
+    "context": "Du bygger en tekst-effekt, hvor en lyd som ha gentages. Brugeren bestemmer både teksten og antallet.",
+    "plan": "Læs antallet som int og gentag teksten uden at tilføje mellemrum.",
+    "inputs": [
+      "Tekst",
+      "Antal gentagelser"
+    ]
+  },
+  "1-13": {
+    "context": "En træningsapp får varigheden i minutter, men stopuret skal bruge sekunder.",
+    "plan": "Brug omregningen fra minutter til sekunder.",
+    "inputs": [
+      "Antal minutter"
+    ]
+  },
+  "1-14": {
+    "context": "En videospiller kender kun længden i sekunder. Lav den korte tidsvisning, man normalt ser ved afspilning.",
+    "plan": "Find hele minutter og de resterende sekunder hver for sig.",
+    "inputs": [
+      "Antal sekunder"
+    ]
+  },
+  "1-15": {
+    "context": "En vejrmåling skal vises til en ven, der bruger Fahrenheit. Programmet får temperaturen i Celsius.",
+    "plan": "Brug den angivne formel og vis præcis én decimal.",
+    "inputs": [
+      "Grader Celsius"
+    ]
+  },
+  "1-16": {
+    "context": "En bod sælger flere af den samme vare. Kunden indtaster stykprisen og antallet, og programmet beregner beløbet.",
+    "plan": "Gang pris og antal; vis resultatet som et beløb med to decimaler.",
+    "inputs": [
+      "Stykpris",
+      "Antal varer"
+    ]
+  },
+  "1-17": {
+    "context": "En butik holder udsalg. Du skal lave en beregner, der tager den oprindelige pris og en rabat i procent.",
+    "plan": "Find rabatbeløbet, og træk det fra den oprindelige pris.",
+    "inputs": [
+      "Pris før rabat",
+      "Rabat i procent"
+    ]
+  },
+  "1-18": {
+    "context": "En gruppe venner deler regningen efter en fælles aktivitet. Alle skal betale lige meget.",
+    "plan": "Fordel den samlede pris på det positive antal personer.",
+    "inputs": [
+      "Samlet pris",
+      "Antal personer"
+    ]
+  },
+  "1-19": {
+    "context": "Du vil sammenligne tre træningsmålinger. Programmet skal finde deres gennemsnit.",
+    "plan": "Læg de tre målinger sammen, og del med tre.",
+    "inputs": [
+      "Første måling",
+      "Anden måling",
+      "Tredje måling"
+    ]
+  },
+  "1-20": {
+    "context": "Et spil lader to spillere vælge et tal. Programmet skal undersøge, om de valgte det samme.",
+    "plan": "Sammenlign tallene med ==; forskellen på = og == er vigtig.",
+    "inputs": [
+      "Første heltal",
+      "Andet heltal"
+    ]
+  },
+  "1-21": {
+    "context": "Et minispil accepterer kun tal fra 10 til 20. Programmet skal kontrollere et forslag fra spilleren.",
+    "plan": "Kontrollér begge grænser, og husk at 10 og 20 også er med.",
+    "inputs": [
+      "Heltal"
+    ]
+  },
+  "1-22": {
+    "context": "Du laver søgning i en lille notesamling. Brugeren indtaster en tekst og det ord, der skal findes.",
+    "plan": "Undersøg, om søgeordet forekommer i teksten, uden at ændre bogstaverne.",
+    "inputs": [
+      "Tekst",
+      "Søgeord"
+    ]
+  },
+  "1-23": {
+    "context": "Et opslag har fået et forkert ord flere steder. Lav en funktion i programmet, som erstatter alle forekomster på én gang.",
+    "plan": "Brug tekstens replace-metode med det gamle og det nye ord.",
+    "inputs": [
+      "Tekst",
+      "Gammelt ord",
+      "Nyt ord"
+    ]
+  },
+  "1-24": {
+    "context": "En formular skal kende forskel på en manglende værdi og en tom tekst. Denne øvelse gør forskellen synlig.",
+    "plan": "Opret None, sammenlign med is, og undersøg derefter om teksten er tom.",
+    "inputs": [
+      "Tekst"
+    ]
+  },
+  "1-25": {
+    "context": "Du laver en lille historiegenerator. Brugeren vælger en person, et sted og en ting, og programmet sætter historien sammen.",
+    "plan": "Brug de tre svar i de to sætninger i den aftalte rækkefølge.",
+    "inputs": [
+      "Navn",
+      "Sted",
+      "Ting"
+    ]
+  },
+  "2-1": {
+    "context": "Et spil skal sende spillere til et lige eller ulige hold ud fra deres nummer.",
+    "plan": "Find resten ved division med 2."
+  },
+  "2-2": {
+    "context": "En måling viser, om temperaturen er over, under eller præcis på nul. Lav teksten til visningen.",
+    "plan": "Skeln mellem positiv, negativ og nul med betingelser."
+  },
+  "2-3": {
+    "context": "Tre spillere har hver fået en score. Find den største, så resultattavlen kan vise vinderscoren.",
+    "plan": "Sammenlign alle tre tal, eller brug max."
+  },
+  "2-4": {
+    "context": "Et aktivitetscenter har tre aldersgrupper med forskellige billetpriser. Lav beregningen til deres bestilling.",
+    "plan": "Kontrollér aldersgrænserne i en rækkefølge, der ikke overlapper."
+  },
+  "2-5": {
+    "context": "En kalenderapp skal vide, om februar har en ekstra dag. Den skal også håndtere århundreder rigtigt.",
+    "plan": "Kontrollér reglerne for 4, 100 og 400."
+  },
+  "2-6": {
+    "context": "Du har tre stykker snor og vil se, om de kan danne en rigtig trekant.",
+    "plan": "Kontrollér positive længder og de tre trekantsuligheder."
+  },
+  "2-7": {
+    "context": "Et spil giver 1 point i første runde, 2 i næste og så videre. Find den samlede belønning efter n runder.",
+    "plan": "Saml tallene fra 1 til og med n med en løkke eller en formel."
+  },
+  "2-8": {
+    "context": "Du skal udskrive mærker til de lige numre på en vej. Lav listen over de numre, der skal bruges.",
+    "plan": "Start ved 0, og tag alle lige tal til og med grænsen med."
+  },
+  "2-9": {
+    "context": "En træner vil vide, hvor mange målinger der viser en forbedring. Kun tal større end nul tæller.",
+    "plan": "Gennemløb listen og tæl de positive værdier."
+  },
+  "2-10": {
+    "context": "En pointliste indeholder både bonusser og fradrag. I denne oversigt skal kun bonusserne lægges sammen.",
+    "plan": "Læg kun værdier større end nul til summen."
+  },
+  "2-11": {
+    "context": "Et barn øver gangetabellen. Lav en funktion, der giver de første ti svar til en selvvalgt tabel.",
+    "plan": "Byg en liste med n ganget med tallene 1 til 10."
+  },
+  "2-12": {
+    "context": "En arrangør vil tælle rækkefølger for forskellige ting. Du skal beregne fakultet for et lille heltal.",
+    "plan": "Start produktet ved 1, og gang de nødvendige heltal på."
+  },
+  "2-13": {
+    "context": "Et mønster vokser efter Fibonacci-reglen. Lav en liste, som en tegne-app kan bruge til mønstret.",
+    "plan": "Hvert nyt tal dannes af de to foregående; håndtér også n lig 0."
+  },
+  "2-14": {
+    "context": "Et ordspil giver point for vokaler. Både danske vokaler og store bogstaver skal tælle korrekt.",
+    "plan": "Gør bogstaverne ens i størrelse og tæl vokalerne."
+  },
+  "2-15": {
+    "context": "Du laver et ordpuslespil med tekster, der kan læses begge veje. Mellemrum og store bogstaver skal ikke forstyrre.",
+    "plan": "Lav en ensartet tekst, og sammenlign den med sin omvendte rækkefølge."
+  },
+  "2-16": {
+    "context": "En liste fra et tekstfelt indeholder nogle helt tomme svar. Fjern dem, men behold svar, der består af et mellemrum.",
+    "plan": "Kontrollér længden af hver streng i stedet for at strippe den."
+  },
+  "2-17": {
+    "context": "En måler har gemt flere værdier. Find det første tidspunkt i listen, hvor en værdi overstiger grænsen.",
+    "plan": "Gennemløb i original rækkefølge og stop ved første match."
+  },
+  "2-18": {
+    "context": "En app har en skyder med en mindste og største tilladt værdi. Hold brugerens tal inden for området.",
+    "plan": "Returnér nærmeste grænse, hvis tallet ligger udenfor."
+  },
+  "2-19": {
+    "context": "Et lille kodeordsspil bruger summen af cifrene i et nummer. Lav beregningen til spillet.",
+    "plan": "Undersøg hvert decimalciffer og læg værdierne sammen."
+  },
+  "2-20": {
+    "context": "En skærm skal gøre plads til et heltal. Find antal cifre uden at tælle et eventuelt minustegn.",
+    "plan": "Se på tallets absolutte værdi; nul har ét ciffer."
+  },
+  "2-21": {
+    "context": "Du laver en klassisk FizzBuzz-runde til et talspil. Nogle tal skal erstattes af særlige ord.",
+    "plan": "Kontrollér først tal, der er delelige med både 3 og 5."
+  },
+  "2-22": {
+    "context": "En resultattavle skal vise den bedste score. Når ingen har spillet, skal den returnere None.",
+    "plan": "Kontrollér den tomme liste, før du finder maksimum."
+  },
+  "2-23": {
+    "context": "En øvelsesformular har tre enkle krav til en adgangskode. Kontroller længde, ASCII-tal og ASCII-store bogstaver.",
+    "plan": "Undersøg hvert krav separat, og saml resultaterne."
+  },
+  "2-24": {
+    "context": "En opsparing fordobles i hver fiktiv runde. Hvor mange runder tager det at nå et bestemt mål?",
+    "plan": "Start ved 1 og tæl fordoblingerne, indtil målet er nået."
+  },
+  "2-25": {
+    "context": "En liste over tider bør stå i stigende rækkefølge. Lav en kontrol af, om det allerede er tilfældet.",
+    "plan": "Sammenlign hvert tal med sin efterfølger uden at ændre listen."
+  },
+  "3-1": {
+    "context": "En tilmeldingsliste har dubletter. Behold første forekomst, så den oprindelige rækkefølge ikke ændres.",
+    "plan": "Gem værdier, du allerede har set, og tilføj kun nye."
+  },
+  "3-2": {
+    "context": "Du laver en statistik over ordene i en tekst. Det samme ord med stort og lille bogstav skal tælles sammen.",
+    "plan": "Del teksten, brug små bogstaver og opdatér en dictionary."
+  },
+  "3-3": {
+    "context": "En netbutiks kurv består af varer med pris og antal. Beregn det samlede beløb.",
+    "plan": "Find hver vares delsum og læg delsummerne sammen."
+  },
+  "3-4": {
+    "context": "Et kartotek sorterer ord i grupper efter begyndelsesbogstav. Tomme felter må ikke give fejl.",
+    "plan": "Brug små begyndelsesbogstaver som nøgler og behold de originale ord."
+  },
+  "3-5": {
+    "context": "Flere grupper har hver afleveret en lille liste. Lav én samlet liste i samme rækkefølge.",
+    "plan": "Gennemløb grupperne og derefter elementerne i hver gruppe."
+  },
+  "3-6": {
+    "context": "Et katalog fortæller, hvilken gruppe hvert element tilhører. Lav den omvendte oversigt fra gruppe til elementer.",
+    "plan": "Opret en liste for hver værdi og læg de oprindelige nøgler i den."
+  },
+  "3-7": {
+    "context": "En sensor mangler nogle målinger, som står som None. Find gennemsnittet af de målinger, der faktisk findes.",
+    "plan": "Filtrér None fra og håndtér situationen uden gyldige målinger."
+  },
+  "3-8": {
+    "context": "En løber skriver sin distance som fx 1,5 km eller 350m. Træningsappen skal gemme samme enhed hver gang.",
+    "plan": "Find enheden, læs tallet og omregn til meter."
+  },
+  "3-9": {
+    "context": "En tilmeldingsformular får navne med forskellig brug af mellemrum og store bogstaver. Gør visningen ensartet.",
+    "plan": "Saml ordene med enkelte mellemrum og brug title på resultatet."
+  },
+  "3-10": {
+    "context": "En quiz skal vælge det længste ord fra en liste. Ved lighed skal det første forslag vinde.",
+    "plan": "Hold styr på det hidtil længste ord og håndtér en tom liste."
+  },
+  "3-11": {
+    "context": "To spil har hver en liste over banenumre. Find de baner, som findes i begge spil, uden dubletter.",
+    "plan": "Find fælles værdier og returnér dem i sorteret rækkefølge."
+  },
+  "3-12": {
+    "context": "En musikafspiller skal rykke de sidste sange frem i køen. Lav en rotation af listen.",
+    "plan": "Brug resten ved division med listens længde til store rotationer."
+  },
+  "3-13": {
+    "context": "En app viser varer i mindre portioner. Del en lang liste op i blokke med højst n elementer.",
+    "plan": "Tag udsnit på n elementer; behold også den sidste korte blok."
+  },
+  "3-14": {
+    "context": "En træningsapp viser den samlede distance efter hver tur. Lav de løbende summer.",
+    "plan": "Opdatér en samlet sum og gem den efter hver ny værdi."
+  },
+  "3-15": {
+    "context": "En afstemning bruger heltal som valgmuligheder. Find det hyppigste valg med en fast regel ved lighed.",
+    "plan": "Tæl forekomster og vælg den mindste værdi blandt lige hyppige kandidater."
+  },
+  "3-16": {
+    "context": "Du skal beskrive midten af en samling målinger uden at lade en enkelt ekstrem måling styre alt.",
+    "plan": "Sorter målingerne og håndtér både lige og ulige antal."
+  },
+  "3-17": {
+    "context": "Forskellige målinger skal vægte forskelligt i et samlet resultat. Lav en beregner til det vægtede gennemsnit.",
+    "plan": "Gang hver værdi med sin vægt og del summen med vægtenes sum."
+  },
+  "3-18": {
+    "context": "Et ordspil vil vide, hvor mange korte og lange ord teksten indeholder. Lav en oversigt efter ordlængde.",
+    "plan": "Brug længden som tekstnøgle og tæl ordene i hver gruppe."
+  },
+  "3-19": {
+    "context": "En turnering modtager resultater som semikolonsepareret tekst. Navne kan indeholde semikolon inde i anførselstegn.",
+    "plan": "Lad csv-modulet læse felterne og omdan point til int."
+  },
+  "3-20": {
+    "context": "En app modtager en JSON-liste med tal. Find summen af de tal, der er større end en valgt grænse.",
+    "plan": "Læs JSON-teksten til Python-data, før du filtrerer og summerer."
+  },
+  "3-21": {
+    "context": "Du skal handle ind til en aktivitet, men nogle varer findes allerede på lager. Lav listen over det, der mangler.",
+    "plan": "Sammenlign ønsket med lageret og medtag kun positive mangler."
+  },
+  "3-22": {
+    "context": "En liste med numre burde være uden gentagelser. Find de numre, der optræder flere gange.",
+    "plan": "Tæl forekomster og sorter de gentagne værdier."
+  },
+  "3-23": {
+    "context": "En beregner skal håndtere division med nul uden at gå ned. Brug None, når resultatet ikke kan beregnes.",
+    "plan": "Kontrollér nævneren, før du dividerer."
+  },
+  "3-24": {
+    "context": "Når en elev gemmer sin kode, skal filnavnet ende på .py. Eksisterende endelser må ikke blive tilføjet igen.",
+    "plan": "Sammenlign endelsen uden hensyn til store og små bogstaver."
+  },
+  "3-25": {
+    "context": "Du laver en lille tekststatistik til en notesbog. Vis tegn, ord og linjer som tre separate tal.",
+    "plan": "Vælg den passende tekstfunktion til hver af de tre optællinger."
+  },
+  "4-1": {
+    "context": "En formular skal acceptere decimaler med enten komma eller punktum. Ugyldig tekst må ikke stoppe programmet.",
+    "plan": "Ryd yderste whitespace, ret komma og håndtér fejl ved konvertering."
+  },
+  "4-2": {
+    "context": "En kodeeditor skal opdage ubalancerede parenteser. Den skal kende forskel på flere typer parenteser.",
+    "plan": "Brug en stak til åbne parenteser og match lukningerne."
+  },
+  "4-3": {
+    "context": "En sorteret resultatliste kan være meget lang. Find et bestemt tal uden at undersøge alle felter i rækkefølge.",
+    "plan": "Halvér søgeområdet efter hver sammenligning."
+  },
+  "4-4": {
+    "context": "Et matematikværktøj skal finde alle primtal under en grænse. Det skal også kunne klare 10.000.",
+    "plan": "Markér multipla af fundne primtal som sammensatte tal."
+  },
+  "4-5": {
+    "context": "En kalender har flere tidsblokke, som overlapper eller rører hinanden. Saml dem til en overskuelig oversigt.",
+    "plan": "Sorter efter start og udvid den seneste blok, når de hænger sammen."
+  },
+  "4-6": {
+    "context": "En måling svinger meget fra punkt til punkt. Beregn et glidende gennemsnit for at gøre udviklingen mere overskuelig.",
+    "plan": "Flyt et vindue med k værdier gennem listen og beregn hvert gennemsnit."
+  },
+  "4-7": {
+    "context": "Et regneark skal bytte rækker og kolonner. Lav selve ombytningen af tabellens data.",
+    "plan": "Saml elementer med samme kolonneindeks i nye rækker."
+  },
+  "4-8": {
+    "context": "Et lille matematikværktøj skal kunne gange to matricer. Dimensionerne er allerede kontrolleret.",
+    "plan": "Find hvert felt som summen af produkter fra en række og en kolonne."
+  },
+  "4-9": {
+    "context": "En simpel komprimering gemmer gentagne tegn som tegn og antal. Lav komprimeringen af en tekst.",
+    "plan": "Saml kun tegn, der står lige efter hinanden."
+  },
+  "4-10": {
+    "context": "Du skal læse en tekst tilbage fra den simple komprimering med tegn og antal.",
+    "plan": "Gentag hvert tegn det angivne antal gange og sæt delene sammen."
+  },
+  "4-11": {
+    "context": "En gåde bruger en Caesar-kode. Flyt bogstaver i alfabetet, men behold andre tegn og store/små bogstaver.",
+    "plan": "Regn med alfabetindekser og brug modulo 26 ved kanten."
+  },
+  "4-12": {
+    "context": "En resultattavle skal sortere efter point og derefter navn, så samme point giver en stabil rækkefølge.",
+    "plan": "Brug en sorteringsnøgle med både faldende point og stigende navn."
+  },
+  "4-13": {
+    "context": "Du laver en fiktiv kontosimulator. Indbetalinger og hævninger skal behandles i rækkefølge uden overtræk.",
+    "plan": "Opdatér saldoen, eller tæl en afvist hævning, når saldoen ville blive negativ."
+  },
+  "4-14": {
+    "context": "Et tegneprogram har en simpel stak, hvor seneste handling hentes først. Simulér indsætning og fjernelse.",
+    "plan": "Brug append og pop og håndtér en tom stak uden fejl."
+  },
+  "4-15": {
+    "context": "En animation skal besøge felterne i en tabel som en spiral. Lav rækkefølgen af værdierne.",
+    "plan": "Gå langs de fire kanter og flyt dem gradvist ind mod midten."
+  },
+  "4-16": {
+    "context": "Et ordspil vil gruppere ord, som kan laves af de samme bogstaver. Grupperne skal beholde deres første rækkefølge.",
+    "plan": "Brug en ensartet nøgle for ordenes bogstaver."
+  },
+  "4-17": {
+    "context": "Et netværksværktøj kontrollerer en IPv4-adresse skrevet som tekst. Det skal afvise forkert formaterede felter.",
+    "plan": "Kontrollér antal felter, ASCII-cifre, værdier og foranstillede nuller."
+  },
+  "4-18": {
+    "context": "Et kortværktøj skal beregne afstanden mellem to punkter. Funktionen skal også virke med mere end to koordinater.",
+    "plan": "Find koordinatforskellene, kvadrér dem, summér og tag kvadratroden."
+  },
+  "4-19": {
+    "context": "Du har en række målepunkter og vil finde den rette linje, der passer bedst til dem.",
+    "plan": "Beregn gennemsnit, hældning og derefter skæringen med y-aksen."
+  },
+  "4-20": {
+    "context": "En notefil indeholder afsnit med tomme linjer imellem. Gør hvert afsnit til én sammenhængende tekst.",
+    "plan": "Saml ikke-tomme linjer indtil en tom linje afslutter afsnittet."
+  },
+  "4-21": {
+    "context": "En app skal finde to beløb, der tilsammen rammer et mål. Returnér deres pladser i den oprindelige liste.",
+    "plan": "Gem tidligere værdier og slå den manglende makker op."
+  },
+  "4-22": {
+    "context": "En lokaleplan skal opdage dobbeltbookinger. To møder må gerne mødes præcis ved sluttidspunktet.",
+    "plan": "Sorter intervallerne og sammenlign naboers slut- og starttid."
+  },
+  "4-23": {
+    "context": "Et måleprogram vil vise, hvor mange værdier der er negative, nul og positive.",
+    "plan": "Tæl de tre kategorier i hver sin dictionary-værdi."
+  },
+  "4-24": {
+    "context": "Et program skal sammenligne versionsnumre som 1.2 og 1.2.0. Tekstsortering alene giver ikke det rigtige svar.",
+    "plan": "Del på punktum, sammenlign heltal og udfyld manglende led med nul."
+  },
+  "4-25": {
+    "context": "Du bygger en lille tæller, som kan bruges flere steder i et program. Her samles data og funktion i en klasse.",
+    "plan": "Lad objektet gemme sin værdi og opdatér den i tilfoej-metoden."
+  },
+  "5-1": {
+    "context": "En samling af mapper indeholder tal i flere niveauer af lister. Find summen uden at kende dybden på forhånd.",
+    "plan": "Behandl tal direkte og løs indlejrede lister med rekursion."
+  },
+  "5-2": {
+    "context": "En beregning skal opløfte et tal i en meget stor heltalseksponent. Gentagen multiplikation er unødigt langsom.",
+    "plan": "Udnyt at en potens kan deles op ved gentagen kvadrering."
+  },
+  "5-3": {
+    "context": "En automat kan give bestemte mønttyper tilbage. Find færrest mulige mønter til beløbet, hvis det kan lade sig gøre.",
+    "plan": "Opbyg de bedste resultater for mindre beløb og genbrug dem."
+  },
+  "5-4": {
+    "context": "En træningslog indeholder værdier, der går både op og ned. Find den længste strengt stigende delfølge.",
+    "plan": "Gem den bedste længde ved hver position og sammenlign tidligere værdier."
+  },
+  "5-5": {
+    "context": "En stavehjælp vil måle, hvor mange små ændringer der skal til for at omdanne ét ord til et andet.",
+    "plan": "Sammenlign orddele og vælg mellem indsætning, sletning og erstatning."
+  },
+  "5-6": {
+    "context": "To tekstversioner har fælles tegn i samme rækkefølge, men også forskelle. Find længden af den fælles delfølge.",
+    "plan": "Opbyg svar for kortere tekststykker og udvid dem trinvis."
+  },
+  "5-7": {
+    "context": "Et kort består af stoppesteder med direkte forbindelser. Find den rute, der bruger færrest forbindelser.",
+    "plan": "Undersøg naboer lag for lag med en kø og husk besøgte knuder."
+  },
+  "5-8": {
+    "context": "På et andet kort har forbindelserne forskellige rejsetider. Find den korteste samlede afstand.",
+    "plan": "Brug en prioritetskø med den billigste kendte vej først."
+  },
+  "5-9": {
+    "context": "Flere byggeopgaver skal udføres i en bestemt afhængighedsrækkefølge. Find en gyldig rækkefølge, eller opdag en cyklus.",
+    "plan": "Hold styr på indgående kanter og vælg mindste tilgængelige knude."
+  },
+  "5-10": {
+    "context": "Et simpelt landkort bruger 1 for land og 0 for vand. Tæl de adskilte øer på kortet.",
+    "plan": "Besøg alle sammenhængende landfelter fra ét startfelt ad gangen."
+  },
+  "5-11": {
+    "context": "Du pakker en rygsæk med begrænset kapacitet. Hver genstand kan vælges højst én gang.",
+    "plan": "Overvej for hver genstand både at tage den med og lade den ligge."
+  },
+  "5-12": {
+    "context": "En pointlog indeholder gevinster og tab. Find den sammenhængende periode med den bedste samlede score.",
+    "plan": "Hold styr på bedste sum, der slutter her, og bedste sum samlet."
+  },
+  "5-13": {
+    "context": "En liste er blevet blandet rundt. Tæl de par, der står i omvendt rækkefølge i forhold til stigende sortering.",
+    "plan": "Undersøg par eller udnyt en sammenfletning til at tælle smartere."
+  },
+  "5-14": {
+    "context": "En lille beregner modtager udtryk i postfix-form. Tallene kommer før den operator, der skal bruges.",
+    "plan": "Brug en stak; tag de to seneste værdier ved en operator."
+  },
+  "5-15": {
+    "context": "Et søgetræ gemmer forgreninger som indlejrede lister. Find det største antal knuder på en vej nedad.",
+    "plan": "Et tomt træ har højde 0; ellers lægges 1 til største børnehøjde."
+  },
+  "5-16": {
+    "context": "En app vil holde få data i en cache. Når den er fuld, fjernes den mindst nyligt brugte værdi.",
+    "plan": "Opdatér rækkefølgen ved både opslag og indsættelse."
+  },
+  "5-17": {
+    "context": "Et søgeværktøj skal finde alle placeringer af et mønster. To forekomster kan godt overlappe.",
+    "plan": "Undersøg alle mulige startindekser uden at springe et helt mønster frem."
+  },
+  "5-18": {
+    "context": "Et tekstspil giver point for lange tekststykker uden gentagne tegn. Find den længste længde.",
+    "plan": "Flyt et vindues start, når et tegn allerede findes i det."
+  },
+  "5-19": {
+    "context": "En robot bevæger sig gennem et gitter med forhindringer. Den må kun gå til højre eller ned.",
+    "plan": "Hvert frit felt kan nås fra feltet ovenover og feltet til venstre."
+  },
+  "5-20": {
+    "context": "En kodeøvelse skal vise alle lovlige kombinationer af n parentespar. Ugyldige kombinationer skal undgås.",
+    "plan": "Byg strengen gradvist, og tilføj kun lovlige åbninger og lukninger."
+  },
+  "5-21": {
+    "context": "En afstemning kan have et valg med mere end halvdelen af stemmerne. Find det, hvis det findes.",
+    "plan": "Vælg en kandidat og kontrollér dens faktiske antal forekomster."
+  },
+  "5-22": {
+    "context": "En sorteret liste er blevet roteret, så den starter et andet sted. Find den mindste værdi med binær søgning.",
+    "plan": "Brug sammenligninger til at afgøre, hvilken halvdel der indeholder bruddet."
+  },
+  "5-23": {
+    "context": "Et netværk har flere grupper, som måske er forbundet. Tæl de adskilte komponenter.",
+    "plan": "Besøg hver gruppe eller saml knuder med en union-find-struktur."
+  },
+  "5-24": {
+    "context": "Du vil nå så mange aktiviteter som muligt uden tidsmæssige overlap. Find det maksimale antal.",
+    "plan": "Overvej aktiviteterne efter sluttid og vælg dem, der stadig passer."
+  },
+  "5-25": {
+    "context": "En lommeregner skal læse meget enkle udtryk uden at køre vilkårlig Python-kode.",
+    "plan": "Læs syntakstræet og tillad kun de præcist nævnte tal og operatorer."
+  }
+}

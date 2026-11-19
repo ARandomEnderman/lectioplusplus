@@ -350,6 +350,7 @@
     }, 'Annullér ændringer');
     const draftStatus = element('span', 'lxp-draft-status');
     dashboardPanel.prepend(element('div', 'lxp-layout-toolbar', draftStatus, undoLayout, redoLayout, cancelLayout, saveLayout));
+    const customSidebar = globalThis.lectioPlusCustomSidebar?.({ui,panel:panels.get('navigation'),getPreferences:getSavedPreferences,onChange:commit,status});
     const extras = globalThis.lectioPlusSettingsExtras({ ui, panels, getPreferences: getSavedPreferences, onChange: commit, saveSettings: onChange,
       canTransfer: () => !dirty() && !saving, status });
     node.append(tabs, content, status);
@@ -370,6 +371,7 @@
       board.inert = library.inert = saving;
       title.disabled = columns.disabled = saving;
       extras.sync(preferences);
+      customSidebar?.sync(preferences);
       const signature = JSON.stringify([preferences.dashboard, preferences.showClicker]);
       if (layoutSignature !== signature) {
         const focused = board.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;

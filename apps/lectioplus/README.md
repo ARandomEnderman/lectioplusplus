@@ -1,5 +1,21 @@
 # LectioPlus+
 
+## Version 0.1.5
+
+Samler ændringerne til og med Test 34: navnesøgning under Elever og Lærere, ti klassiske spil, 125 Python-opgaver med tydeligere vejledning, interaktivt input og terminal samt flere fagværktøjer og egne sidebjælkelinks. Markeringen af det aktuelle klokkeslæt fra 0.1.4 er bevaret.
+
+Opdatér ved at pakke hele `lectioplus-chrome.zip` ud i den eksisterende installationsmappe, genindlæse udvidelsen og derefter Lectio-fanen. Hele `vendor`-mappen skal med. Interaktiv Python kræver en browser med WebAssembly JSPI; kodeværkstedet viser en fejl, hvis browseren mangler denne funktion. Liveverifikation på indloggede Lectio-sider er ikke udført.
+
+Afsnittene om testpakker nedenfor er historiske udviklingsnoter.
+
+## Test 34
+
+**Elever** og **Lærere** har nu et søgefelt, der filtrerer navnene, mens du skriver. Søg på fornavn, efternavn eller dele af navnet. Der er antal resultater, besked ved ingen match og **Ryd søgning**. Søgningen bruger de personer, Lectio allerede har indlæst på siden. Se [TEST34.md](TEST34.md). Alle funktioner fra Test 33 er med. Manifestversion 0.1.3 er bevaret; denne testpakke er ikke udgivet på GitHub.
+
+## Test 33
+
+Det nye faneblad **Spil** har ti klassikere og bonusspillet Grøn eller rød med mad og aktiviteter. Spillene kører lokalt med synlige betjeningsknapper, pause og genstart. Python-opgaverne har fået konkrete situationer, tre deltrin, læsbare eksempler, en stor læsevisning og knappen **Prøv eksemplet** til funktionsopgaver. Eksisterende opgavekode og fremskridt bevares. Se [TEST33.md](TEST33.md). Alle rettelser fra Test 32 er med. Manifestversion 0.1.3 er bevaret; denne test er ikke udgivet på GitHub.
+
 ## Version 0.1.3
 
 Denne opdatering samler de afprøvede ændringer til og med Test 20: moderne undersider og tilpasning, 54 skoleværktøjer, privatlivsindstillinger samt lokal dansk tegnsætning med rettet opstart. Strafe Clicker er fra som standard ved ny installation.
@@ -164,3 +180,15 @@ Alle 112 afgrænsede teksteksempler og den samlede suite på 1.873 kontroller be
 ## Test 20: opstart af den lokale sprogmodel
 
 Den installerede udvidelse bruger nu browserens egen beskedkanal til modelvinduet. Status viser indlæsningstrin og sekunder, og blokeret opstart, manglende filer samt afbrudt forbindelse giver tydelige fejl med mulighed for at prøve igen. Kopiér hele `extension`-mappen, og genindlæs både udvidelsen og Lectio-fanen. Se [TEST20.md](TEST20.md) for testdækning og begrænsninger.
+
+## Test 21: overblik over værktøjer og indhold i skemaet
+
+HjælpeMidler starter med fem faggrupper og seks genveje med favoritter først. Alle 54 værktøjer har en brugsvejledning og kan findes via fag, opgaveord eller den samlede oversigt. Mellemregninger er foldbare, og gemmefunktionerne står efter værktøjet. Skemaet viser et lille indholdsikon, når Lectios oprindelige markering findes på lektionen. Se [TEST21.md](TEST21.md) for afprøvning, 2.066 beståede kontroller og kendte begrænsninger. Ingen ny release i denne test.
+
+## Test 22: indtastning, personlige layouts og atomnavne
+
+Talrækker og målepar kan indtastes i tabeller. Reaktionsmængder har navngivne felter for hvert stof, og kredsløb har et felt for hver modstand. Værktøjernes felter, hjælpetekster og resultatvisning kan tilpasses fælles eller pr. værktøj. Atombyggeren viser grundstoffets navn, fx Kulstof (karbon), både ved et enkelt atom og ved valg af et atom i et molekyle. Alle 2.121 kontroller i 29 testsuiter består. Se [TEST22.md](TEST22.md) for muligheder og begrænsninger. Dette er stadig en testpakke uden ny release.
+
+## Test 23: indstillinger ved favoritter
+
+Tilpasning af værktøjets layout åbnes nu med en lille indstillingsknap ved siden af **Føj til favoritter**. Panelet er skjult, indtil knappen bruges. Se [TEST23.md](TEST23.md).

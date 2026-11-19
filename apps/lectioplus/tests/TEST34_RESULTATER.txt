@@ -1,0 +1,356 @@
+=== test34-search.cjs ===
+PASS elev: local unnamed search field
+PASS elev: counts only available people
+PASS elev: case, spaces and unordered name parts
+PASS elev: navigation preserved
+PASS elev: Danish name
+PASS elev: partial and accent-tolerant name
+PASS elev: decomposed Unicode name
+PASS elev: no-results message
+PASS elev: Enter cannot submit Lectio form
+PASS elev: Escape restores all matches
+PASS elev: original links and handlers preserved
+PASS elev: refresh retains field, focus target and query
+PASS elev: new AJAX rows use active search
+PASS elev: detached rows restored
+PASS elev: clear restores focus and preserves native hiding
+PASS elev: disable restores original content
+PASS laerer: local unnamed search field
+PASS laerer: counts only available people
+PASS laerer: case, spaces and unordered name parts
+PASS laerer: navigation preserved
+PASS laerer: Danish name
+PASS laerer: partial and accent-tolerant name
+PASS laerer: decomposed Unicode name
+PASS laerer: no-results message
+PASS laerer: Enter cannot submit Lectio form
+PASS laerer: Escape restores all matches
+PASS laerer: original links and handlers preserved
+PASS laerer: refresh retains field, focus target and query
+PASS laerer: new AJAX rows use active search
+PASS laerer: detached rows restored
+PASS laerer: clear restores focus and preserves native hiding
+PASS laerer: disable restores original content
+PASS table: filter entire person row, preserve headers
+PASS multi-column lists do not hide matching neighbours
+PASS bare person links are supported
+PASS unrelated route untouched: FindSkema.aspx/stamklasse
+PASS unrelated route untouched: SkemaNy.aspx/elev
+PASS unrelated route untouched: login.aspx/elev
+PASS preview shell integrates student search
+PASS shell observer leaves active filtering intact
+PASS teacher search uses its own query
+PASS preview teacher filtering
+PASS return navigation preserves student query without duplicate controls
+PASS main menu restored after leaving people directory
+PASS no runtime errors:
+TOTAL 45 people-search checks
+
+=== navigation.cjs ===
+PASS shell starts
+PASS every fixture lesson is shown
+PASS 08–16 is eight hours, not a row per lesson start
+PASS normal schedule size is roomier by default
+PASS normal size applies to the time scale
+PASS morning break keeps its actual time interval
+PASS lunch break keeps its actual time interval
+PASS size selector can add more room
+PASS no empty rows for staggered starts
+PASS actual start minutes parsed
+PASS overlapping lessons get separate lanes
+PASS unknown time remains visible outside the clock
+PASS short event retains full accessible time
+PASS search filters lessons
+PASS filtering does not erase genuine breaks
+PASS search keeps the shared clock stable
+PASS today switches to one day
+PASS today uses Copenhagen fixture date
+PASS correct source view: home
+PASS navigation: home
+PASS correct source view: schedule
+PASS navigation: schedule
+PASS correct source view: tasks
+PASS navigation: tasks
+PASS correct source view: homework
+PASS navigation: homework
+PASS correct source view: messages
+PASS navigation: messages
+PASS correct source view: attendance
+PASS navigation: attendance
+PASS shared native layout: attendance
+PASS correct source view: grades
+PASS navigation: grades
+PASS shared native layout: grades
+PASS correct source view: study
+PASS navigation: study
+PASS shared native layout: study
+PASS correct source view: documents
+PASS navigation: documents
+PASS shared native layout: documents
+PASS correct source view: books
+PASS navigation: books
+PASS shared native layout: books
+PASS correct source view: surveys
+PASS navigation: surveys
+PASS shared native layout: surveys
+PASS correct source view: support
+PASS navigation: support
+PASS shared native layout: support
+PASS correct source view: profile
+PASS navigation: profile
+PASS shared native layout: profile
+PASS correct source view: school
+PASS navigation: school
+PASS correct source view: schedule/activity
+PASS detail receives shared layout: schedule/activity
+PASS navigation: schedule/activity
+PASS correct source view: schedule/feedback
+PASS detail receives shared layout: schedule/feedback
+PASS navigation: schedule/feedback
+PASS correct source view: tasks/detail
+PASS detail receives shared layout: tasks/detail
+PASS navigation: tasks/detail
+PASS correct source view: tasks/group
+PASS detail receives shared layout: tasks/group
+PASS navigation: tasks/group
+PASS correct source view: homework/detail
+PASS detail receives shared layout: homework/detail
+PASS navigation: homework/detail
+PASS correct source view: messages/sent
+PASS detail receives shared layout: messages/sent
+PASS navigation: messages/sent
+PASS correct source view: messages/trash
+PASS detail receives shared layout: messages/trash
+PASS navigation: messages/trash
+PASS correct source view: messages/thread
+PASS detail receives shared layout: messages/thread
+PASS navigation: messages/thread
+PASS correct source view: messages/compose
+PASS detail receives shared layout: messages/compose
+PASS navigation: messages/compose
+PASS correct source view: attendance/causes
+PASS detail receives shared layout: attendance/causes
+PASS navigation: attendance/causes
+PASS correct source view: grades/remarks
+PASS detail receives shared layout: grades/remarks
+PASS navigation: grades/remarks
+PASS correct source view: study/course
+PASS detail receives shared layout: study/course
+PASS navigation: study/course
+PASS correct source view: documents/folder
+PASS detail receives shared layout: documents/folder
+PASS navigation: documents/folder
+PASS correct source view: documents/edit
+PASS detail receives shared layout: documents/edit
+PASS navigation: documents/edit
+PASS correct source view: books/history
+PASS detail receives shared layout: books/history
+PASS navigation: books/history
+PASS correct source view: surveys/answer
+PASS detail receives shared layout: surveys/answer
+PASS navigation: surveys/answer
+PASS correct source view: surveys/report
+PASS detail receives shared layout: surveys/report
+PASS navigation: surveys/report
+PASS correct source view: support/appointments
+PASS detail receives shared layout: support/appointments
+PASS navigation: support/appointments
+PASS correct source view: profile/contact
+PASS detail receives shared layout: profile/contact
+PASS navigation: profile/contact
+PASS correct source view: school/students
+PASS detail receives shared layout: school/students
+PASS navigation: school/students
+PASS correct source view: school/teachers
+PASS detail receives shared layout: school/teachers
+PASS navigation: school/teachers
+PASS correct source view: school/classes
+PASS detail receives shared layout: school/classes
+PASS navigation: school/classes
+PASS correct source view: school/rooms
+PASS detail receives shared layout: school/rooms
+PASS navigation: school/rooms
+PASS correct source view: school/teams
+PASS detail receives shared layout: school/teams
+PASS navigation: school/teams
+PASS correct source view: school/advanced
+PASS detail receives shared layout: school/advanced
+PASS navigation: school/advanced
+PASS correct source view: electives
+PASS navigation: electives
+PASS correct source view: school/changes-day
+PASS detail receives shared layout: school/changes-day
+PASS navigation: school/changes-day
+PASS correct source view: school/changes-week
+PASS detail receives shared layout: school/changes-week
+PASS navigation: school/changes-week
+PASS correct source view: school/month
+PASS detail receives shared layout: school/month
+PASS navigation: school/month
+PASS correct source view: school/groups
+PASS detail receives shared layout: school/groups
+PASS navigation: school/groups
+PASS correct source view: school/resources
+PASS detail receives shared layout: school/resources
+PASS navigation: school/resources
+PASS correct source view: school/descriptions
+PASS detail receives shared layout: school/descriptions
+PASS navigation: school/descriptions
+PASS original form controls and handlers survive
+PASS native pages retain input state across preview navigation
+PASS long page sections use one compact selector without dropping sections
+PASS message folders remain available in the enhanced overview
+PASS submenu opens its native detail view
+PASS detail breadcrumb returns to its parent
+PASS parent stays selected on detail pages
+PASS unrecognized data tables receive shared styling
+PASS form tables are distinguished from data tables
+PASS global search discovers submenus
+PASS no runtime errors:
+PASS mobile starts on a single day
+PASS native day-header row parsed cell by cell
+PASS native cell date and timeline read
+PASS changed status and room preserved
+TOTAL 164 checks
+
+=== native-routes.cjs ===
+PASS real route family: SkemaNy.aspx
+PASS no runtime error: SkemaNy.aspx
+PASS real route family: OpgaverElev.aspx
+PASS no runtime error: OpgaverElev.aspx
+PASS real route family: material_lektieoversigt.aspx
+PASS no runtime error: material_lektieoversigt.aspx
+PASS real route family: beskeder2.aspx
+PASS no runtime error: beskeder2.aspx
+PASS real route family: beskeder2.aspx?type=visbesked&id=fake
+PASS detail workflow keeps native form
+PASS no runtime error: beskeder2.aspx?type=visbesked&id=fake
+PASS real route family: beskeder2.aspx?type=nybesked
+PASS detail workflow keeps native form
+PASS no runtime error: beskeder2.aspx?type=nybesked
+PASS real route family: ElevAflevering.aspx?exerciseid=fake
+PASS detail workflow keeps native form
+PASS no runtime error: ElevAflevering.aspx?exerciseid=fake
+PASS real route family: subnav/fravaerelev.aspx
+PASS no runtime error: subnav/fravaerelev.aspx
+PASS real route family: subnav/fravaerelev_fravaersaarsager.aspx
+PASS no runtime error: subnav/fravaerelev_fravaersaarsager.aspx
+PASS real route family: grades/grade_report.aspx
+PASS no runtime error: grades/grade_report.aspx
+PASS real route family: studieplan/forloeb_vis.aspx?phaseid=fake
+PASS no runtime error: studieplan/forloeb_vis.aspx?phaseid=fake
+PASS real route family: DokumentOversigt.aspx?folderid=fake
+PASS no runtime error: DokumentOversigt.aspx?folderid=fake
+PASS real route family: DokumentFolderRediger.aspx
+PASS no runtime error: DokumentFolderRediger.aspx
+PASS real route family: spoergeskema/spoergeskema_rapport.aspx
+PASS no runtime error: spoergeskema/spoergeskema_rapport.aspx
+PASS real route family: spoergeskema/spoergeskema_besvar.aspx?id=fake
+PASS no runtime error: spoergeskema/spoergeskema_besvar.aspx?id=fake
+PASS active native tab mirrored
+PASS postback delegates exactly once to original control
+PASS generic menu callbacks do not leave original mode permanently enabled
+PASS delegation does not replace source control
+PASS delegated Lectio dialogs remain accessible
+PASS closing native dialog restores previous modern visibility
+PASS disabling restores native page layout
+PASS disabling removes classification attributes
+PASS data and form classification
+PASS authored content and schedule layouts excluded
+PASS wide table becomes keyboard-scrollable
+PASS original scroll-host attributes restored
+PASS form value preserved
+TOTAL 46 route and native DOM checks
+
+=== privacy.cjs ===
+PASS anonymity is optional and off by default
+PASS anonymity accepts only a boolean
+PASS disabled privacy retains displayed names
+PASS own Forside header identifies the full name
+PASS all exact name occurrences are masked without changing other people
+PASS a name split across styled spans appears once
+PASS original inline markup survives masking
+PASS native text data is preserved for Lectio readers
+PASS word boundaries do not hide parts of another name
+PASS link targets and existing click handlers remain intact
+PASS tooltips and accessible link labels hide the full name
+PASS masked text has an explicit accessible name
+PASS native browser title masks the name
+PASS person photo hidden: header-photo
+PASS person photo hidden: card-photo
+PASS person photo hidden: other-photo
+PASS person photo hidden: legacy-photo
+PASS person photo hidden: responsive
+PASS unrelated illustration remains: material
+PASS unrelated illustration remains: logo
+PASS inline portrait background is hidden
+PASS submitted inputs, drafts, option values and hidden state remain unchanged
+PASS editable name content is not rewritten
+PASS page scripts and JSON data are untouched
+PASS late menus and popovers receive anonymity
+PASS late portrait is hidden without navigation
+PASS reused image becomes visible when it is no longer a portrait
+PASS turning anonymity off restores the entire name
+PASS restoration preserves intervening host tooltip changes
+PASS native title restores its source value
+PASS turning photos back on restores images and markers
+PASS name and photo choices are independent
+PASS renderers can retain the original title while masking is active
+PASS branding and anonymity cooperate in the tab title
+PASS idle privacy and tab branding do not form an observer loop
+PASS branding restores the raw label after anonymity is disabled
+PASS cloned and cached text remains reversible
+PASS cloned accessible labels regain the full original name
+PASS reused text nodes no longer hide an unrelated person
+PASS disabling LectioPlus restores original display
+PASS privacy and branding have no DOM errors:
+PASS another student schedule obtains identity from own Forside only once
+PASS another student header is not anonymized as the user
+PASS failed identity lookup never guesses someone else is the user
+PASS failed lookup does not retry on every DOM change
+PASS authentication or exam route untouched: login.aspx
+PASS authentication or exam route untouched: logout.aspx
+PASS authentication or exam route untouched: eksamen.aspx
+PASS same-origin blank frame inherits known identity
+PASS same-origin embedded portrait is detected
+PASS Anonym toggle is immediately below the profile photo toggle
+PASS new toggle exposes visible on/off feedback
+PASS anonymity preference survives backup
+PASS scraped identity and photo IDs never enter the settings backup
+PASS privacy loads early in matching Lectio frames
+TOTAL 55 privacy checks
+
+=== extension-audit.cjs ===
+PASS older backup gains new defaults and removes only retired AI navigation
+PASS full allowed flashcard and note collection fits backup limit even with escaped characters
+PASS large exported backup imports without truncating owned content
+PASS branding initially applies
+PASS late title/icon changes do not discard chosen tab branding
+PASS branding follows replacement head
+PASS disabling branding restores current native head assets
+PASS branding and backups run without DOM errors
+PASS school picker waits for late original content
+PASS late school list starts and malformed links are skipped individually
+PASS failed school-picker setting rolls back visibly
+PASS school picker recovery has no DOM errors
+PASS empty schedule can derive selected ISO week from its actual URL
+PASS real-route navigation accepts Lectio form outside masterContent and renders selected week
+PASS week fetch keeps modern layout without reload errors
+PASS stylesheet parses: customization.css
+PASS stylesheet parses: games.css
+PASS stylesheet parses: native-pages.css
+PASS stylesheet parses: native.css
+PASS stylesheet parses: popup.css
+PASS stylesheet parses: privacy.css
+PASS stylesheet parses: school-expanded.css
+PASS stylesheet parses: school-lab.css
+PASS stylesheet parses: school-picker.css
+PASS stylesheet parses: school-polish.css
+PASS stylesheet parses: school-tools.css
+PASS stylesheet parses: styles.css
+PASS stylesheet parses: theme.css
+PASS stylesheet parses: workspace.css
+PASS print rules use the currently displayed modern view instead of a stale original week
+PASS test keeps minimal permissions and does not trigger a release
+PASS AI client/server are absent from current source
+TOTAL 34 extension-wide regression checks

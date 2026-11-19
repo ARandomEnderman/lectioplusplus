@@ -2,6 +2,7 @@
   'use strict';
   globalThis.lectioPlusSchoolSpecial=(id,c)=>{
     const {E,B,field,prefs,save,format,showResult,error}=c,M=globalThis.lectioPlusMath;
+    const expanded=globalThis.lectioPlusExpandedUI?.(id,c);if(expanded)return expanded;
     if(id==='translate'&&globalThis.lectioPlusTranslationTool)return globalThis.lectioPlusTranslationTool(c);
     const extra=globalThis.lectioPlusSchoolWriting?.(id,c)||globalThis.lectioPlusSchoolLab?.(id,c);if(extra)return extra;
     const node=E('div','lxp-special-tool');

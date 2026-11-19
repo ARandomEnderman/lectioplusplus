@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LectioPlus+",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
   "permissions": [
     "storage"
@@ -25,7 +25,9 @@
       "resources": [
         "strafe-clicker-icon.png",
         "icon-32.png",
-        "punctuation-frame.html"
+        "punctuation-frame.html",
+        "workbench-host.html",
+        "workbench-sandbox.html"
       ],
       "matches": [
         "https://lectio.dk/*",
@@ -54,7 +56,11 @@
         "school-tools.css",
         "school-picker.css",
         "school-lab.css",
-        "privacy.css"
+        "privacy.css",
+        "vendor/workbench/codemirror/lib/codemirror.css",
+        "school-expanded.css",
+        "school-polish.css",
+        "games.css"
       ],
       "all_frames": true,
       "match_about_blank": true,
@@ -102,6 +108,7 @@
         "tab-branding.js",
         "settings-transfer.js",
         "settings-extras.js",
+        "custom-sidebar.js",
         "settings.js",
         "school-math.js",
         "school-elements.js",
@@ -110,13 +117,33 @@
         "punctuation-client.js",
         "school-writing.js",
         "translation.js",
+        "school-expanded-core.js",
+        "school-expanded-science.js",
+        "school-expanded-data.js",
+        "school-code-lessons.js",
         "school-catalog.js",
         "school-language.js",
         "school-visuals.js",
         "school-molecule-builder.js",
         "school-lab.js",
+        "vendor/workbench/codemirror/lib/codemirror.js",
+        "vendor/workbench/codemirror/mode/python/python.js",
+        "vendor/workbench/codemirror/mode/javascript/javascript.js",
+        "vendor/workbench/codemirror/mode/xml/xml.js",
+        "vendor/workbench/codemirror/mode/css/css.js",
+        "vendor/workbench/codemirror/mode/htmlmixed/htmlmixed.js",
+        "vendor/workbench/codemirror/mode/sql/sql.js",
+        "workbench-client.js",
+        "school-expanded-ui.js",
+        "school-science-workshop.js",
+        "school-diagram-workshop.js",
+        "school-study-workshop.js",
+        "school-code-layout.js",
+        "school-code-workshop.js",
         "school-special.js",
         "school-tools.js",
+        "games-core.js",
+        "games.js",
         "content.js"
       ],
       "run_at": "document_end"
@@ -129,6 +156,12 @@
     "https://api.mymemory.translated.net/*"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts; default-src 'none'; script-src 'sha256-7wYrTDpp/fNS5tj1ln++4StcBsO9kpRRU3VKSBnw1Pk=' 'unsafe-eval' blob:; worker-src blob:; connect-src blob:; child-src 'none';"
+  },
+  "sandbox": {
+    "pages": [
+      "workbench-sandbox.html"
+    ]
   }
 }

@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const root=path.resolve(__dirname,'../extension');let checks=0;const ok=(v,label)=>{assert.ok(v,label);checks++;};const tick=()=>new Promise(r=>setImmediate(r));
+(async()=>{
+ // Execute the real JavaScript worker branch. No browser or DOM is involved.
+ const events=[],context={self:{postMessage:m=>events.push(m)},URL,Blob,Date,setTimeout,clearTimeout};vm.createContext(context);vm.runInContext(fs.readFileSync(root+'/workbench-worker.js','utf8'),context);
+ const run=code=>{events.length=0;return context.self.onmessage({data:{id:7,payload:{language:'javascript',code},files:{}}});};
+ let done=false;const pending=run('console.log("før"); await new Promise(r=>setTimeout(r,10)); console.error("efter");');pending.then(()=>done=true);ok(!done&&events.some(e=>e.phase==='output'&&e.text==='før\n'),'output before program finishes');await pending;const output=events.filter(e=>e.phase==='output');ok(output.map(e=>e.text).join('')==='før\nefter\n','stream keeps order');ok(output[1].stream==='stderr','stderr stays distinct');ok(events.at(-1).result.text==='før\nefter\n','final result retains full output');
+ await run('console.log("bevar"); throw new Error("min fejl");');ok(events.at(-1).type==='error'&&events.at(-1).message==='min fejl','runtime error returned');ok(events.slice(0,-1).some(e=>e.phase==='output'&&e.text==='bevar\n'),'output flushed before error');
+ await run('console.log("x".repeat(20000));');const chunks=events.filter(e=>e.phase==='output');ok(chunks.length>=3&&chunks.every(e=>e.text.length<=8192),'output forwarded in bounded chunks');ok(chunks.map(e=>e.text).join('').length===20001,'chunking loses no text');
+ await run('for(let i=0;i<5000;i++) console.log("x".repeat(30));');ok(events.at(-1).type==='error'&&/100.000/.test(events.at(-1).message),'output limit is enforced');ok(events.filter(e=>e.phase==='output').reduce((n,e)=>n+e.text.length,0)<=100000,'stream cannot exceed output budget');
+ // Exercise the actual host relay with an opaque-sandbox message channel stub.
+ const messages=[],timers=new Map();let timerId=0,connect,receive,child,frame;
+ class Channel{constructor(){const a={start(){},close(){},postMessage(){}},b={};this.port1=a;this.port2=b;child=a;}}
+ const runtime={id:'test-extension',onConnect:{addListener:fn=>connect=fn}};
+ const host={chrome:{runtime},location:{hash:'#'+'b'.repeat(32)},URL,Map,Number,AbortController,MessageChannel:Channel,fetch:async()=>({ok:true,text:async()=>''}),setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),document:{createElement:()=>frame={setAttribute(){},remove(){this.removed=true;},contentWindow:{postMessage(){}}},body:{append:f=>f.onload()}},addEventListener(){}};
+ vm.createContext(host);vm.runInContext(fs.readFileSync(root+'/workbench-host.js','utf8'),host);
+ connect({name:'lxp-workbench:'+'b'.repeat(32),sender:{id:runtime.id,url:'https://www.lectio.dk/lectio/999/forside.aspx',tab:{id:1},frameId:0},onMessage:{addListener:fn=>receive=fn},onDisconnect:{addListener(){}},postMessage:m=>messages.push(m)});
+ await receive({id:1,type:'execute',payload:{language:'javascript',code:'console.log(42)'}});ok(child,'sandbox channel opened');child.onmessage({data:{type:'sandbox-ready',protocol:3}});
+ const send=m=>child.onmessage({data:{id:1,...m}});send({type:'progress',phase:'loading',stage:'worker-ready'});send({type:'progress',phase:'working'});const runningTimer=[...timers.keys()][0];ok(timers.get(runningTimer).ms===10000,'host arms execution deadline');send({type:'progress',phase:'output',text:'42\n',stream:'stdout'});ok(messages.at(-1).text==='42\n','host forwards output');ok(timers.has(runningTimer),'output cannot extend runtime deadline');send({type:'progress',phase:'working'});ok(timers.has(runningTimer),'repeated working event cannot extend deadline');
+ const count=messages.length;send({type:'progress',phase:'output',text:'x'.repeat(8193)});child.onmessage({data:{id:999,type:'progress',phase:'output',text:'wrong'}});ok(messages.length===count,'oversize and stale output rejected');send({type:'result',result:{text:'42\n'}});ok(frame.removed&&timers.size===0&&messages.at(-1).type==='result','completion tears down sandbox and timers');
+ console.log('TOTAL',checks,'live output and host deadline checks');
+})().catch(e=>{console.error(e);process.exit(1);});
