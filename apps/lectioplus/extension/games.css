@@ -97,3 +97,9 @@ html[data-lxp-reduced-motion="true"] .lxp-game-card { transition:none; transform
 .lxp-game-difficulty select { max-width:100%; min-width:0; }
 .lxp-game-toolbar button[aria-pressed=true] { border-color:var(--lxp-accent); background:var(--lxp-active); color:var(--lxp-accent); }
 .lxp-game-card[data-game="osu"] .lxp-game-card-art { color:var(--lxp-accent); background:repeating-radial-gradient(circle at center,transparent 0 24px,var(--lxp-border) 25px 26px,transparent 27px 43px),var(--lxp-bg); }
+.lxp-song-audio { display:grid; gap:10px; margin-top:16px; border-top:1px solid var(--lxp-border); padding-top:16px; min-width:0; }
+.lxp-song-audio h3,.lxp-song-audio p { margin:0; overflow-wrap:anywhere; }
+.lxp-song-audio label { display:grid; gap:5px; font-size:13px; font-weight:600; }
+.lxp-song-audio input { min-width:0; width:100%; box-sizing:border-box; color:var(--lxp-text); background:var(--lxp-bg); border:1px solid var(--lxp-border); border-radius:8px; padding:6px; }
+.lxp-song-audio input::file-selector-button { color:var(--lxp-text); background:var(--lxp-surface); border:1px solid var(--lxp-border); border-radius:6px; padding:5px 8px; }
+.lxp-song-audio audio { display:block; width:100%; min-width:0; }

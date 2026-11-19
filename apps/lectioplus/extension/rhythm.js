@@ -106,12 +106,32 @@
     s.longest = Math.max(s.longest,s.combo); s.index++; s.verdict = String(points);
   }
 
+  const waves = {chip:'square',pluck:'triangle',keys:'triangle',bell:'sine',reed:'sawtooth',bass:'sine'};
+  function scheduleTone(audio,master,n,onset,end){
+    const osc = audio.createOscillator(), gain = audio.createGain();
+    osc.type = waves[n.voice]; osc.frequency.value = 440 * 2 ** ((n.pitch-69)/12);
+    const volume = {chip:.11,reed:.12,bass:.28,bell:.38,keys:.35,pluck:.32}[n.voice];
+    const held = n.voice==='reed' || n.voice==='chip';
+    const attack = Math.min(onset+(held ? .026 : .012),end-.005);
+    gain.gain.setValueAtTime(.0001,onset);
+    gain.gain.exponentialRampToValueAtTime(volume,attack);
+    gain.gain.exponentialRampToValueAtTime(volume*(held ? .72 : .17),attack+(end-attack)*.7);
+    gain.gain.exponentialRampToValueAtTime(.0001,end);
+    osc.connect(gain); gain.connect(master); osc.start(onset); osc.stop(end);
+  }
+
+  async function renderScore(track){
+    const rate=22050, audio=new OfflineAudioContext(1,Math.ceil(track.end*rate),rate);
+    const master=audio.createGain();master.gain.value=.75;master.connect(audio.destination);
+    for(const note of track.notes)scheduleTone(audio,master,note,note.time,note.time+note.duration*.94);
+    return recordingClip(track,{buffer:await audio.startRendering(),start:lead});
+  }
+
   // Schedule on Web Audio's own clock. The same timeline drives hits and approach rings.
   function playback(track,offset) {
     const audio = new AudioContext(), master = audio.createGain();
     master.gain.value = .45; master.connect(audio.destination);
     const start = audio.currentTime - offset;
-    const waves = {chip:'square',pluck:'triangle',keys:'triangle',bell:'sine',reed:'sawtooth',bass:'sine'};
     let cursor = track.notes.findIndex(n=>n.time+n.duration > offset);
     if (cursor < 0) cursor = track.notes.length;
     function schedule() {
@@ -119,20 +139,134 @@
         const n = track.notes[cursor++], end = start+n.time+n.duration*.94;
         const onset = Math.max(audio.currentTime,start+n.time);
         if (end-onset < .015) continue;
-        const osc = audio.createOscillator(), gain = audio.createGain();
-        osc.type = waves[n.voice]; osc.frequency.value = 440 * 2 ** ((n.pitch-69)/12);
-        const volume = {chip:.11,reed:.12,bass:.28,bell:.38,keys:.35,pluck:.32}[n.voice];
-        const held = n.voice==='reed' || n.voice==='chip';
-        const attack = Math.min(onset+(held ? .026 : .012),end-.005);
-        gain.gain.setValueAtTime(.0001,onset);
-        gain.gain.exponentialRampToValueAtTime(volume,attack);
-        gain.gain.exponentialRampToValueAtTime(volume*(held ? .72 : .17),attack+(end-attack)*.7);
-        gain.gain.exponentialRampToValueAtTime(.0001,end);
-        osc.connect(gain); gain.connect(master); osc.start(onset); osc.stop(end);
+        scheduleTone(audio,master,n,onset,end);
       }
     }
     return {ready:audio.resume(), now:()=>audio.currentTime-start, schedule,
       close(){if(audio.state!=='closed')void audio.close().catch(()=>{});}};
   }
-  globalThis.lectioPlusRhythm = {tracks,session,advance,hit,playback};
+  // Each set of four eight-step bars defines a different pop chart.
+  // Slots are eighth notes. The accent pattern changes between the four sections.
+  const popScores = [
+    ['california-gurls','California Gurls','Katy Perry feat. Snoop Dogg',125,'01367452','x.x.x.x. x..xx.x. x.x..xx. x..xx.xx'],
+    ['firework','Firework','Katy Perry',124,'64201357','x...x.x. x.x.x.x. x.xx..x. x..xx.xx'],
+    ['roar','Roar','Katy Perry',90,'07632145','x...x... x.x..x.. x..xx.x. x.x.x..x'],
+    ['shake-it-off','Shake It Off','Taylor Swift',160,'02571364','x...x.x. x.x...x. x.x.x.x. x..xx..x'],
+    ['blank-space','Blank Space','Taylor Swift',96,'04371625','x...x..x x..x..x. x.x..x.. x..xx.x.'],
+    ['anti-hero','Anti-Hero','Taylor Swift',97,'75310246','x..x..x. x.x.x... x..xx..x x.x..xx.'],
+    ['blinding-lights','Blinding Lights','The Weeknd',171,'21456703','x...x... x.x...x. x.x.x.x. x..x..x.'],
+    ['levitating','Levitating','Dua Lipa',103,'02135476','x..x.x.. x.x..x.x x..xx..x x.x.xx..'],
+    ['bad-romance','Bad Romance','Lady Gaga',119,'37046251','x.x.x... x..x..x. x.x.xx.. x.xx..xx'],
+    ['treasure','Treasure','Bruno Mars',116,'05732461','x..x..x. x.x..xx. x..x.x.x x.xx..x.']
+  ];
+  const lead = 1.5;
+  const spots = [[134,102],[294,87],[461,87],[522,180],[453,267],[299,278],[145,255],[87,174]];
+  const popTracks = popScores.map(([id,title,artist,bpm,path,patterns])=>{
+    const beat = 60/bpm, bars = patterns.split(' '), targets = [], notes = [];
+    for(let bar=0;bar<24;bar++){
+      const section=Math.floor(bar/6);
+      const pattern=bars[bar%6===5 ? (section+1)%4 : section];
+      for(let slot=0;slot<8;slot++){
+        const time=lead+(bar*4+slot/2)*beat;
+        if(slot%2===0){
+          notes.push({time, duration:beat*.28, pitch:slot%4===0?36:54, voice:'bass'});
+        }
+        if(pattern[slot]!=='x')continue;
+        const pos=targets.length%8;
+        const [x,y]=spots[Number(path[(section%2 ? 7-pos : pos)])];
+        targets.push({time,x,y});
+        notes.push({time,duration:beat*.16,pitch:slot%2 ? 82 : 73,voice:'pluck'});
+      }
+    }
+    return {id,title,artist,bpm,targets,notes,end:lead+96*beat};
+  });
+
+  // Fold the onset strengths over one beat to estimate the phase of a studio recording.
+  function firstBeat(buffer,bpm){
+    const samples=buffer.getChannelData(0), rate=buffer.sampleRate;
+    const hop=Math.max(1,Math.round(rate*.01)), beat=60/bpm, bins=100;
+    const phase=new Float64Array(bins);
+    let previous=0, first=null;
+    for(let i=0;i+hop<=samples.length && i/rate<(first===null?24:first+16);i+=hop){
+      let power=0;
+      for(let j=i;j<i+hop;j++)power+=samples[j]*samples[j];
+      const rms=Math.sqrt(power/hop);
+      if(first===null && rms>.008)first=i/rate;
+      if(first!==null){
+        const bin=Math.round(((i/rate)%beat)/beat*bins)%bins;
+        phase[bin]+=Math.max(0,rms-previous);
+      }
+      previous=rms;
+    }
+    if(first===null)return 0;
+    let peak=0, strongest=-1;
+    for(let i=0;i<bins;i++){
+      const value=phase[i]+.65*(phase[(i+bins-1)%bins]+phase[(i+1)%bins]);
+      if(value>strongest){strongest=value;peak=i;}
+    }
+    const phaseTime=peak*beat/bins;
+    return Math.max(0,phaseTime+Math.ceil((first-.05-phaseTime)/beat)*beat);
+  }
+
+  async function importRecording(file,track){
+    if(file.size>64*1024*1024)throw Error('Vælg en lydfil på højst 64 MB.');
+    let buffer;
+    try{
+      const decoder=new OfflineAudioContext(1,1,22050);
+      buffer=await decoder.decodeAudioData(await file.arrayBuffer());
+    }catch{throw Error('Filen kunne ikke læses som lyd. Prøv en MP3- eller WAV-fil.');}
+    const maxStart=buffer.duration-(track.end-lead);
+    if(maxStart<0)throw Error('Filen er for kort til banen. Vælg en længere indspilning.');
+    const start=Math.min(maxStart,firstBeat(buffer,track.bpm));
+    return {id:track.id,buffer,start,maxStart,filename:file.name};
+  }
+
+  function playRecording(track,recording,offset){
+    const audio=new AudioContext(), origin=audio.currentTime-offset;
+    const source=audio.createBufferSource(), gain=audio.createGain();
+    source.buffer=recording.buffer;source.connect(gain);gain.connect(audio.destination);
+    const delay=lead-recording.start;
+    const when=Math.max(audio.currentTime,origin+delay), end=origin+track.end;
+    if(end>when){
+      gain.gain.setValueAtTime(.82,when);
+      gain.gain.setValueAtTime(.82,Math.max(when,end-.10));
+      gain.gain.linearRampToValueAtTime(0,end);
+      source.start(when,Math.max(0,when-origin-delay),end-when);
+    }
+    return {ready:audio.resume(),now:()=>audio.currentTime-origin,schedule(){},
+      close(){if(audio.state!=='closed')void audio.close().catch(()=>{});}};
+  }
+  // A local WAV has a seekable media clock, including the lead-in used by the chart.
+  function recordingClip(track,recording){
+    const buffer=recording.buffer,rate=buffer.sampleRate,channels=Math.min(2,buffer.numberOfChannels);
+    const frames=Math.ceil(track.end*rate), stride=channels*2, bytes=frames*stride;
+    const data=new ArrayBuffer(44+bytes), view=new DataView(data);
+    function tag(offset,text){
+      for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i));
+    }
+    tag(0,'RIFF');view.setUint32(4,36+bytes,true);tag(8,'WAVE');tag(12,'fmt ');
+    view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,channels,true);
+    view.setUint32(24,rate,true);view.setUint32(28,rate*stride,true);
+    view.setUint16(32,stride,true);view.setUint16(34,16,true);
+    tag(36,'data');view.setUint32(40,bytes,true);
+    const shift=Math.round((recording.start-lead)*rate);
+    for(let ch=0;ch<channels;ch++){
+      const samples=buffer.getChannelData(ch);
+      const end=Math.min(frames,samples.length-shift);
+      for(let frame=Math.max(0,-shift);frame<end;frame++){
+        const fade=Math.min(1,(frames-frame)/(rate*.025));
+        const v=Math.max(-1,Math.min(1,samples[frame+shift]*fade));
+        view.setInt16(44+frame*stride+ch*2,Math.round(v*(v<0?32768:32767)),true);
+      }
+    }
+    return new Blob([data],{type:'audio/wav'});
+  }
+
+  function mediaPlayback(media,track,offset){
+    media.pause();media.currentTime=offset;media.muted=false;
+    return {ready:media.play(),now:()=>media.ended?track.end:media.currentTime,
+      schedule(){},close(){media.pause();}};
+  }
+
+  globalThis.lectioPlusRhythm = {tracks,popTracks,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
 })();
