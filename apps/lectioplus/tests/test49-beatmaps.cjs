@@ -17,6 +17,24 @@ function recording(times, duration) {
   const left = new Float32Array(right.length);
   return {duration, sampleRate, numberOfChannels:2, getChannelData:i=>i?right:left};
 }
+// A synthetic mix with bass, a sustained pad, quarter-note kicks and
+// sixteenth-note hi-hats. All sound is generated for this regression.
+function layeredMix(bpm,rate=22050) {
+  const beat=60/bpm, duration=24, samples=new Float32Array(rate*duration);
+  let noise=17;
+  for(let i=0;i<samples.length;i++){
+    const t=i/rate, barBeat=t/beat, kick=t%beat, hat=t%(beat/4);
+    const bassNote=[55,65.406,73.416,49][Math.floor(barBeat/4)%4];
+    noise=(Math.imul(noise,1664525)+1013904223)>>>0;
+    const backing=.15*Math.sin(2*Math.PI*220*t)+.14*Math.sin(2*Math.PI*329.63*t);
+    const bass=.22*Math.sin(2*Math.PI*bassNote*t)*(.55+.45*Math.exp(-kick*8));
+    const drum=.46*Math.exp(-kick*15)*Math.sin(2*Math.PI*(58*kick+.9*(1-Math.exp(-kick*30))));
+    const hiss=.15*Math.exp(-hat*76)*(2*noise/4294967296-1);
+    samples[i]=backing+bass+drum+hiss;
+  }
+  return {duration,sampleRate:rate,numberOfChannels:1,getChannelData:()=>samples};
+}
+
 function timesBetween(start,end,interval) {
   const times=[];
   for (let t=start;t<end-.03;t+=interval) times.push(t);
@@ -33,6 +51,20 @@ function timesBetween(start,end,interval) {
       const dense=R.newChart(chart,'dense',271);
       assert(dense.targets.length>=pulses.length*.76,'dense map keeps the quick pulse at '+bpm);
       assert(dense.targets.some((note,i)=>i && note.time-dense.targets[i-1].time<1.1*60/bpm),'consecutive fast beats are playable');
+    }
+  }
+  for(const bpm of [85,125,160,205,250]){
+    buffer=layeredMix(bpm);
+    for(const profile of [R.customTrack,R.popTracks.find(track=>track.id==='california-gurls')]){
+      const {chart}=await R.importRecording(file,profile);
+      assert(Math.abs(chart.bpm-bpm)<=1,'layered mix at '+bpm+' BPM on '+profile.title+' estimated as '+chart.bpm);
+      for(const seed of [271,985]){
+        const maps=['sparse','normal','dense'].map(density=>R.newChart(chart,density,seed).targets);
+        assert(maps[0].length<maps[1].length && maps[1].length<maps[2].length,'three distinct playable densities');
+        const normal=maps[1];
+        assert(normal.length>chart.end*.8 && normal.length<chart.end*4.5,'normal density for a layered mix');
+        assert(normal.every((note,i)=>!i||note.time-normal[i-1].time>=.11),'no frame-scale note clusters');
+      }
     }
   }
   const drums=[...timesBetween(.4,8,.50),...timesBetween(10,18,.15)];
