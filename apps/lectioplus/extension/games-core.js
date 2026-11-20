@@ -1,8 +1,8 @@
 (() => {
   'use strict';
   const catalog = [
-    {id:'osu',title:'osu! · Rytmecirkler',symbol:'♫',category:'Arkade',description:'Lav en bane fra din egen sang, eller vælg blandt 10 popbaner og 20 instrumentalbaner.',controls:'Ram de nummererede cirkler, når ringen møder kanten. Klik, tryk på skærmen eller sigt med musen og brug dine to slagtaster. På en slider skal du holde knappen nede og følge kuglen. På en spinner skal du holde nede og dreje rundt om midten.',live:true},
-    {id:'dash',title:'Geometry Dash · Neonbaner',symbol:'◆',category:'Arkade',description:'15 originale rytmebaner med hop, ringe og flyveportaler.',controls:'Klik eller brug mellemrum eller ↑. Hold for at hoppe igen ved landing. Gule puder giver afsæt, og et ekstra tryk ved en ring giver et lufthop. I skibet stiger du ved at holde nede og falder, når du slipper.',live:true},
+    {id:'osu',title:'osu! · Rytmespil',symbol:'♫',category:'Arkade',description:'Spil cirkler, trommer, frugtfangst eller fire tangentbaner med en af sangene eller din egen lydfil.',controls:'Ram de nummererede cirkler, når ringen møder kanten. Klik, tryk på skærmen eller sigt med musen og brug dine to slagtaster. På en slider skal du holde knappen nede og følge kuglen. På en spinner skal du holde nede og dreje rundt om midten.',live:true},
+    {id:'dash',title:'Geometry Dash · Neonbaner',symbol:'◆',category:'Arkade',description:'Vælg en bane fra Easy til Extreme Demon, øv med checkpoints, eller byg din egen portalbane.',controls:'Klik eller brug mellemrum eller ↑. Hold for at hoppe igen ved landing. Gule puder giver afsæt, og et ekstra tryk ved en ring giver et lufthop. I wave-portalen styrer du diagonalt: hold for at stige, slip for at dykke. I skibet stiger du ved at holde nede og falder, når du slipper.',live:true},
     {id:'lights',title:'Lys ud',symbol:'💡',category:'Hjernevridere',description:'Sluk hele brættet. Hvert tryk skifter flere lys.',controls:'Vælg et felt for at skifte det og dets naboer oppe, nede og til siderne. Sluk alle 25 lys.'},
     {id:'dino',title:'Dinohop',symbol:'🦖',category:'Arkade',description:'Hop over kaktusser, og hold løbet i gang.',controls:'Mellemrum, ↑ eller Hop. Ét hop ad gangen.',live:true},
     {id:'snake',title:'Snake',symbol:'🐍',category:'Arkade',description:'Saml frugter, og giv slangen plads til at vokse.',controls:'Piletaster, WASD eller retningsknapper. Undgå vægge og din egen hale.',live:true},
@@ -16,6 +16,8 @@
     {id:'four',title:'Fire på stribe',symbol:'🔴',category:'For to',description:'Læg en plan, og få fire brikker på stribe.',controls:'Spil sammen på samme skærm. Vælg en kolonne. Rød starter.'},
     {id:'choices',title:'Grøn eller rød',symbol:'🟢',category:'Bonus',description:'Din smag, dine valg. Mad, aktiviteter og spil.',controls:'Grøn = ja tak · rød = spring over. Ingen rigtige eller forkerte svar.'}
   ];
+  const arcade=globalThis.lectioPlusArcade;
+  if(arcade)catalog.push(...arcade.catalog);
   const topics=[['🍕','Pizza til aftensmad'],['🎮','En aften med spil'],['🏖️','En dag på stranden'],['🍍','Ananas på pizza'],['🎢','Rutsjebaner'],['❄️','Vinter frem for sommer'],['🏕️','En nat i telt'],['🎧','Musik mens du arbejder'],['🍣','Sushi'],['📚','En god bog'],['🏃','En løbetur'],['🎬','Filmmaraton'],['🥞','Pandekager til morgenmad'],['♟️','Brætspil'],['🌶️','Stærk mad'],['🚲','Cykeltur uden en plan'],['🧩','Et svært puslespil'],['🍫','Mørk chokolade'],['🛸','Science fiction'],['🎤','Karaoke'],['🍦','Is om vinteren'],['🌅','At stå op til solopgangen'],['🎳','Bowling'],['🌲','En tur i skoven']];
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const shuffle=(a,r)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
@@ -42,6 +44,7 @@
     if(id==='tic')Object.assign(s,{board:empty(3,3),player:1,moves:0});
     if(id==='four')Object.assign(s,{board:empty(7,6),player:1,moves:0});
     if(id==='choices')Object.assign(s,{topics:shuffle(topics.map(x=>x.slice()),rng),index:0,yes:[],no:[]});
+    if(arcade?.ids.has(id))arcade.init(s);
     return s;
   }
   function food(s){const spaces=[];for(let y=0;y<s.size;y++)for(let x=0;x<s.size;x++)if(!s.snake.some(p=>p[0]===x&&p[1]===y))spaces.push([x,y]);s.food=spaces[Math.floor(s.rng()*spaces.length)]||null;if(!s.food)s.status='won';}
@@ -107,6 +110,7 @@
   }
   function act(s,action,value){
     if(s.status!=='playing')return;
+    if(arcade?.ids.has(s.id)){arcade.move(s,action,value);return;}
     if(s.id==='lights' && action==='cell' && Array.isArray(value)){
       const [x,y]=value;
       if(![x,y].every(v=>Number.isInteger(v)&&v>=0&&v<5))return;
@@ -152,8 +156,9 @@
   function overlaps(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
   function step(s,dt,keys=new Set()){
     if(s.status!=='playing'||!Number.isFinite(dt)||dt<=0)return;
-    dt=Math.min(dt,0.05);s.time+=dt;
-    if(s.id==='dash')globalThis.lectioPlusDash.step(s,dt,keys.has('jump'));
+    dt=['dive','moles'].includes(s.id)?dt:Math.min(dt,0.05);s.time+=dt;
+    if(arcade?.ids.has(s.id)){arcade.tick(s,dt);return;}
+    if(s.id==='dash')globalThis.lectioPlusDash.step(s,dt,keys.has('jump'),Number(keys.has('right'))-Number(keys.has('left')));
     if(s.id==='snake'){s.clock+=dt;const pace=Math.max(0.065,0.17/s.factor-s.score*0.0004);if(s.clock>=pace){s.clock-=pace;snakeStep(s);}}
     if(s.id==='blocks'){s.clock+=dt;if(s.clock>=Math.max(0.1,0.75/s.factor-Math.floor(s.lines/10)*0.07)){s.clock=0;drop(s);}}
     if(s.id==='memory'&&s.wait){s.wait=Math.max(0,s.wait-dt);if(!s.wait)s.flipped=[];}
@@ -190,5 +195,23 @@
       }
     }
   }
-  globalThis.lectioPlusGamesCore={catalog,create,act,step,collides};
+  function choiceProfile(s){
+    if(!s.yes.length)return {title:'Du er kræsen på den gode måde',body:'Du sprang alle 24 forslag over. Når du selv vælger, skal det åbenbart være noget helt andet!'};
+    if(!s.no.length)return {title:'Du er en ja-tak-type',body:'Fra karaoke til en nat i telt gav du alle 24 forslag grønt lys. Du er nem at invitere med!'};
+    const groups=[
+      ['🍕🍍🍣🥞🌶️🍫🍦','Du er en madopdager','Det var især smag og madoplevelser, der fik grønt lys hos dig.'],
+      ['🏖️❄️🏕️🏃🚲🌅🌲','Du er et friluftsmenneske','Du lyste især grønt, når valget førte dig udenfor.'],
+      ['🎮📚🎬♟️🧩🛸','Du er typen, der fordyber sig','Du faldt især for ting, du kan leve dig ind i.'],
+      ['🎢🎧🎤🎳','Du er en stemningsskaber','Musik og oplevelser med energi fyldte mest blandt dine valg.']
+    ];
+    const ranked=groups.map(([icons,title,body])=>{
+      const items=s.yes.filter(([icon])=>icons.includes(icon));
+      const total=topics.filter(([icon])=>icons.includes(icon)).length;
+      return {title,body,items,weight:items.length/total};
+    }).sort((a,b)=>b.weight-a.weight);
+    const top=ranked[0],mixed=top.weight===ranked[1].weight;
+    const examples=(mixed?s.yes:top.items).slice(0,2).map(([,label])=>'“'+label+'”').join(' og ');
+    return {title:mixed?'Du er en alsidig type':top.title,body:(mixed?'Dine grønne valg fordelte sig på flere slags oplevelser.':top.body)+' Du valgte blandt andet '+examples+'.'};
+  }
+  globalThis.lectioPlusGamesCore={catalog,create,act,step,collides,choiceProfile};
 })();

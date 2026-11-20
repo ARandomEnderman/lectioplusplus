@@ -30,7 +30,7 @@
   function osuKey(key){
     if(typeof key!=='string')return '';
     if(key===' '||key==='Space')return 'Space';
-    if(/^(?:Arrow(?:Up|Down|Left|Right)|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown)$/.test(key))return key;
+    if(/^(?:Arrow(?:Up|Down|Left|Right)|Shift|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown)$/.test(key))return key;
     return /^[\p{L}\p{N}\p{P}\p{S}]$/u.test(key)?key.toLowerCase():'';
   }
   function osuBindings(input={}){
@@ -38,9 +38,22 @@
     const result=Object.fromEntries(Object.keys(defaults).map(key=>[key,osuKey(input?.[key])||defaults[key]]));
     return new Set(Object.values(result)).size===4?result:defaults;
   }
+  function modeBindings(mode,input){
+    const sets={taiko:{lane0:'f',lane1:'j',lane2:'d',lane3:'k'},mania:{lane0:'d',lane1:'f',lane2:'j',lane3:'k'},catch:{lane0:'ArrowLeft',lane1:'ArrowRight',lane2:'Shift'}};
+    if(!Object.hasOwn(sets,mode))return osuBindings(input);
+    const defaults={...sets[mode],pause:'p',retry:'r'};
+    const keys=Object.entries(defaults).map(([id,key])=>[id,osuKey(input?.[id])||key]);
+    return new Set(keys.map(([,key])=>key)).size===keys.length?Object.fromEntries(keys):defaults;
+  }
   function games(value={}){
-    const input=value&&typeof value==='object'?value:{},allowed=['dino','snake','blocks','pong','breakout','2048','mines','memory','tic','four','choices'];
-    return {bindings:osuBindings(input.bindings),mouseHits:input.mouseHits!==false,difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=id==='dash'? /^(?:[1-9]|1[0-5])$/.test(difficulty)&&v<=100 : id==='osu' ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(-95))};
+    const input=value&&typeof value==='object'?value:{},allowed=['dino','snake','blocks','pong','breakout','2048','mines','memory','tic','four','choices','teacher','flap','moles','echo','slide','sudoku','code','word','maze','crates','dive','timeline','families','higher','atlas'];
+    const draft=input.dashDraft||{};
+    const modes=Array.isArray(draft.modes)?draft.modes.filter(v=>['cube','ship','wave','ufo','robot','spider','ball','swing'].includes(v)).slice(0,16):[];
+    const dashDraft={title:cleanText(draft.title,42).trim()||'Min portalbane',modes:modes.length?modes:['cube','wave','ship']};
+    const dashCoins=Object.fromEntries(Object.entries(input.dashCoins||{}).filter(([id,bits])=>(/^(?:v2-)?[1-9]\d{0,2}$/.test(id)&&Number(id.replace(/^v2-/,''))<=134||/^v[34]-13[0-4]$/.test(id))&&Number.isInteger(bits)&&bits>0&&bits<=7));
+    return {ruleset:choice(input.ruleset,['standard','taiko','catch','mania'],'standard'),
+      modeKeys:Object.fromEntries(['taiko','catch','mania'].map(mode=>[mode,modeBindings(mode,input.modeKeys?.[mode])])),
+      dashDraft,dashCoins,dashInk:choice(input.dashInk,['auto','#50ffbc','#ff87bb','#ffe06c','#8dc8ff'],'auto'),bindings:osuBindings(input.bindings),mouseHits:input.mouseHits!==false,difficulty:choice(input.difficulty,['easy','normal','hard'],'normal'),bests:Object.fromEntries(Object.entries(input.bests&&typeof input.bests==='object'?input.bests:{}).filter(([key,v])=>{const [id,difficulty,...rest]=key.split(':');const valid=(id==='dash3'||id==='dash4')?/^13[0-4]$/.test(difficulty)&&v<=100:(id==='dash'||id==='dash2')? /^(?:[1-9][0-9]?|1[012][0-9]|13[0-4])$/.test(difficulty)&&v<=100 : ['osu','osu-taiko','osu-catch','osu-mania'].includes(id) ? /^([a-z][a-z-]{0,31})$/.test(difficulty||'') : allowed.includes(id)&&['easy','normal','hard'].includes(difficulty);return !rest.length&&valid&&Number.isInteger(v)&&v>=0&&v<=1000000000;}).slice(-650))};
   }
   function choice(value, options, fallback) { return options.includes(value) ? value : fallback; }
   function cleanText(value, length) { return typeof value === 'string' ? value.slice(0, length) : ''; }
@@ -271,5 +284,5 @@
     } };
   }
 
-  globalThis.lectioPlusAppearance = { defaults, normalize, osuBindings, osuKey, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, sidebarIcons, navigationItems, defaultNavigation, themes, designs };
+  globalThis.lectioPlusAppearance = { defaults, normalize, osuBindings, modeBindings, osuKey, dark, apply, attributeNames, controls, toggle, widgets, defaultDashboard, safeUrl, sidebarIcons, navigationItems, defaultNavigation, themes, designs };
 })();
