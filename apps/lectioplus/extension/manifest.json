@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LectioPlus+",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
   "permissions": [
     "storage"
