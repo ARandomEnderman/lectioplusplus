@@ -224,10 +224,84 @@
     return winner?Math.round(60*winner.weight/winner.periodSum):0;
   }
 
-  function analyseAudio(buffer){
+  // Isolated drum hits can have a much faster pulse than a full mix. Only
+  // trust their successive intervals when the waveform decays between hits.
+  function separatedHits(attacks,energy,step){
+    if(attacks.length<2)return false;
+    let separated=0;
+    for(let i=1;i<attacks.length;i++){
+      const start=Math.round(attacks[i-1].time/step),end=Math.round(attacks[i].time/step);
+      let high=0,low=Infinity;
+      for(let j=start;j<end;j++){
+        high=Math.max(high,energy[j]);
+        if(j>start)low=Math.min(low,energy[j]);
+      }
+      if(low<high*.12)separated++;
+    }
+    return separated>=(attacks.length-1)*.85;
+  }
+
+  // Compare short windows on either side of a possible attack. This suppresses
+  // single-frame fluctuations caused by the pitch of a sustained note.
+  function bandNovelty(levels,step){
+    const sums=new Float64Array(levels.length+1),rise=new Float32Array(levels.length);
+    let peak=0;
+    for(let i=0;i<levels.length;i++){sums[i+1]=sums[i]+levels[i];peak=Math.max(peak,levels[i]);}
+    if(!peak)return rise;
+    const width=Math.max(2,Math.round(.025/step));
+    for(let i=0;i<levels.length-width;i++){
+      const before=(sums[i]-sums[Math.max(0,i-width)])/width;
+      const after=(sums[i+width]-sums[i])/width;
+      rise[i]=Math.max(0,after-before)/(before+peak*.12);
+    }
+    return rise;
+  }
+
+  function mixedPulse(onsets,bass,step,reference){
+    // Correlate the accents over multiple bars. Low-frequency accents help
+    // distinguish the beat from hi-hat subdivisions. A catalogue tempo is only
+    // a preference when several recurring periods fit the recording.
+    const n=onsets.length, limit=Math.min(Math.floor(n/4),Math.round(2/step));
+    const signal=new Float32Array(n);
+    let mean=0;
+    for(let i=0;i<n;i++){signal[i]=Math.min(5,onsets[i])+2*Math.min(4,bass[i]);mean+=signal[i];}
+    mean/=n;
+    for(let i=0;i<n;i++)signal[i]-=mean;
+    const corr=new Float64Array(limit+1);
+    const blocks=Math.min(8,Math.ceil(n/2048)),blockSize=Math.min(2048,Math.floor(n/blocks));
+    for(let lag=2;lag<=limit;lag++){
+      let xy=0,xx=0,yy=0;
+      for(let b=0;b<blocks;b++){
+        const start=blocks===1?0:Math.round(b*(n-blockSize)/(blocks-1));
+        const end=Math.min(start+blockSize,n-lag);
+        for(let i=start;i<end;i++){
+          const a=signal[i],v=signal[i+lag];xy+=a*v;xx+=a*a;yy+=v*v;
+        }
+      }
+      corr[lag]=xy/Math.sqrt(xx*yy||1);
+    }
+    let best=0,winner=0;
+    for(let lag=3;lag<limit;lag++){
+      if(corr[lag]<.16||corr[lag]<corr[lag-1]||corr[lag]<=corr[lag+1])continue;
+      const bpm=60/(lag*step),octaves=Math.log2(bpm/(reference||125));
+      // Two or three beats can correlate just as well as one. Prefer the
+      // shorter period when the intervening accents repeat just as clearly.
+      const half=Math.round(lag/2),third=Math.round(lag/3);
+      const subdivision=Math.max(0,corr[half],corr[third]);
+      const score=(corr[lag]-.60*subdivision)*(.62+.38*Math.exp(-octaves*octaves));
+      if(score>best){best=score;winner=lag;}
+    }
+    if(!winner)return 0;
+    const a=corr[winner-1],b=corr[winner],c=corr[winner+1];
+    const shift=(a-c)/(2*(a-2*b+c));
+    return Math.round(60/((winner+shift)*step));
+  }
+
+  function analyseAudio(buffer,reference){
     const channels=Array.from({length:Math.min(2,buffer.numberOfChannels||1)},(_,i)=>buffer.getChannelData(i));
     const hop=Math.max(1,Math.round(buffer.sampleRate*.005)),step=hop/buffer.sampleRate;
     const energy=new Float32Array(Math.ceil(channels[0].length/hop)),flux=new Float32Array(energy.length);
+    const bassLevels=new Float32Array(energy.length),airLevels=new Float32Array(energy.length);
     const low=new Float64Array(channels.length),last=new Float64Array(channels.length);
     const cut=1-Math.exp(-2*Math.PI*180/buffer.sampleRate);
     let prevBass=0,prevAir=0,prevLevel=0,peak=0;
@@ -247,7 +321,7 @@
       }
       const count=(end-start)*channels.length;
       const level=Math.sqrt(power/count),bottom=Math.sqrt(bass/count),top=Math.sqrt(air/count);
-      energy[k]=level;peak=Math.max(peak,level);
+      energy[k]=level;bassLevels[k]=bottom;airLevels[k]=top;peak=Math.max(peak,level);
       flux[k]=Math.max(0,level-prevLevel)+.8*Math.max(0,bottom-prevBass)+1.8*Math.max(0,top-prevAir);
       prevLevel=.65*level+.35*prevLevel;prevBass=.65*bottom+.35*prevBass;prevAir=.65*top+.35*prevAir;
     }
@@ -273,7 +347,22 @@
       }
       valley=flux[i];
     }
-    return {energy,step,peak,attacks,bpm:estimateTempo(attacks,step)};
+    if(separatedHits(attacks,energy,step)){
+      return {energy,step,peak,attacks,bpm:estimateTempo(attacks,step)};
+    }
+    const rises=bandNovelty(energy,step),bassRise=bandNovelty(bassLevels,step),airRise=bandNovelty(airLevels,step);
+    const totals=new Float64Array(rises.length+1);
+    for(let i=0;i<rises.length;i++){
+      rises[i]+=bassRise[i]+.45*airRise[i];totals[i+1]=totals[i]+rises[i];
+    }
+    const musical=[];
+    for(let i=0;i<rises.length;i++){
+      if(rises[i]<=(rises[i-1]||0)||rises[i]<(rises[i+1]||0))continue;
+      const lo=Math.max(0,i-neighbourhood),hi=Math.min(rises.length,i+neighbourhood+1);
+      if(rises[i]<Math.max(.22,1.65*(totals[hi]-totals[lo])/(hi-lo)))continue;
+      musical.push({time:i*step,strength:rises[i]});
+    }
+    return {energy,step,peak,attacks:musical,bpm:musical.length>=2?mixedPulse(rises,bassRise,step,reference):0};
   }
   function firstBeat(buffer){
     const analysis=analyseAudio(buffer);
@@ -284,7 +373,7 @@
     const {energy,step,peak,attacks=[]}=recording.analysis;
     const bpm=recording.analysis.bpm||profile.bpm||120,beat=60/bpm,end=recording.buffer.duration;
     let source=attacks;
-    if(attacks.length<2){
+    if(attacks.length<2 || !recording.analysis.bpm){
       // Unmetered sustained audio: use a regular practice pulse only while audible.
       source=[];
       for(let time=recording.detectedStart;time<end;time+=beat){
@@ -320,6 +409,19 @@
       }
     }
     const beat=60/track.bpm;
+    if(track.recordId){
+      // Choose the strongest onset in a tight cluster before random variation.
+      // Normal and sparse rounds leave room to react even during a drum roll.
+      const spacing=density==='dense'?Math.max(.028,Math.min(.12,beat*.36)):
+        density==='sparse'?Math.max(.22,Math.min(.44,beat*.87)):Math.max(.112,Math.min(.29,beat*.55));
+      const spaced=[];
+      for(const note of candidates){
+        const prev=spaced.at(-1);
+        if(!prev||note.time-prev.time>=spacing)spaced.push(note);
+        else if(note.strength>prev.strength)spaced[spaced.length-1]=note;
+      }
+      candidates=spaced;
+    }
     const targets=[];
     let nextPhrase=-Infinity,pattern=0,orientation=0,angle=0,stride=0,index=0;
     let x=320,y=180;
@@ -353,7 +455,7 @@
       const decoder=new OfflineAudioContext(1,1,22050);
       buffer=await decoder.decodeAudioData(await file.arrayBuffer());
     }catch{throw Error('Browseren kunne ikke læse lydfilen. Prøv MP3 eller WAV.');}
-    const analysis=analyseAudio(buffer), bpm=analysis.bpm||track.bpm||120;
+    const analysis=analyseAudio(buffer,track.bpm), bpm=analysis.bpm||track.bpm||120;
     const start=analysis.attacks[0]?.time??0;
     let hash=2166136261;
     for(const ch of [track.id,file.name,file.size,buffer.duration,file.lastModified||0].join('|'))
