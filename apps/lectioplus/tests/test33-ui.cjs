@@ -29,7 +29,7 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
     if(game.id==='osu')ok([...toolbar().querySelectorAll('button')].some(b=>b.textContent==='Vælg sangfil'),'pop start requests the actual song');
     click(toolbar(),game.id==='osu'?'Spil med øvebeat':'Start spil');await wait();ok(games.dataset.gameState==='playing','start '+game.id);
     click(toolbar(),'Pause');const stopped=draws;await wait();ok(games.dataset.gameState==='paused'&&draws===stopped,'pause stops rendering '+game.id);
-    click(toolbar(),'Fortsæt');click(toolbar(),'Start forfra');ok(games.dataset.gameState==='ready','restart '+game.id);
+    click(toolbar(),'Fortsæt');click(toolbar(),game.id==='osu'?'Ny bane':'Start forfra');ok(games.dataset.gameState==='ready','restart '+game.id);
     ok(!games.querySelector('img[src],iframe'),'no remote profiles or embeds '+game.id);
   }
   await route('#lxp-games/dash');
@@ -72,6 +72,22 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
   ok(withRecords.bests['dash3:134']===70 && !withRecords.bests['dash3:129'] && withRecords.dashCoins['v3-134']===3 && !withRecords.dashCoins['v3-129'],'revised levels have separate records');
   ok(withRecords.bests['dash2:134']===100 && !withRecords.bests['dash2:135'] && withRecords.dashCoins['v2-134']===5 && !withRecords.dashCoins['v2-135'],'previous demon records remain stored');
   await route('#lxp-games/osu');
+  const osuSpeed=games.querySelector('[aria-label="Spiltempo"]'),density=games.querySelector('[aria-label="Nodetæthed"]');
+  const rounds=[],createChart=w.lectioPlusRhythm.newChart;
+  w.lectioPlusRhythm.newChart=(...args)=>{const chart=createChart(...args);rounds.push(chart);return chart;};
+  click(toolbar(),'Ny bane');click(toolbar(),'Ny bane');
+  ok(rounds[0].seed!==rounds[1].seed && rounds[0].targets.map(n=>n.time).join()!==rounds[1].targets.map(n=>n.time).join(),'new round rerolls the actual musical pattern');
+  osuSpeed.value='137';osuSpeed.dispatchEvent(new w.Event('input'));osuSpeed.dispatchEvent(new w.Event('change'));await wait();
+  density.value='dense';density.dispatchEvent(new w.Event('change'));await wait();
+  const options=JSON.parse(w.localStorage.getItem('lectioPlusPreview')).games;
+  ok(options.osuRate===137 && options.osuDensity==='dense' && rounds.at(-1).seed===rounds[1].seed,'rhythm settings persist; density preserves the round seed');
+  const bpmInput=games.querySelector('[aria-label="Spiltempo i BPM"]');
+  bpmInput.value='375';bpmInput.dispatchEvent(new w.Event('change'));await wait();
+  ok(Number(osuSpeed.value)>200 && Number(bpmInput.value)===375,'BPM input goes beyond the percentage slider presets');
+  const highRate=JSON.parse(w.localStorage.getItem('lectioPlusPreview')).games.osuRate;
+  ok(highRate===Number(osuSpeed.value) && Number(games.querySelector('audio').playbackRate)===highRate/100,'high tempo reaches both storage and audio');
+  bpmInput.value='';bpmInput.dispatchEvent(new w.Event('change'));
+  ok(Number(bpmInput.value)===375 && Number(osuSpeed.value)===highRate,'empty BPM restores the working tempo');
   const binds=games.querySelector('.lxp-game-bindings'),first=binds.querySelector('button');
   const press=(el,key,type='keydown')=>el.dispatchEvent(new w.KeyboardEvent(type,{key,bubbles:true,cancelable:true}));
   first.click();press(first,'x');ok(binds.textContent.includes('allerede'),'duplicate bind rejected');
@@ -83,8 +99,10 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
   let strikes=0;w.lectioPlusRhythm.hit=()=>strikes++;
   canvas.dispatchEvent(new w.MouseEvent('pointermove',{clientX:100,clientY:100,bubbles:true}));
   press(arena(),'z');press(arena(),'f');ok(strikes===1,'custom strike replaces old key');press(arena(),'f','keyup');
+  const roundCount=rounds.length;ok(osuSpeed.disabled && bpmInput.disabled && density.disabled,'rhythm controls locked while playing');
   press(arena(),'p');ok(games.dataset.gameState==='paused','osu pause key');
   press(arena(),'p');ok(games.dataset.gameState==='playing','osu resume key');
+  ok(rounds.length===roundCount,'pause and resume retain the same chart');
   w.lectioPlusRhythm.hit=oldHit;press(arena(),'Escape');
   click(binds,'Gendan standardtaster');await wait();ok(first.textContent==='Z','defaults restored');
   const selector=toolbar().querySelector('[aria-label="osu! spilform"]');
@@ -102,7 +120,7 @@ const ok=(v,label)=>{assert.ok(v,label);checks++;},wait=()=>new Promise(resolve=
     const pointer=(event,x)=>field.dispatchEvent(new w.MouseEvent(event,{clientX:x,clientY:255,bubbles:true,button:0}));
     const was=events;pointer('pointerdown',400);await wait();pointer('pointerup',400);
     ok(events>was,'canvas input '+mode);w.lectioPlusRhythm[capture]=original;
-    click(toolbar(),'Pause');click(toolbar(),'Start forfra');
+    click(toolbar(),'Pause');click(toolbar(),'Ny bane');
   }
   await route('#lxp-games/dino');click(toolbar(),'Start spil');await route('#home');const pausedDraws=draws;await wait();ok(games.hidden&&draws===pausedDraws,'leaving games suspends animation');await route('#lxp-games/dino');ok(games.dataset.gameState==='paused','return does not resume silently');
   click(toolbar(),'Fortsæt');w.dispatchEvent(new w.Event('blur'));ok(games.dataset.gameState==='paused','window blur pauses');click(toolbar(),'Fortsæt');

@@ -143,21 +143,21 @@
   }
 
   // Schedule on Web Audio's own clock. The same timeline drives hits and approach rings.
-  function playback(track,offset) {
+  function playback(track,offset,rate=1) {
     const audio = new AudioContext(), master = audio.createGain();
     master.gain.value = .45; master.connect(audio.destination);
-    const start = audio.currentTime - offset, notes=track.notes;
+    const start = audio.currentTime - offset/rate, notes=track.notes;
     let cursor = notes.findIndex(n=>n.time+n.duration > offset);
     if (cursor < 0) cursor = notes.length;
     function schedule() {
-      while (cursor < notes.length && start+notes[cursor].time < audio.currentTime+.3) {
-        const n = notes[cursor++], end = start+n.time+n.duration*.94;
-        const onset = Math.max(audio.currentTime,start+n.time);
+      while (cursor < notes.length && start+notes[cursor].time/rate < audio.currentTime+.3) {
+        const n = notes[cursor++], end = start+(n.time+n.duration*.94)/rate;
+        const onset = Math.max(audio.currentTime,start+n.time/rate);
         if (end-onset < .015) continue;
         scheduleTone(audio,master,n,onset,end);
       }
     }
-    return {ready:audio.resume(), now:()=>audio.currentTime-start, schedule,
+    return {ready:audio.resume(), now:()=>(audio.currentTime-start)*rate, schedule,
       close(){if(audio.state!=='closed')void audio.close().catch(()=>{});}};
   }
   // Each set of four eight-step bars defines a different pop chart.
@@ -196,103 +196,156 @@
     return {id,title,artist,bpm,targets,notes,end:lead+96*beat};
   });
 
-  // Fold the onset strengths over one beat to estimate the phase of a studio recording.
-  function firstBeat(buffer,bpm){
-    const samples=buffer.getChannelData(0), rate=buffer.sampleRate;
-    const hop=Math.max(1,Math.round(rate*.01)), beat=60/bpm, bins=100;
-    const phase=new Float64Array(bins);
-    let previous=0, first=null;
-    for(let i=0;i+hop<=samples.length && i/rate<(first===null?24:first+16);i+=hop){
-      let power=0;
-      for(let j=i;j<i+hop;j++)power+=samples[j]*samples[j];
-      const rms=Math.sqrt(power/hop);
-      if(first===null && rms>.008)first=i/rate;
-      if(first!==null){
-        const bin=Math.round(((i/rate)%beat)/beat*bins)%bins;
-        phase[bin]+=Math.max(0,rms-previous);
+  const customTrack={id:'own-song',title:'Egen sang',artist:'Lokal lydfil',custom:true,targets:[],notes:[],end:0};
+
+  // Vote for observed pulse periods on a logarithmic scale. Average across a
+  // short run of similar intervals to reduce timing error from the audio frames.
+  function estimateTempo(attacks,step){
+    const votes=new Map();
+    let winner=null;
+    for(let i=1;i<attacks.length;i++){
+      const gap=attacks[i].time-attacks[i-1].time;
+      let first=i-1;
+      while(first>0 && i-first<8){
+        const earlier=attacks[first].time-attacks[first-1].time;
+        if(Math.abs(earlier-gap)>Math.max(step*2,gap*.14))break;
+        first--;
       }
-      previous=rms;
+      const period=(attacks[i].time-attacks[first].time)/(i-first);
+      const position=48*Math.log2(period),center=Math.round(position);
+      for(let bin=center-1;bin<=center+1;bin++){
+        const weight=Math.sqrt(attacks[i].strength)*(1.5-Math.abs(bin-position));
+        const vote=votes.get(bin)||{weight:0,periodSum:0};
+        vote.weight+=weight;vote.periodSum+=weight*period;
+        votes.set(bin,vote);
+        if(!winner||vote.weight>winner.weight)winner=vote;
+      }
     }
-    if(first===null)return 0;
-    let peak=0, strongest=-1;
-    for(let i=0;i<bins;i++){
-      const value=phase[i]+.65*(phase[(i+bins-1)%bins]+phase[(i+1)%bins]);
-      if(value>strongest){strongest=value;peak=i;}
-    }
-    const phaseTime=peak*beat/bins;
-    return Math.max(0,phaseTime+Math.ceil((first-.05-phaseTime)/beat)*beat);
+    return winner?Math.round(60*winner.weight/winner.periodSum):0;
   }
 
-  const customTrack={id:'own-song',title:'Egen sang',artist:'Lokal lydfil',custom:true,targets:[],notes:[],end:0};
-  // Read the envelope once. Keep both channels so a hard-panned beat is still visible.
   function analyseAudio(buffer){
     const channels=Array.from({length:Math.min(2,buffer.numberOfChannels||1)},(_,i)=>buffer.getChannelData(i));
-    const hop=Math.max(1,Math.round(buffer.sampleRate*.02)), step=hop/buffer.sampleRate;
-    const energy=new Float32Array(Math.ceil(channels[0].length/hop)), flux=new Float32Array(energy.length);
-    let peak=0, average=0;
+    const hop=Math.max(1,Math.round(buffer.sampleRate*.005)),step=hop/buffer.sampleRate;
+    const energy=new Float32Array(Math.ceil(channels[0].length/hop)),flux=new Float32Array(energy.length);
+    const low=new Float64Array(channels.length),last=new Float64Array(channels.length);
+    const cut=1-Math.exp(-2*Math.PI*180/buffer.sampleRate);
+    let prevBass=0,prevAir=0,prevLevel=0,peak=0;
     for(let k=0;k<energy.length;k++){
-      let power=0;
       const start=k*hop,end=Math.min(start+hop,channels[0].length);
-      for(const samples of channels)for(let i=start;i<end;i+=2)power+=samples[i]*samples[i];
-      energy[k]=Math.sqrt(power/(Math.ceil((end-start)/2)*channels.length));
-      flux[k]=Math.max(0,energy[k]-average);
-      average=.45*average+.55*energy[k];
-      peak=Math.max(peak,energy[k]);
+      let power=0,bass=0,air=0;
+      for(let ch=0;ch<channels.length;ch++){
+        const samples=channels[ch];
+        let bassSample=low[ch],previous=last[ch];
+        for(let j=start;j<end;j++){
+          const sample=samples[j];
+          bassSample+=cut*(sample-bassSample);
+          power+=sample*sample;bass+=bassSample*bassSample;air+=(sample-previous)**2;
+          previous=sample;
+        }
+        low[ch]=bassSample;last[ch]=previous;
+      }
+      const count=(end-start)*channels.length;
+      const level=Math.sqrt(power/count),bottom=Math.sqrt(bass/count),top=Math.sqrt(air/count);
+      energy[k]=level;peak=Math.max(peak,level);
+      flux[k]=Math.max(0,level-prevLevel)+.8*Math.max(0,bottom-prevBass)+1.8*Math.max(0,top-prevAir);
+      prevLevel=.65*level+.35*prevLevel;prevBass=.65*bottom+.35*prevBass;prevAir=.65*top+.35*prevAir;
     }
     if(peak<.00001)throw Error('Filen indeholder ingen hørbar lyd.');
-    // Autocorrelation of onset peaks, sampled across the whole song.
-    const low=Math.ceil(60/185/step), high=Math.floor(60/72/step);
-    const correlations=new Float64Array(high+2);
-    let bestLag=0,bestScore=0;
-    for(let lag=low;lag<=high;lag++){
-      let score=0;
-      for(let k=lag;k<flux.length;k++)score+=flux[k]*flux[k-lag];
-      correlations[lag]=score;
-      if(score>bestScore){bestLag=lag;bestScore=score;}
-    }
-    const curvature=2*bestScore-correlations[bestLag-1]-correlations[bestLag+1];
-    const refined=bestLag+(curvature>0?(correlations[bestLag+1]-correlations[bestLag-1])/(2*curvature):0);
-    return {energy,flux,step,peak,bpm:bestLag?Math.round(60/(refined*step)):120};
-  }
-  function fullChart(profile,recording){
-    const {energy,flux,step,peak}=recording.analysis;
-    const bpm=profile.custom?recording.analysis.bpm:profile.bpm, beat=60/bpm;
-    const end=recording.buffer.duration, targets=[];
-    // Follow local accents, leave rests empty, and keep enough room to approach each object.
-    const radius=Math.floor(beat*.47/step);
-    for(let grid=recording.detectedStart;grid<end;grid+=beat){
-      const center=Math.round(grid/step);
-      let accent=center,loud=0;
-      for(let k=Math.max(0,center-radius);k<=Math.min(energy.length-1,center+radius);k++){
-        loud=Math.max(loud,energy[k]);
-        if(flux[k]>(flux[accent]||0))accent=k;
+    const sums=new Float64Array(flux.length+1),attacks=[];
+    for(let i=0;i<flux.length;i++)sums[i+1]=sums[i]+flux[i];
+    const neighbourhood=Math.max(1,Math.round(.2/step));
+    let valley=Infinity,lastPeak=0;
+    for(let i=0;i<flux.length;i++){
+      valley=Math.min(valley,flux[i]);
+      if(flux[i]<=(flux[i-1]||0)||flux[i]<(flux[i+1]||0))continue;
+      const lo=Math.max(0,i-neighbourhood),hi=Math.min(flux.length,i+neighbourhood+1);
+      const floor=Math.max(peak*.003,(sums[hi]-sums[lo])/(hi-lo)*1.75,energy[i]*.035);
+      // A sharp release also has high-frequency energy. Ignore it when the
+      // sound itself has already fallen away (e.g. the end of a square pulse).
+      if(flux[i]<=floor || energy[i]<(energy[i-1]||0)*.25)continue;
+      const attack={time:i*step,strength:flux[i]/floor};
+      // Two peaks separated by a clear dip are separate attacks, even in a fast roll.
+      if(attacks.length && valley>.45*Math.min(lastPeak,flux[i])){
+        if(flux[i]>lastPeak){attacks[attacks.length-1]=attack;lastPeak=flux[i];}
+      }else{
+        attacks.push(attack);lastPeak=flux[i];
       }
-      if(loud<peak*.009)continue;
-      const time=(flux[accent]>peak*.025?accent*step:grid)+recording.start-recording.detectedStart;
-      if(time<Math.min(.55,end*.25)||time>end-.18||time-(targets.at(-1)?.time??-1)<.23)continue;
-      targets.push({time});
-      // Include a distinct offbeat when the recording actually has a second attack.
-      const half=Math.round((grid+beat/2)/step);
-      let off=half;
-      for(let k=Math.max(1,half-2);k<=Math.min(flux.length-2,half+2);k++)
-        if(flux[k]>(flux[off]||0))off=k;
-      const offTime=off*step+recording.start-recording.detectedStart;
-      if(flux[off]>Math.max(peak*.07,(flux[accent]||0)*.32) &&
-         offTime-time>=.23 && offTime<=end-.18)targets.push({time:offTime});
+      valley=flux[i];
     }
-    // Preserve a readable cursor path even when a chorus gains extra subdivisions.
-    const seed=Array.from(recording.recordId).reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,0)%628/100;
-    let phase=seed;
-    for(const [i,target] of targets.entries()){
-      const gap=i?target.time-targets[i-1].time:beat;
-      phase+=Math.min(1.25,.76*gap/beat);
-      target.x=320+190*Math.sin(phase)+32*Math.sin(phase*.48);
-      target.y=180+91*Math.cos(phase*.67+seed)+24*Math.sin(phase*1.42);
+    return {energy,step,peak,attacks,bpm:estimateTempo(attacks,step)};
+  }
+  function firstBeat(buffer){
+    const analysis=analyseAudio(buffer);
+    return analysis.attacks[0]?.time??0;
+  }
+
+  function fullChart(profile,recording){
+    const {energy,step,peak,attacks=[]}=recording.analysis;
+    const bpm=recording.analysis.bpm||profile.bpm||120,beat=60/bpm,end=recording.buffer.duration;
+    let source=attacks;
+    if(attacks.length<2){
+      // Unmetered sustained audio: use a regular practice pulse only while audible.
+      source=[];
+      for(let time=recording.detectedStart;time<end;time+=beat){
+        if(energy[Math.round(time/step)]>peak*.015)source.push({time,strength:1});
+      }
+    }
+    const targets=[];
+    for(const attack of source){
+      const time=attack.time+recording.start-recording.detectedStart;
+      if(time<0||time>end-Math.min(.12,end*.1))continue;
+      const phase=targets.length*.76;
+      targets.push({time,strength:attack.strength,x:320+180*Math.sin(phase),y:180+85*Math.cos(phase*.7)});
     }
     if(!targets.length)throw Error('Der var for lidt lyd til at lave en spilbar bane.');
     return {...profile,title:profile.custom?recording.filename.replace(/\.[^.]+$/,''):profile.title,
-      bpm,end,targets,notes:[],recordId:recording.recordId};
+      bpm,end,targets,notes:[],estimated:attacks.length>=2 && Boolean(recording.analysis.bpm),recordId:recording.recordId};
   }
+
+  // One roll per fresh round. Audio, pause/resume and input all use song time.
+  // Each phrase chooses a rhythm and a cursor motif from actual note attacks.
+  function newChart(track,density='normal',seed=crypto.getRandomValues(new Uint32Array(1))[0]){
+    if(!track.targets.length)return track;
+    let bits=seed>>>0;
+    const random=()=>{bits=(Math.imul(1664525,bits)+1013904223)>>>0;return bits/4294967296;};
+    let candidates=track.targets;
+    if(track.notes.length){
+      candidates=[];
+      for(const note of track.notes){
+        const strength=note.voice==='bass'?2:5;
+        const prev=candidates.at(-1);
+        if(prev && Math.abs(note.time-prev.time)<1e-7)prev.strength=Math.max(prev.strength,strength);
+        else candidates.push({time:note.time,strength});
+      }
+    }
+    const beat=60/track.bpm;
+    const targets=[];
+    let nextPhrase=-Infinity,pattern=0,orientation=0,angle=0,stride=0,index=0;
+    let x=320,y=180;
+    for(const note of candidates){
+      const gap=note.time-(targets.at(-1)?.time??-Infinity);
+      if(gap<=0)continue;
+      if(note.time>=nextPhrase){
+        nextPhrase=note.time+beat*(random()<.5?4:8);
+        pattern=Math.floor(random()*3);orientation=random()*Math.PI*2;
+        stride=50+80*random();angle=(random()<.5?-1:1)*(.4+random()*.8);index=0;
+      }
+      const slot=index++, accented=note.strength>=4;
+      const accent=pattern===0?slot%4===0:pattern===1?slot%4===2:slot%3===0;
+      const keep=(density==='dense'?.80:density==='sparse'?.31:.62)+(accent?.18:0)+(accented?.065:0);
+      if(gap<beat*1.55 && random()>keep)continue;
+      const length=Math.min(stride,Math.max(38,gap*440));
+      orientation+=pattern===1?(slot%2?1.6:-1.4):pattern===2?angle*2:angle;
+      let dx=Math.cos(orientation)*length,dy=Math.sin(orientation)*length*.76;
+      if(x+dx<48||x+dx>592){dx=-dx;orientation=Math.PI-orientation;}
+      if(y+dy<46||y+dy>314){dy=-dy;orientation=-orientation;}
+      x+=dx;y+=dy;
+      targets.push({time:note.time,x,y,figure:random(),accent:random()});
+    }
+    return {...track,targets,seed};
+  }
+
   async function importRecording(file,track=customTrack){
     if(file.size>64*1024*1024)throw Error('Vælg en lydfil på højst 64 MB.');
     let buffer;
@@ -300,8 +353,8 @@
       const decoder=new OfflineAudioContext(1,1,22050);
       buffer=await decoder.decodeAudioData(await file.arrayBuffer());
     }catch{throw Error('Browseren kunne ikke læse lydfilen. Prøv MP3 eller WAV.');}
-    const analysis=analyseAudio(buffer), bpm=track.custom?analysis.bpm:track.bpm;
-    const start=firstBeat(buffer,bpm);
+    const analysis=analyseAudio(buffer), bpm=analysis.bpm||track.bpm||120;
+    const start=analysis.attacks[0]?.time??0;
     let hash=2166136261;
     for(const ch of [track.id,file.name,file.size,buffer.duration,file.lastModified||0].join('|'))
       hash=Math.imul(hash^ch.charCodeAt(0),16777619);
@@ -317,7 +370,7 @@
     let nextSpin=19;
     for(let i=0;i<track.targets.length;i++){
       const a=track.targets[i];
-      if(a.time>=nextSpin && a.time+4<track.end){
+      if(a.time>=nextSpin && a.time+4<track.end && (a.figure===undefined||a.figure>.8)){
         // Replace a continuous musical phrase. Never spin across a rest.
         let j=i;
         while(j+1<track.targets.length && track.targets[j+1].time-track.targets[j].time<.95 &&
@@ -332,9 +385,9 @@
     }
     const s=session({...track,targets});
     s.sliders=new Map();
-    for(let i=3;i<targets.length-1;i+=5){
+    for(let i=0;i<targets.length-1;i++){
       const a=targets[i],b=targets[i+1],gap=b.time-a.time;
-      if(a.spinEnd||b.spinEnd||gap<.32)continue;
+      if((a.figure===undefined?i%5!==3:a.figure>.28)||a.spinEnd||b.spinEnd||gap<.32)continue;
       const dx=(b.x-a.x)*.58,dy=(b.y-a.y)*.58;
       s.sliders.set(i,{x:a.x,y:a.y,cx:a.x+dx*.5-dy*.22,cy:a.y+dy*.5+dx*.22,
         ex:a.x+dx,ey:a.y+dy,time:a.time,end:a.time+Math.min(.95,gap*.74)});
@@ -360,18 +413,18 @@
         next.x=lastX+Math.max(-reach,Math.min(reach,wanted-lastX));
         lastX=next.x;lastTime=note.time;
       }else if(mode==='taiko'){
-        next.lane=(i%5===2||i%5===3)?1:0;
-        if(i%9===5&&gap>.45)next.rollEnd=note.time+Math.min(.85,gap*.8);
+        next.lane=Number(note.accent===undefined?(i%5===2||i%5===3):note.accent>.6);
+        if((note.figure===undefined?i%9===5:note.figure<.14)&&gap>.45)next.rollEnd=note.time+Math.min(.85,gap*.8);
       }else{
         let lane=Math.max(0,Math.min(3,Math.floor(note.x/160)));
         for(let j=0;j<4&&laneEnds[lane]>note.time-.07;j++)lane=(lane+1)%4;
         next.lane=lane;
-        if(i%6===3){
+        if((note.figure===undefined?i%6===3:note.figure<.2)&&gap>.18){
           next.end=Math.min(track.end-.20,note.time+Math.max(.27,Math.min(.9,gap*1.5)));
           if(next.end<=note.time+.2)delete next.end;
         }
         laneEnds[lane]=next.end||note.time;
-        if(i%12===8&&laneEnds[(lane+2)%4]<note.time-.12){
+        if((note.accent===undefined?i%12===8:note.accent>.90)&&laneEnds[(lane+2)%4]<note.time-.12){
           const chord=(lane+2)%4;targets.push({time:note.time,lane:chord});laneEnds[chord]=note.time;
         }
       }
@@ -468,19 +521,19 @@
     }
   }
 
-  function playRecording(track,recording,offset){
-    const audio=new AudioContext(), origin=audio.currentTime-offset;
+  function playRecording(track,recording,offset,rate=1){
+    const audio=new AudioContext(), origin=audio.currentTime-offset/rate;
     const source=audio.createBufferSource(), gain=audio.createGain();
-    source.buffer=recording.buffer;source.connect(gain);gain.connect(audio.destination);
+    source.buffer=recording.buffer;if(source.playbackRate)source.playbackRate.value=rate;source.connect(gain);gain.connect(audio.destination);
     const delay=recording.file?0:lead-recording.start;
-    const when=Math.max(audio.currentTime,origin+delay), end=origin+track.end;
+    const when=Math.max(audio.currentTime,origin+delay/rate), end=origin+track.end/rate;
     if(end>when){
       gain.gain.setValueAtTime(.82,when);
       gain.gain.setValueAtTime(.82,Math.max(when,end-.10));
       gain.gain.linearRampToValueAtTime(0,end);
-      source.start(when,Math.max(0,when-origin-delay),end-when);
+      source.start(when,Math.max(0,(when-origin)*rate-delay),(end-when)*rate);
     }
-    return {ready:audio.resume(),now:()=>audio.currentTime-origin,schedule(){},
+    return {ready:audio.resume(),now:()=>(audio.currentTime-origin)*rate,schedule(){},
       close(){if(audio.state!=='closed')void audio.close().catch(()=>{});}};
   }
   // A local WAV has a seekable media clock, including the lead-in used by the chart.
@@ -509,8 +562,8 @@
     return new Blob([data],{type:'audio/wav'});
   }
 
-  function mediaPlayback(media,track,offset){
-    media.pause();media.currentTime=offset;media.muted=false;
+  function mediaPlayback(media,track,offset,rate=1){
+    media.pause();media.currentTime=offset;media.playbackRate=rate;media.muted=false;
     // Some browsers quantize currentTime. Interpolate between observed ticks,
     // bounded to one tick, so animation stays smooth without running through a stall.
     let anchor=null,stamp=0,last=offset;
@@ -519,7 +572,7 @@
       const raw=media.currentTime, tick=performance.now();
       if(raw!==anchor){anchor=raw;stamp=tick;}
       const ahead=!media.paused && !media.seeking && media.readyState>=3
-        ?Math.min(.09,(tick-stamp)/1000):0;
+        ?Math.min(.09,(tick-stamp)/1000)*rate:0;
       last=Math.max(last,Math.min(Math.max(raw,track.end-.001),raw+ahead));
       return last;
     }
@@ -527,5 +580,5 @@
       schedule(){},close(){media.pause();}};
   }
 
-  globalThis.lectioPlusRhythm = {rulesets,modeSession,modePress,modeRelease,modeTick,tracks,popTracks,customTrack,fullChart,playingSession,sliderPoint,follow,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
+  globalThis.lectioPlusRhythm = {rulesets,newChart,modeSession,modePress,modeRelease,modeTick,tracks,popTracks,customTrack,fullChart,playingSession,sliderPoint,follow,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
 })();
