@@ -1,4 +1,4 @@
-// Festtilstand: on by default, off when disabled or when "Færre animationer" is on; CSS keeps its safety guards.
+// Festtilstand: off by default, switchable in popup and settings, off with "Færre animationer"; CSS keeps its safety guards.
 const fs = require('node:fs'), assert = require('node:assert/strict'), path = require('node:path'), { JSDOM } = require('jsdom');
 const app = path.resolve(__dirname, '..');
 let checks = 0;
@@ -9,18 +9,21 @@ w.matchMedia = () => ({ matches: false, addEventListener() {} });
 w.eval(fs.readFileSync(app + '/extension/appearance.js', 'utf8'));
 const A = w.lectioPlusAppearance, root = w.document.documentElement;
 const party = (prefs) => { A.apply(root, A.normalize(prefs), false); return root.hasAttribute('data-lxp-party'); };
-ok(A.defaults.party === true && A.normalize({}).party === true, 'party mode is on by default');
-ok(party({}), 'default preferences set data-lxp-party');
-ok(!party({ party: false }), 'turning Festtilstand off removes data-lxp-party');
-ok(!party({ reducedMotion: true }), '"Færre animationer" also turns party mode off');
-ok(A.normalize({ party: 'yes' }).party === true && A.normalize({ party: false }).party === false, 'only an explicit false disables it');
-A.apply(root, A.normalize({}), false, false);
+ok(A.defaults.party === false && A.normalize({}).party === false, 'party mode is off by default');
+ok(!party({}), 'default preferences leave out data-lxp-party');
+ok(party({ party: true }), 'switching Festtilstand on sets data-lxp-party');
+ok(!party({ party: true, reducedMotion: true }), '"Færre animationer" keeps party mode off');
+ok(A.normalize({ party: 'yes' }).party === false && A.normalize({ party: true }).party === true, 'only an explicit true enables it');
+A.apply(root, A.normalize({ party: true }), false, false);
 ok(!root.hasAttribute('data-lxp-party'), 'disabled extension leaves no party attribute');
 const css = fs.readFileSync(app + '/extension/party.css', 'utf8');
 const outside = css.replace(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}\n/g, '');
 ok(!/html\[data-lxp-party\][^{]*\{[^}]*animation/.test(outside), 'every party animation sits inside prefers-reduced-motion: no-preference');
 const manifest = JSON.parse(fs.readFileSync(app + '/extension/manifest.json', 'utf8'));
 const scripts = manifest.content_scripts.flatMap((entry) => entry.js || []), styles = manifest.content_scripts.flatMap((entry) => entry.css || []);
+const popup = fs.readFileSync(app + '/extension/popup.html', 'utf8'), popupJs = fs.readFileSync(app + '/extension/popup.js', 'utf8'), settingsJs = fs.readFileSync(app + '/extension/settings.js', 'utf8');
+ok(/<input id="party" type="checkbox"/.test(popup) && /save\(\{ party: party\.checked \}\)/.test(popupJs), 'popup has a Festtilstand switch that saves the preference');
+ok(/field\('appearance', 'party', 'Festtilstand'/.test(settingsJs), 'settings has a Festtilstand switch');
 ok(styles.includes('party.css') && scripts.indexOf('party.js') > -1 && scripts.indexOf('party.js') < scripts.indexOf('content.js'), 'manifest loads party.css and party.js');
 dom.window.close();
 console.log('TOTAL', checks, 'party-mode checks');

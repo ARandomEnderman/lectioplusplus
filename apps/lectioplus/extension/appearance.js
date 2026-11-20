@@ -23,7 +23,7 @@
   const defaultDashboard = () => ({ columns: 'two', title: 'Dit overblik', custom: [],
     slots: widgets.map(([id, , width]) => ({ id, width, visible: id !== 'shortcuts' })) });
   const defaults = { enabled: true, theme: 'dark', design: 'strafe', density: 'comfortable', hideProfilePhoto: false, anonymizeName: false,
-    showClicker: false, tabBranding: true, reducedMotion: false, party: true, contentWidth: 'normal', font: 'system',
+    showClicker: false, tabBranding: true, reducedMotion: false, party: false, contentWidth: 'normal', font: 'system',
     navigationDensity: 'comfortable', navigationGroups: 'collapsed', tableDensity: 'comfortable', sectionShortcuts: true,
     scheduleSize: '76', scheduleView: 'auto', showBreaks: true, colorLessons: true, showLessonRoom: true,
     dashboard: defaultDashboard(), navigation: defaultNavigation(), customSidebar: [], toolbox: toolbox(), games: games() };
@@ -138,7 +138,7 @@
       showClicker: values.showClicker === true,
       tabBranding: values.tabBranding !== false,
       reducedMotion: values.reducedMotion === true,
-      party: values.party !== false,
+      party: values.party === true,
       contentWidth: choice(values.contentWidth, ['normal', 'wide'], 'normal'),
       font: choice(values.font, ['system', 'arial'], 'system'),
       navigationDensity: choice(values.navigationDensity, ['comfortable', 'compact'], 'comfortable'),

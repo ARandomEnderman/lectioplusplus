@@ -2,17 +2,20 @@ const appearance = globalThis.lectioPlusAppearance;
 const extensionAPI = globalThis.browser ?? globalThis.chrome;
 const enabled = document.getElementById('enabled');
 const showClicker = document.getElementById('show-clicker');
+const party = document.getElementById('party');
 const status = document.getElementById('status');
 const system = matchMedia('(prefers-color-scheme: dark)');
 let preferences = appearance.defaults;
 const controls = appearance.controls(save);
 const enabledToggle = appearance.toggle(enabled);
 const clickerToggle = appearance.toggle(showClicker);
+const partyToggle = appearance.toggle(party);
 
 function render() {
   appearance.apply(document.documentElement, preferences, system.matches);
   enabledToggle.sync(preferences.enabled);
   clickerToggle.sync(preferences.showClicker);
+  partyToggle.sync(preferences.party);
   controls.sync(preferences);
 }
 
@@ -40,6 +43,8 @@ async function start() {
     enabled.disabled = false;
     showClicker.disabled = false;
     showClicker.addEventListener('change', () => save({ showClicker: showClicker.checked }));
+    party.disabled = false;
+    party.addEventListener('change', () => save({ party: party.checked }));
     enabled.addEventListener('change', () => save({ enabled: enabled.checked }));
     system.addEventListener('change', render);
     extensionAPI.storage.onChanged.addListener((changes, area) => {
