@@ -53,7 +53,7 @@
     rules.setAttribute('aria-label','osu! spilform');rulesLabel.append(rules);
     for(const [id,mode] of Object.entries(R.rulesets)){const opt=E('option','',mode.name);opt.value=id;rules.append(opt);}
     let loadedRules=false;
-    rules.addEventListener('change',()=>{const mode=rules.value;openGame('osu',true);void save({ruleset:mode});});
+    rules.addEventListener('change',()=>{const mode=rules.value;openGame('osu',true,rhythm?.track.seed);void save({ruleset:mode});});
     const ownOption=E('option','','Egen sang …');ownOption.value=R.customTrack.id;song.append(ownOption);
     const ownButton=B('Åbn egen sang…',()=>{
       song.value=R.customTrack.id;openGame('osu',true);chooseFile.click();
@@ -111,6 +111,49 @@
     let recording=null,importNumber=0,loadingFile=false,lastHud=0,rhythmPalette=null;
     const soundPanel=E('section','lxp-song-audio');
     const soundStatus=E('p');soundStatus.setAttribute('role','status');
+    const tempoLabel=E('label','','Spiltempo'),tempo=E('input'),tempoValue=E('span','lxp-osu-tempo-value');
+    tempo.type='range';tempo.min='50';tempo.max='200';tempo.step='any';tempo.value='100';
+    tempo.setAttribute('aria-label','Spiltempo');tempoLabel.append(tempoValue,tempo);
+    const bpmLabel=E('label','','Spiltempo i BPM'),bpmInput=E('input');
+    bpmInput.type='number';bpmInput.min='0';bpmInput.step='any';bpmInput.setAttribute('aria-label','Spiltempo i BPM');
+    bpmLabel.append(bpmInput);
+    let savedPercent=100;
+    function showTempo(percent=Number(tempo.value)){
+      const base=rhythm?.track.bpm;
+      const text=Number(percent.toFixed(2)).toLocaleString('da-DK')+' %';
+      tempoValue.textContent=text;tempo.setAttribute('aria-valuetext',text);
+      bpmLabel.hidden=!base;bpmInput.value=base?String(Number((base*percent/100).toFixed(2))):'';
+    }
+    function setTempoSlider(percent){
+      tempo.min=String(Math.min(50,percent));tempo.max=String(Math.max(200,percent));
+      tempo.value=String(percent);showTempo(percent);
+    }
+    function changeTempo(percent){
+      if(running||loadingFile)return;
+      if(!Number.isFinite(percent)||percent<=0){
+        setTempoSlider(savedPercent);soundStatus.textContent='Skriv et positivt tempo i BPM.';return;
+      }
+      try{media.playbackRate=percent/100;}
+      catch{
+        setTempoSlider(savedPercent);soundStatus.textContent='Browserens lydafspiller understøtter ikke denne afspilningshastighed.';return;
+      }
+      savedPercent=percent;setTempoSlider(percent);updateSoundPanel();
+      void save({osuRate:percent});render();
+    }
+    tempo.addEventListener('input',()=>showTempo(Math.round(Number(tempo.value))));
+    tempo.addEventListener('change',()=>changeTempo(Math.max(1,Math.round(Number(tempo.value)))));
+    bpmInput.addEventListener('change',()=>{
+      if(rhythm?.track.bpm)changeTempo(Number((bpmInput.valueAsNumber/rhythm.track.bpm*100).toPrecision(12)));
+    });
+    const densityLabel=E('label','','Nodetæthed'),density=E('select');
+    for(const [id,label] of [['sparse','Færre slag'],['normal','Normal'],['dense','Flere slag']]){
+      const opt=E('option','',label);opt.value=id;density.append(opt);
+    }
+    density.setAttribute('aria-label','Nodetæthed');densityLabel.append(density);
+    density.addEventListener('change',()=>{
+      if(running||loadingFile)return;
+      const value=density.value;openGame('osu',true,rhythm?.track.seed);void save({osuDensity:value});
+    });
     const chooseFile=E('input');chooseFile.type='file';chooseFile.accept='audio/*,.mp3,.wav,.m4a,.ogg,.flac';
     const fileLabel=E('label','','Vælg sangfil');fileLabel.append(chooseFile);
     const offsetInput=E('input');offsetInput.type='number';offsetInput.min='0';offsetInput.step='0.01';
@@ -131,13 +174,14 @@
       function load(blob){
         if(clipSource!==source)return;
         clipUrl=URL.createObjectURL(blob);media.src=clipUrl;
+        try{media.playbackRate=savedPercent/100;}catch{backupAudio=true;}
         media.hidden=!hasRecording() && Boolean(rhythm?.track.artist);
       }
       if(hasRecording())load(recording.file);
       else if(!source.custom)R.renderScore(source).then(load).catch(()=>{ /* The live synthesizer also plays this score. */ });
     }
     const removeFile=B('Fjern sangfil',()=>{releaseClip();recording=null;openGame('osu',true);});
-    soundPanel.append(E('h3','','Musik'),soundStatus,fileLabel,media,offsetLabel,removeFile);
+    soundPanel.append(E('h3','','Musik'),soundStatus,tempoLabel,bpmLabel,densityLabel,fileLabel,media,offsetLabel,removeFile);
     function hasRecording(){return recording!==null && recording.id===rhythm?.track.id;}
     function updateSoundPanel(){
       if(!rhythm)return;
@@ -158,7 +202,7 @@
             ?rhythm.track.title+' · '+duration(rhythm.track.end):option.dataset.label;
         }
       }
-      soundStatus.textContent=attached?'Lydfil: '+recording.filename+' · '+duration(rhythm.track.end)
+      soundStatus.textContent=attached?'Lydfil: '+recording.filename+' · '+duration(rhythm.track.end)+(rhythm.track.estimated?' · ca. '+rhythm.track.bpm+' BPM':' · fast øvepuls')
         :rhythm.track.custom?'Vælg en lydfil. Banen laves ud fra rytmen i hele sangen.'
         :!rhythm.track.artist?rhythm.track.title+' · Instrumental'
         :'Vælg en lokal MP3- eller WAV-fil med '+rhythm.track.title+' for at høre sangen. Du kan også spille med øvebeat.';
@@ -185,7 +229,7 @@
       recording.start=Math.max(0,Math.min(recording.maxStart,value));
       try{recording.chart=R.fullChart(recording.profile,recording);}
       catch(error){recording.start=previousStart;offsetInput.value=previousStart.toFixed(2);soundStatus.textContent=error.message;return;}
-      openGame('osu',true);
+      openGame('osu',true,rhythm.track.seed);
     });
     const A=globalThis.lectioPlusAppearance;
     const D=globalThis.lectioPlusDash;
@@ -487,7 +531,13 @@
       }
       toggle();
     }
-    const recordKey=()=>current.id==='dash'?dashBestKey(state.level.id):current.id==='osu'?('osu'+(rhythm.mode==='standard'?'':'-'+rhythm.mode)+':')+(rhythm.track.recordId||rhythm.track.id):current.id+':'+state.difficulty;
+    function recordKey(){
+      if(current.id==='dash')return dashBestKey(state.level.id);
+      if(current.id!=='osu')return current.id+':'+state.difficulty;
+      const mode=rhythm.mode==='standard'?'osu':'osu-'+rhythm.mode;
+      const songKey=mode+':'+(rhythm.track.recordId||rhythm.track.id);
+      return density.value==='normal' && tempo.value==='100'?songKey:songKey+':'+density.value+'-'+tempo.value;
+    }
     const prefs=()=>getPreferences().games||{difficulty:'normal',bests:{}};
     async function save(changes){
       try{if(await onChange({games:{...prefs(),...changes}})!==false)return true;}catch{}
@@ -509,16 +559,17 @@
       if(current.id==='osu'){
         if(!hasRecording() && (rhythm.track.custom || rhythm.track.artist && !silent && !beatChosen)){chooseFile.click();return;}
         stopPreview();audioError='';
+        const rate=Number(tempo.value)/100;
         const nativePlayer=Boolean(clipUrl) && !silent && !backupAudio;
         const failed=()=>{if(nativePlayer)backupAudio=true;
           audioError=nativePlayer?'Afspilleren kunne ikke starte. Prøv igen med den alternative lydafspiller.':'Lyden kunne ikke starte. Tjek fanens lyd, og prøv igen.';stop();render();};
         try {
           if(silent){
-            const origin=performance.now()/1000-rhythm.time;
-            player={now:()=>performance.now()/1000-origin,schedule(){},close(){},ready:Promise.resolve()};
-          }else if(nativePlayer)player=R.mediaPlayback(media,rhythm.track,rhythm.time);
-          else if(hasRecording())player=R.playRecording(rhythm.track,recording,rhythm.time);
-          else player=R.playback(rhythm.track,rhythm.time);
+            const origin=performance.now()/1000-rhythm.time/rate;
+            player={now:()=>(performance.now()/1000-origin)*rate,schedule(){},close(){},ready:Promise.resolve()};
+          }else if(nativePlayer)player=R.mediaPlayback(media,rhythm.track,rhythm.time,rate);
+          else if(hasRecording())player=R.playRecording(rhythm.track,recording,rhythm.time,rate);
+          else player=R.playback(rhythm.track,rhythm.time,rate);
           lastAudioTick=performance.now();
           const active=player;player.ready.catch(()=>{if(player===active)failed();});
         } catch {failed();return;}
@@ -597,7 +648,7 @@
       }
       controls.append(b);return b;
     }
-    function openGame(id,reset=false){
+    function openGame(id,reset=false,seed){
       const game=C.catalog.find(g=>g.id===id);if(!game)return;
       if(current?.id===id&&!reset)return;
       if(current?.id==='teacher')clearTeachers();
@@ -607,13 +658,17 @@
       stop();capturing=null;dashAudioError=false;courseMenu.hidden=id!=='dash';current=game;state=C.create(id,{level:selectedCourse||customCourse,difficulty:game.live?(reset?difficulty.value:prefs().difficulty):'normal'});recorded=false;started=false;lastGrid='';flagMode=false;
       importNumber++;loadingFile=false;beatChosen=keepBeat;aim=null;audioError='';ownButton.hidden=songLabel.hidden=practice.hidden=id!=='osu';rhythmPalette=null;
       const selected=allTracks.find(t=>t.id===song.value)||allTracks[0];
-      if(id==='osu'&&!loadedRules){rules.value=prefs().ruleset||'standard';loadedRules=true;}
+      if(id==='osu'&&!loadedRules){rules.value=prefs().ruleset||'standard';savedPercent=prefs().osuRate||100;setTempoSlider(savedPercent);
+        density.value=prefs().osuDensity||'normal';loadedRules=true;}
       rulesLabel.hidden=id!=='osu';
-      rhythm=id==='osu'?R.modeSession(recording?.id===selected.id?recording.chart:selected,rules.value):null;
+      const source=recording?.id===selected.id?recording.chart:selected;
+      rhythm=id==='osu'?R.modeSession(R.newChart(source,density.value,seed),rules.value):null;
+      if(rhythm)showTempo();
+      restart.textContent=id==='osu'?'Ny bane':'Start forfra';
       setText(name,game.title);setText(description,game.description);setText(guide,game.controls);difficulty.value=state.difficulty;settings.hidden=!game.live||id==='osu'||id==='dash';
       tip.textContent=game.category==='For to'?'Giv turen videre til den anden spiller.':game.category==='Bonus'?'Dine valg bliver kun i denne runde.':'Pause virker med P eller Escape. Spillet pauser automatisk, når du forlader det.';
       if(id==='osu'&&rhythm.mode!=='standard')guide.textContent=R.rulesets[rhythm.mode].guide;
-      if(id==='osu')tip.textContent='Du kan ændre slag, pause og genstart under Tastbindinger. Escape sætter også spillet på pause.';
+      if(id==='osu')tip.textContent='Ny bane giver sangen et nyt mønster. Spiltempo ændrer musikkens hastighed, og nodetæthed bestemmer, hvor mange slag du spiller.';
       if(id==='dash'){
         if(!studioLoaded){
           const saved=prefs().dashDraft||initial;
@@ -686,7 +741,7 @@
       if(needsFile)start.textContent='Vælg sangfil';
       courseMenu.hidden=current.id!=='dash'||running||state.status==='lost';
       layout.hidden=current.id==='dash'&&!started;
-      if(rhythm)media.controls=!running;rules.disabled=running||loadingFile;
+      if(rhythm)media.controls=!running;rules.disabled=tempo.disabled=bpmInput.disabled=density.disabled=running||loadingFile;
       start.disabled=Boolean(current.live&&!ctx)||loadingFile||current.id==='teacher' && !finished && !running && state.stage!=='ready' && !started;
       chooseFile.disabled=running||loadingFile;removeFile.disabled=offsetInput.disabled=running||loadingFile;difficulty.disabled=running;song.disabled=ownButton.disabled=running;practice.disabled=running||Boolean(rhythm?.track.custom&&!hasRecording());
       veil.hidden=!(current.live&&!started||started&&!running&&!finished);
@@ -707,7 +762,7 @@
           if(current.id==='dash'&&state.status==='won'&&state.coins)changes.dashCoins={...prefs().dashCoins,[dashCoinKey(state.level.id)]:(prefs().dashCoins?.[dashCoinKey(state.level.id)]||0)|state.coins};
           if(Object.keys(changes).length)void save(changes).then(()=>{if(current?.id==='dash'&&state.status==='won')showCourse(state.level);});
         }}
-      }else if(current.id==='osu')setText(feedback,audioError||(silent?'Uden lyd':hasRecording()?'Sangfil: '+recording.filename:rhythm.track.artist?(beatChosen?'Øvebeat':'Ingen sangfil valgt'):'Instrumental')+(rhythm.track.bpm?' · '+rhythm.track.bpm+' BPM':'')+' · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
+      }else if(current.id==='osu')setText(feedback,audioError||(silent?'Uden lyd':hasRecording()?'Sangfil: '+recording.filename:rhythm.track.artist?(beatChosen?'Øvebeat':'Ingen sangfil valgt'):'Instrumental')+(rhythm.track.bpm?' · '+Math.round(rhythm.track.bpm*Number(tempo.value)/100)+' BPM':'')+' · Serie '+rhythm.combo+' · '+rhythm.hits+'/'+rhythm.track.targets.length+' ramt');
       else if(current.id==='dash')setText(feedback,state.level.title+' · '+(D.rating(state.level)?.name||'Uden vurdering')+' · Forsøg '+Math.max(1,attempt)+' · '+D.forms[state.mode][0]+(practiceRun?' · Øvelse · checkpoint '+(checkpoint?.score||0)+' %':'')+(dashAudioError?' · Uden lyd':''));
       else if(current.id==='lights')setText(feedback,state.board.flat().filter(Boolean).length+' lys tilbage');
       else if(current.id==='breakout')setText(feedback,`♥ ${state.lives} liv · ${state.bricks.length} mursten tilbage${state.launch?' · Send bolden for at fortsætte':''}`);
