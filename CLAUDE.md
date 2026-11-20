@@ -99,6 +99,6 @@ Single line wraps share model context; blank lines delimit paragraphs. Before co
 
 `workbench-client.js` communicates through `workbench-host.html` with the opaque sandbox `workbench-sandbox.html`, which owns a classic blob worker. Keep sandbox CSP hashes synchronized using `tests/sync-workbench-sandbox.cjs`. Bundled runtimes and licenses live in `extension/vendor/workbench`; ship the entire directory. Interactive Python input uses WebAssembly JSPI and suspends the execution deadline while awaiting an answer. Do not replay code to simulate input.
 
-`school-code-lessons.js` contains 125 exercises in five levels; source guides and reference solutions are under `tests/fixtures`. Preserve exercise IDs, drafts and progress. `games-core.js` owns pure game logic; `games.js` renders `#lxp-games` routes. Games use local preferences and no scraped personal data.
+`school-code-lessons.js` contains 125 exercises in five levels; source guides and reference solutions are under `tests/fixtures`. Preserve exercise IDs, drafts and progress. `games-core.js` owns pure game logic; `games.js` renders `#lxp-games` routes. Games use local preferences. Gæt læreren reads teacher names and photos from the current school while its quiz is open. Keep this data in tab memory and respect the photo visibility setting.
 
 Run `npm ci --prefix apps/lectioplus/tests` and `npm test --prefix apps/lectioplus/tests` with Node 24 for release validation, including the real Python runtime tests. Fixture tests do not establish live browser or logged-in Lectio compatibility.

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LectioPlus+",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "En ny brugerflade til Lectio med ugeplan, opgaveliste, lektier og beskeder.",
   "permissions": [
     "storage"
@@ -145,6 +145,12 @@
         "school-tools.js",
         "rhythm.js",
         "dash.js",
+        "dash-scenery.js",
+        "quiz-games.js",
+        "quiz-board.js",
+        "arcade-collection.js",
+        "arcade-board.js",
+        "teacher-directory.js",
         "games-core.js",
         "games.js",
         "party.js",

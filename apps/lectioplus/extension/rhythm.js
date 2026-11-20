@@ -117,11 +117,15 @@
     s.longest = Math.max(s.longest,s.combo); s.index++; s.verdict = String(points);
   }
 
-  const waves = {chip:'square',pluck:'triangle',keys:'triangle',bell:'sine',reed:'sawtooth',bass:'sine'};
+  const waves = {kick:'sine',chip:'square',pluck:'triangle',keys:'triangle',bell:'sine',reed:'sawtooth',bass:'sine'};
   function scheduleTone(audio,master,n,onset,end){
     const osc = audio.createOscillator(), gain = audio.createGain();
     osc.type = waves[n.voice]; osc.frequency.value = 440 * 2 ** ((n.pitch-69)/12);
-    const volume = {chip:.11,reed:.12,bass:.28,bell:.38,keys:.35,pluck:.32}[n.voice];
+    if(n.voice==='kick'){
+      osc.frequency.setValueAtTime(145,onset);
+      osc.frequency.exponentialRampToValueAtTime(45,Math.min(onset+.085,end));
+    }
+    const volume = {kick:.48,chip:.11,reed:.12,bass:.28,bell:.38,keys:.35,pluck:.32}[n.voice];
     const held = n.voice==='reed' || n.voice==='chip';
     const attack = Math.min(onset+(held ? .026 : .012),end-.005);
     gain.gain.setValueAtTime(.0001,onset);
@@ -142,12 +146,12 @@
   function playback(track,offset) {
     const audio = new AudioContext(), master = audio.createGain();
     master.gain.value = .45; master.connect(audio.destination);
-    const start = audio.currentTime - offset;
-    let cursor = track.notes.findIndex(n=>n.time+n.duration > offset);
-    if (cursor < 0) cursor = track.notes.length;
+    const start = audio.currentTime - offset, notes=track.notes;
+    let cursor = notes.findIndex(n=>n.time+n.duration > offset);
+    if (cursor < 0) cursor = notes.length;
     function schedule() {
-      while (cursor < track.notes.length && start+track.notes[cursor].time < audio.currentTime+.3) {
-        const n = track.notes[cursor++], end = start+n.time+n.duration*.94;
+      while (cursor < notes.length && start+notes[cursor].time < audio.currentTime+.3) {
+        const n = notes[cursor++], end = start+n.time+n.duration*.94;
         const onset = Math.max(audio.currentTime,start+n.time);
         if (end-onset < .015) continue;
         scheduleTone(audio,master,n,onset,end);
@@ -337,6 +341,101 @@
     }
     return s;
   }
+  const rulesets={
+    standard:{name:'osu!',guide:'Sigt på cirklerne, følg sliderne og drej spinnerne.'},
+    taiko:{name:'osu!taiko',guide:'Slå røde noter i midten og blå på kanten. Trom på de gule hvirvler.'},
+    catch:{name:'osu!catch',guide:'Bevæg kurven under frugten. Hold sprint ved lange spring. Du kan også styre med mus eller touch.'},
+    mania:{name:'osu!mania · 4K',guide:'Ram noterne på stregen i de fire spor. Hold lange noter til halen når stregen.'}
+  };
+  function modeSession(track,mode){
+    if(!Object.hasOwn(rulesets,mode)||mode==='standard')return Object.assign(playingSession(track),{mode:'standard'});
+    const targets=[],laneEnds=[-1,-1,-1,-1];
+    let lastX=320,lastTime=0;
+    track.targets.forEach((note,i)=>{
+      const gap=(track.targets[i+1]?.time??track.end)-note.time;
+      const next={time:note.time};
+      if(mode==='catch'){
+        const reach=Math.min(495,Math.max(0,note.time-lastTime)*510);
+        const wanted=40+(note.x/640)*560;
+        next.x=lastX+Math.max(-reach,Math.min(reach,wanted-lastX));
+        lastX=next.x;lastTime=note.time;
+      }else if(mode==='taiko'){
+        next.lane=(i%5===2||i%5===3)?1:0;
+        if(i%9===5&&gap>.45)next.rollEnd=note.time+Math.min(.85,gap*.8);
+      }else{
+        let lane=Math.max(0,Math.min(3,Math.floor(note.x/160)));
+        for(let j=0;j<4&&laneEnds[lane]>note.time-.07;j++)lane=(lane+1)%4;
+        next.lane=lane;
+        if(i%6===3){
+          next.end=Math.min(track.end-.20,note.time+Math.max(.27,Math.min(.9,gap*1.5)));
+          if(next.end<=note.time+.2)delete next.end;
+        }
+        laneEnds[lane]=next.end||note.time;
+        if(i%12===8&&laneEnds[(lane+2)%4]<note.time-.12){
+          const chord=(lane+2)%4;targets.push({time:note.time,lane:chord});laneEnds[chord]=note.time;
+        }
+      }
+      targets.push(next);
+    });
+    return {...session({...track,targets}),mode,judged:new Set(),holds:new Map(),basket:320,roll:null};
+  }
+  function mark(s,index,points){
+    if(s.judged.has(index))return;
+    s.judged.add(index);
+    if(points){
+      s.hits++;s.points+=points;s.combo++;s.longest=Math.max(s.longest,s.combo);
+      s.score+=points+Math.min(20,s.combo-1)*5;s.verdict=String(points);
+    }else{s.combo=0;s.verdict='Forpasset';}
+    while(s.judged.has(s.index))s.index++;
+  }
+  function modeTick(s,time,input={}){
+    time=Math.max(time,s.time);
+    if(s.mode==='catch'){
+      const speed=input.sprint?590:345;
+      const move=dt=>{
+        const dx=Number.isFinite(input.x)?input.x-s.basket:(input.direction||0)*speed*dt;
+        s.basket=Math.max(24,Math.min(616,s.basket+Math.max(-speed*dt,Math.min(speed*dt,dx))));
+      };
+      let from=s.time;
+      while(s.index<s.track.targets.length&&s.track.targets[s.index].time<=time){
+        const fruit=s.track.targets[s.index];move(Math.max(0,fruit.time-from));from=fruit.time;
+        mark(s,s.index,Math.abs(fruit.x-s.basket)<=28?300:0);
+      }
+      move(Math.max(0,time-from));
+    }else{
+      for(const [lane,hold] of s.holds){
+        if(time>=hold.end){mark(s,hold.index,hold.points);s.holds.delete(lane);}
+      }
+      for(let i=s.index;i<s.track.targets.length;i++){
+        const note=s.track.targets[i];if(note.time+.17>=time)break;
+        if(!s.judged.has(i)&&s.holds.get(note.lane)?.index!==i)mark(s,i,0);
+      }
+      if(s.roll&&time>s.roll.rollEnd)s.roll=null;
+    }
+    s.time=time;
+  }
+  function modePress(s,lane,time){
+    modeTick(s,time);
+    for(let i=s.index;i<s.track.targets.length;i++){
+      const note=s.track.targets[i],delta=Math.abs(time-note.time);
+      if(note.time-time>.17)break;
+      if(delta>.17||s.judged.has(i)||s.holds.has(lane))continue;
+      if(note.lane!==lane){
+        if(s.mode==='taiko'&&!s.roll){mark(s,i,0);return;}
+        continue;
+      }
+      const points=delta<=.065?300:delta<=.115?100:50;
+      if(note.end)s.holds.set(lane,{end:note.end,index:i,points});
+      else{mark(s,i,points);if(note.rollEnd)s.roll=note;}
+      return;
+    }
+    if(s.mode==='taiko'&&s.roll&&time<=s.roll.rollEnd){s.score+=10;s.verdict='Hvirvel +10';}
+  }
+  function modeRelease(s,lane,time){
+    const hold=s.holds.get(lane);if(!hold)return;
+    mark(s,hold.index,time>=hold.end-.1?hold.points:0);s.holds.delete(lane);
+  }
+
   function sliderPoint(path,time){
     const t=Math.max(0,Math.min(1,(time-path.time)/(path.end-path.time))), u=1-t;
     return {x:u*u*path.x+2*u*t*path.cx+t*t*path.ex,y:u*u*path.y+2*u*t*path.cy+t*t*path.ey};
@@ -428,5 +527,5 @@
       schedule(){},close(){media.pause();}};
   }
 
-  globalThis.lectioPlusRhythm = {tracks,popTracks,customTrack,fullChart,playingSession,sliderPoint,follow,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
+  globalThis.lectioPlusRhythm = {rulesets,modeSession,modePress,modeRelease,modeTick,tracks,popTracks,customTrack,fullChart,playingSession,sliderPoint,follow,session,advance,hit,playback,importRecording,playRecording,firstBeat,recordingClip,mediaPlayback,renderScore};
 })();
