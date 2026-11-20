@@ -81,6 +81,7 @@ No build step: `extension/` is loaded as-is (`chrome://extensions` → Developer
 - The Strafe Clicker tab links to the game in its own browser tab for users whose browser blocks its session cookie in the iframe. The game manages that session on its own domain.
 - The default look is the `strafe` design in dark mode (`appearance.js` defaults), which copies Strafe Clicker's colours and system font. In dark mode it also overrides the surface colours (`theme.css`). The frontend app has no `strafe` design.
 - Lectio's own CSS can give `body` a fixed width (`100%`/`100dvw`) and `overflow: hidden`, so `body.lxp-enabled` uses `box-sizing: border-box` to keep the sidebar padding inside it. Full-height views like the clicker are `position: fixed` to the visible area. A plain stub page won't reproduce this, so test layout changes with those body rules added.
+- Festtilstand (party mode, `party` preference, on by default) adds `data-lxp-party` to `<html>`: `party.css` (rainbows, wobble, Comic Sans, blinking badges) and `party.js` (click confetti, cursor sparkles). It stays off when `reducedMotion` is on, and all its animations sit inside `@media (prefers-reduced-motion: no-preference)`. Keep the photosensitivity limits: nothing large flashes, nothing alternates light/dark more than 3 times a second, hard blinking only on small badges at 1 Hz. `tests/party.cjs` checks the guards.
 - All CSS classes and variables are prefixed `lxp-`, so they don't collide with Lectio's own styles.
 
 ### School tools

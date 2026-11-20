@@ -103,6 +103,7 @@
     field('appearance', 'contentWidth', 'Indholdets bredde', [['normal', 'Centreret'], ['wide', 'Udnyt bredden']]);
     field('appearance', 'tabBranding', 'Tilpas fanens navn og ikon', null);
     field('appearance', 'reducedMotion', 'Færre animationer', null);
+    field('appearance', 'party', 'Festtilstand', null, 'Regnbuer, glimmer og alt der bevæger sig. Slås fra af "Færre animationer" og af systemets indstilling for færre animationer.');
     field('schedule', 'scheduleSize', 'Skemaets størrelse', [['60', 'Kompakt'], ['76', 'Normal størrelse'], ['92', 'Mere plads']]);
     field('schedule', 'scheduleView', 'Standardvisning', [['auto', 'Uge på computer, dag på mobil'], ['week', 'Uge'], ['day', 'Dagsliste']]);
     field('schedule', 'showBreaks', 'Vis pauser mellem lektioner', null, 'Tidsrummene bevares også, når markeringen er skjult.');

@@ -23,7 +23,7 @@
   const defaultDashboard = () => ({ columns: 'two', title: 'Dit overblik', custom: [],
     slots: widgets.map(([id, , width]) => ({ id, width, visible: id !== 'shortcuts' })) });
   const defaults = { enabled: true, theme: 'dark', design: 'strafe', density: 'comfortable', hideProfilePhoto: false, anonymizeName: false,
-    showClicker: false, tabBranding: true, reducedMotion: false, contentWidth: 'normal', font: 'system',
+    showClicker: false, tabBranding: true, reducedMotion: false, party: true, contentWidth: 'normal', font: 'system',
     navigationDensity: 'comfortable', navigationGroups: 'collapsed', tableDensity: 'comfortable', sectionShortcuts: true,
     scheduleSize: '76', scheduleView: 'auto', showBreaks: true, colorLessons: true, showLessonRoom: true,
     dashboard: defaultDashboard(), navigation: defaultNavigation(), customSidebar: [], toolbox: toolbox(), games: games() };
@@ -138,6 +138,7 @@
       showClicker: values.showClicker === true,
       tabBranding: values.tabBranding !== false,
       reducedMotion: values.reducedMotion === true,
+      party: values.party !== false,
       contentWidth: choice(values.contentWidth, ['normal', 'wide'], 'normal'),
       font: choice(values.font, ['system', 'arial'], 'system'),
       navigationDensity: choice(values.navigationDensity, ['comfortable', 'compact'], 'comfortable'),
@@ -162,11 +163,12 @@
   }
 
   const attributeNames = ['data-lxp-navigation-density', 'data-lxp-table-density', 'data-lxp-content-width',
-    'data-lxp-font', 'data-lxp-reduced-motion', 'data-lxp-hide-profile-photo', 'data-lxp-anonymize-name', 'data-lxp-mode', 'data-lxp-design', 'data-lxp-density'];
+    'data-lxp-font', 'data-lxp-reduced-motion', 'data-lxp-hide-profile-photo', 'data-lxp-anonymize-name', 'data-lxp-mode', 'data-lxp-design', 'data-lxp-density', 'data-lxp-party'];
   function apply(root, preferences, systemDark, active = true) {
     const values = [preferences.navigationDensity, preferences.tableDensity, preferences.contentWidth, preferences.font,
       preferences.reducedMotion ? '' : null, preferences.hideProfilePhoto ? '' : null, preferences.anonymizeName ? '' : null,
-      dark(preferences, systemDark) ? 'dark' : 'light', preferences.design, preferences.density];
+      dark(preferences, systemDark) ? 'dark' : 'light', preferences.design, preferences.density,
+      preferences.party && !preferences.reducedMotion ? '' : null];
     // Reassert owned attributes without generating another mutation when unchanged.
     // Lectio can update page-level attributes after document_end.
     attributeNames.forEach((attribute, index) => {
